@@ -19,24 +19,24 @@ https://doi.org/10.1103/PhysRevB.102.064301
 
 ## Matrix product states and matrix-product operators
 
-Quantum many-body wave-functions (i.e. pure states) can be represented as matrix-product states (MPS), and this representation often allows to store reliably a quantum state with a huge memory gain (compression). There are also several powerful alogithms to compute and manipulate quantum states in the form of MPS. The most famous one is probably the celebrated Density-Matrix Renormalizatio Group (aka DMRG https://doi.org/10.1103/PhysRevLett.69.2863, https://doi.org/10.1016/j.aop.2010.09.012) In the same way a (many-body) density matrix, describing a mixed state, can be represented as a *matrix-product operator*. For some family of mixed states this representation again offers a huge compression in terms of memory as well as alogorithms to manipulate efficiently theses density matrices of large systems.
+Quantum many-body wave-functions (i.e. pure states) can be represented as *matrix-product states* (MPS), and this representation often allows to store reliably a quantum state with a huge memory gain (compression). There are also several powerful alogithms to compute and manipulate quantum states in the form of MPS. The most famous one is probably the celebrated Density-Matrix Renormalizatio Group (aka DMRG https://doi.org/10.1103/PhysRevLett.69.2863, https://doi.org/10.1016/j.aop.2010.09.012) In the same way an operator acting linearly on a many-body state can be encoded as a *matrix-product operator* (MPO).  
 
-Some references relevant to the representation of density matrices using MPO: https://doi.org/10.1103/PhysRevLett.93.207204, https://doi.org/10.1103/PhysRevLett.93.207205 and http://dx.doi.org/10.1088/1742-5468/2009/02/P02035
+Some references relevant to the use of MPS and MPO for quantum dissipative systems: https://doi.org/10.1103/PhysRevLett.93.207204, https://doi.org/10.1103/PhysRevLett.93.207205 and http://dx.doi.org/10.1088/1742-5468/2009/02/P02035
 
+## Vectorization
+
+A mixed state can be viewed as a pure state in some enlarged Hibert space with dimension squared. This is the so-called *vectorization*, and it is heavily used in this code. For a single q-bit a density matrix can  be viewed as one vector (=pure state) in a space of dimension 4.  In this code a many-body density matrix is considered as a pure state (or a wave-function) in some enlarged Hilbert space of a system with (2^N)^2=4^N states per site.  In turn, such a pure state is encoded as an MPS (of a system with 4 states per site).  The Lindblad super-operator acts linearly on density matrices. Since the present implementation
+encodes the density matrix as an MPS, the Lindblad super-operator is naturally encoded as an MPO.
+This can sometimes be source of confusion: the density matrix is of course an operator acting on the physical Hilbert space of the q-bits, but, after vectorization, we interpret it as a pure state and thus an MPS. 
 
 ## iTensor Library
 
 The present code is based on the iTensor library, version 3 https://www.itensor.org.
 See also the following papers: https://arxiv.org/abs/2007.14822
 
-## Vectorization
+# A few words about the code structure
 
-A mixed state can be viewed as a pure state in some enlarged Hibert space with dimension squared. This is the so-called *vectorization*, and it is heavily used in this code. For a single q-bit a density matrix can  be viewed as one vector (=pure state) in a space of dimension 4.  In this code a many-body density matrix is considered as a pure state (or a wave-function) in some enlarged Hilbert space of a system with (2^N)^2=4^N states per site.  In turn, such a pure state is encoded as an MPS (of a system with 4 states per site).  The Lindblad super-operator acts linearly on density matrices. Since the present implementation
-encodes the density matrix as an MPS, the Lindblad super-operator is naturally encoded as an MPO.
-
-# A few words aboud the code structure
-
-* The files `Pauli.cc` and `Pauli.h` contain the core of the method, i.e. the representation of the many-body density matrix using an MPS. It is specific to 2-level systems (q-bits), but not specific the special form of the Lindbadian of the specific model to be studied. It makes use of a few low-level routines of the iTensor library. Remark: The identity matrix plus the three Pauli matrices form a convenient basis of the the space of density matricxes of one q-bit, hence the name of these two files. 
+* The files `Pauli.cc` and `Pauli.h` contain the core of the method, i.e. the representation of the many-body density matrix using an MPS (vectorization). It is specific to 2-level systems (q-bits), but not specific the special form of the Lindbadian of the specific model to be studied. It makes use of a few low-level routines of the iTensor library. Remark: The identity matrix plus the three Pauli matrices form a convenient basis of the the space of density matricxes of one q-bit, hence the name of these two files. 
 
 * `lindblac.cc`: contains the main() function. This is where the initial state is constructed (from the input parameters), and where the loop over the time steps is defined. It is also where the observable of interests are computed, and the input and outputs are handled 
 
@@ -48,7 +48,7 @@ encodes the density matrix as an MPS, the Lindblad super-operator is naturally e
 
 * `SimpleSquareLattice.h`: contains a basic class to encode the spatial geometry of the system. In the present version it can handle a simple chain, or a square lattice with cylindrical boundary conditions. Similar classes could be created to handle other geometries.
 
-* `TimeEvolution.h` and `TimeEvolution.cc`: Contain the TimeEvolver class. Such an object stores the parameters associated to a 1-time-step evoution of the density matrix. The main parameter is for instance the value tau of the time step. It also contains other parameters associated to the approximations (truncations, etc.) to be made when applying such a time evolution to a given density matrix. This implementation of this class is independent of the details of the specific model to be studied. The actual time-evolution is coded in `TimeEvolution.cc`, the method `evolve` takes a density matrix as an input, an updates it 'in place' by the evolved one.
+* `TimeEvolution.h` and `TimeEvolution.cc`: Contain the `TimeEvolver` class. Such class stores the parameters associated to a 1-time-step evolution of the density matrix. The main parameter is for instance the value/length `tau` of one  time step. It also contains other parameters associated to the approximations (truncations, etc.) to be made when applying such a time evolution to a given density matrix. This implementation of this class is independent of the details of the specific model to be studied. The actual time-evolution is coded in `TimeEvolution.cc`: the method `evolve` takes a density matrix as an input n[it is an iTensor MPS], an updates it 'in place' by the evolved one. Different Trotter orders are available. At order o=2 the error made at each time state is O(tau^3). At order o=3 the error made at each time state is O(tau^4.). At order o=4 the error made at each time state is O(tau^5).
 
 * `io_util.h`: small and  simple methods for inputs and outputs (not specific to this type of simulations). It contains the class `Parameters`, which is used to handle a set of input parameters defined from a acommand line.
 
