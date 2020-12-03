@@ -1,7 +1,6 @@
 #ifndef _SIMULATIONPARAMETERS_
 #define _SIMULATIONPARAMETERS_
 
-#include "utils.h"
 using namespace itensor;
 using namespace std;
 

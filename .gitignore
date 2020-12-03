@@ -1,0 +1,5 @@
+# These are some examples of commonly ignored file patterns.
+
+*~
+*.o
+*.dat

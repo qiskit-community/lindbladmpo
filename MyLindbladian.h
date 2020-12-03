@@ -1,7 +1,6 @@
 #ifndef _MYLINDBLADIAN_
 #define _MYLINDBLADIAN_
 
-#include "utils.h"
 using namespace itensor;
 using namespace std;
 

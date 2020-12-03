@@ -13,17 +13,17 @@ APP=lindblad
 
 # 4. Add any headers your program depends on here. The make program
 #    will auto-detect if these headers have changed and recompile your app.
-HEADERS=utils.h Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h MyLindbladian.h
+HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h MyLindbladian.h mps_mpo_utils.h io_utils.h
 
 # 5. For any additional .cc (source) files making up your project,
 #    add their full filenames here.
-CCFILES=$(APP).cc utils.cc Pauli.cc TimeEvolution.cc
+CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc
+
 
 #################################################################
 #################################################################
 #################################################################
 #################################################################
-
 
 include $(LIBRARY_DIR)/this_dir.mk
 include $(LIBRARY_DIR)/options.mk
@@ -35,7 +35,6 @@ OBJECTS=$(patsubst %.cc,%.o, $(CCFILES))
 GOBJECTS=$(patsubst %,.debug_objs/%, $(OBJECTS))
 
 #Rules ------------------
-
 %.o: %.cc $(HEADERS) $(TENSOR_HEADERS)
 	$(CCCOM) -c $(CCFLAGS) -o $@ $<
 

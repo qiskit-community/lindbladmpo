@@ -2,9 +2,9 @@ LIBRARY_DIR=../itensor/
 
 APP=lindblad
 
-HEADERS=utils.h Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h MyLindbladian.h
+HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h MyLindbladian.h mps_mpo_utils.h io_utils.h
 
-CCFILES=$(APP).cc utils.cc Pauli.cc TimeEvolution.cc
+CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc
 
 #################################################################
 #################################################################

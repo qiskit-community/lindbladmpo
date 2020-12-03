@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "mps_mpo_utils.h"
 
 //____________________________________________________________________
 double Entropy(MPS psi, int i) //returns the von Neumann entropy on some bond (i,i+1)
