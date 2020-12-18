@@ -28,24 +28,26 @@ The representation of the pure state  in terms of an MPS is therefore all the mo
 
 We again refer here to the review by U. Schollwöck: https://doi.org/10.1016/j.aop.2010.09.012
 
-In a parallel way, an operator acting linearly on a many-body state can be encoded as a *matrix-product operator* (MPO).  
+In a parallel way, an operator acting linearly on a many-body state (like an Hamiltonian, an osbservable, or a time-evolution operator) can be encoded as a *matrix-product operator* (MPO).  
 
 ### DMRG
-There are also several powerful alogithms to compute and manipulate quantum states in the form of MPS. The most famous one is probably the celebrated Density-Matrix Renormalizatio Group (aka DMRG https://doi.org/10.1103/PhysRevLett.69.2863, https://doi.org/10.1016/j.aop.2010.09.012). It allows to approximate the ground-state of the Hamiltonian of a one-dimensional (1D) system with shor-ranged interactions in the form of an MPS. It can also be extended to longer range interactions and to two-dimensional systems, although the system sizes that can be studied in the latter cases are much smaller than one 1D systems.
+There are also several powerful alogithms to compute and manipulate quantum states in the form of MPS. The most famous one is the celebrated Density-Matrix Renormalizatio Group (aka DMRG), introduced by S. R. White in 1992 (https://doi.org/10.1103/PhysRevLett.69.2863). It allows to approximate the ground-state of the Hamiltonian of a one-dimensional (1D) system with short-ranged interactions in the form of an MPS. It can also be extended to longer range interactions and to two-dimensional systems, although the system sizes that can be studied in the latter cases are smaller than for 1D systems. The applicability and the efficiency of DMRG again depends on the amount of entanglement present in the targetted states.
+For a review se for instance https://doi.org/10.1016/j.aop.2010.09.012
 
-### PMS, MPO, mixed states and dissipative systems
-Some references relevant to the use of MPS and MPO for quantum dissipative systems: https://doi.org/10.1103/PhysRevLett.93.207204, https://doi.org/10.1103/PhysRevLett.93.207205 and http://dx.doi.org/10.1088/1742-5468/2009/02/P02035
+## MPS, MPO and mixed states
 
-
-## Vectorization
+### Vectorization
 
 A mixed state can be viewed as a pure state in some enlarged Hibert space with dimension squared. This is the so-called *vectorization*, and it is heavily used in this code. For a single q-bit a density matrix can  be viewed as one vector (=pure state of some fictitious system) in a space of dimension 4.  In this code a many-body density matrix is considered as a pure state of a (fictitious) system with (2^N)^2=4^N states.  In turn, such a pure state is encoded as an MPS (of a system with 4 states per site).  The Lindblad super-operator acts linearly on density matrices. Since the present implementation encodes the density matrix as an MPS, the Lindblad super-operator is naturally encoded as an MPO.
 
 This can sometimes be source of confusion: the density matrix is of course an operator acting on the physical Hilbert space of the q-bits, but, after vectorization, we interpret it as a pure state, and thus as an MPS. 
 
-## MPS dimension and operator space entanglement entropy
+Some references relevant to the use of MPS and MPO for quantum dissipative systems: https://doi.org/10.1103/PhysRevLett.93.207204, https://doi.org/10.1103/PhysRevLett.93.207205 and http://dx.doi.org/10.1088/1742-5468/2009/02/P02035
 
-The representation of the many-body density matrix of the system in terms of an MPS is all the more efficient as the corresponding pure-state (of the fictitious system) is weakly entangled.  So, it is natural to consider the  Von Neumann entanglement entropy of the pure-state (of the fictitious system) obtained from the vectorization of the density-matrix (of the real system). We stress that this quantity is not the Von Neuman entropy of the real system, it is instead called the Operator Space Entanglement Entropy (OSEE). So, for a given target accuracy, the smaller the OSEE the smaller the bond dimension of the MPS will be. In practice we instead often fix some maximum bond dimension for the MPS. Then,  the  smaller the OSEE of the physical state the better the MPS approximation will be.
+
+### MPS dimension and operator space entanglement entropy
+
+The representation of the many-body density matrix of the system in terms of an MPS is all the more efficient as the corresponding pure-state (of the fictitious system) is weakly entangled.  So, it is natural to consider the  Von Neumann entanglement entropy of the pure-state (of the fictitious system) obtained from the vectorization of the density-matrix (of the real system). We stress that this quantity is not the Von Neuman entropy of the real system, it is instead called the Operator Space Entanglement Entropy (OSEE) [https://doi.org/10.1103/PhysRevA.76.032316]. So, for a given target accuracy, the smaller the OSEE the smaller the bond dimension of the MPS (and the fastest the numerical calculations). In practice we instead often fix some maximum bond dimension for the MPS. Then,  the  smaller the OSEE of the physical state the better the MPS approximation will be.
 
 # iTensor Library
 
@@ -54,9 +56,11 @@ See also the following papers: https://arxiv.org/abs/2007.14822 . The library al
 
 # A few words about the code structure
 
-* The files `Pauli.cc` and `Pauli.h` contain the core of the method, i.e. the representation of the many-body density matrix using an MPS (vectorization). It is specific to 2-level systems (q-bits), but not specific the special form of the Lindbadian of the specific model to be studied. It makes use of a few low-level routines of the iTensor library. Remark: The identity matrix plus the three Pauli matrices form a convenient basis of the the space of density matricxes of one q-bit, hence the name of these two files. 
+* The files `Pauli.cc` and `Pauli.h` contain the implementation of the vectorization for spin-1/2 systems, that is the representation of the many-body density matrix using an MPS. It is specific to 2-level systems (q-bits), but not specific the special form of the Lindbadian of the specific model to be studied. It makes use of a few low-level routines of the iTensor library. Remark: The identity matrix plus the three Pauli matrices form a convenient basis of the the space of density matricxes of one q-bit, hence the name of these two files. 
 
-* `lindblac.cc`: contains the main() function. This is where the initial state is constructed (the method depends on the input parameters), and where the loop over the time steps is defined. It is also where the observable of interests are computed, and the input and outputs (simple prints to the standard output, or to files) are handled.
+* `lindblac.cc`: contains the main() function. This is where the initial state is constructed (the way the initial state is defined depends on the input parameters), and where the loop over the time steps is defined. It is also where the observable of interests are computed, and the input and outputs (simple prints to the standard output, or to files) are handled.
+
+Possible initial states: 1) A pure (product) state where all the spins point in a simple predefined direction ("x", "-x", "y", "-y", "z" (='up') of "-z" (='down')), 2) A pure state which is the ground-state of some user-defined Hamiltonian (denote by H0 in the code). This implies some DMRG sweeps to get the state from H0. 3) An inifinite-temperature (mixed) state, where the density matrix is proportionnal to the identity matrix 4) A mixed state which is read from the disk. Such a state may have been written to disk at the end of some previouslsimulation.
 
 * `Mylindbladian.h`: This is the place where the Lindbladian super-operator of the specific model to be simulated is defined. It takes the form of an `autoMPO` object of the iTensor library. Thanks to the use of the iTensor library, the terms in the Lindbladian can be defined in a simple way (using spin-1/2 operators and product of such operators), almost as if one was writing them with pen and paper.
 
@@ -66,7 +70,7 @@ See also the following papers: https://arxiv.org/abs/2007.14822 . The library al
 
 * `SimpleSquareLattice.h`: contains a basic class to encode the spatial geometry of the system (a lattice). In the present version it can handle a simple one-dimensional chain, or a square lattice with cylindrical boundary conditions. Similar classes could be created to handle other geometries and other lattices. 
 
-* `TimeEvolution.h` and `TimeEvolution.cc`: Contain the `TimeEvolver` class. Such class stores the parameters associated to a 1-time-step evolution of the density matrix. The main parameter is for instance the value/length `tau` of one  time step. It also contains other parameters associated to the approximations (truncations, etc.) to be made when applying such a time evolution to a given density matrix. This implementation of this class is independent of the details of the specific model to be studied. The actual time-evolution is coded in `TimeEvolution.cc`: the method `evolve` takes a density matrix as an input n[it is an iTensor MPS], an updates it 'in place' by the evolved one. Different Trotter orders are available. At order o=2 the error made at each time state is O(tau^3). At order o=3 the error made at each time state is O(tau^4.). At order o=4 the error made at each time state is O(tau^5).
+* `TimeEvolution.h` and `TimeEvolution.cc`: Contain the `TimeEvolver` class. Such class stores the parameters associated to a single-time-step evolution of the density matrix. An important parameter is for instance the value/length `tau` of one  time step. A `TimeEvolver` also contains other parameters associated to the approximations (truncations, etc.) to be made when applying such the time evolution operator (which is an MPO) to a given density matrix. The `TimeEvolver` class is independent of the details of the specific model to be studied. The actual time-evolution is coded in `TimeEvolution.cc`: the method `evolve` takes a density matrix as an input [it is an iTensor MPS], an updates it 'in place' by the evolved one. Different Trotter orders are available. At order o=2 the error made at each time state is O(tau^3). At order o=3 the error made at each time state is O(tau^4.). At order o=4 the error made at each time state is O(tau^5).
 
 * `io_util.h`: small and  simple methods for inputs and outputs (not specific to this type of simulations). It contains the class `Parameters`, which is used to handle a set of input parameters (each one being a pair "name" / "value") defined from a acommand line.
 
