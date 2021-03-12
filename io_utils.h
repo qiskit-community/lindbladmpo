@@ -42,7 +42,7 @@ inline double char2double(char *a)
   return x;
 }
 //____________________________________________________________
-class Parameters : public map<string, double>
+class Parameters_old : public map<string, double>
 {
 public:
   double val(string var_name) const
@@ -100,5 +100,107 @@ public:
     }
   }
 };
+//____________________________________________________________
+class Parameters : public map<string, string>
+{
+public:
+  //------------------------------------------------------
+void ReadFromFile(string filename) {
+  ifstream f(filename);
+  string line;
+  while (getline (filename, line)) {
+  // Output the text from the file
+  cout << line;
+}
+  //------------------------------------------------------
+  double val(string var_name) const
+  {
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      return 0;
+    }
+    else
+      return stod(it->second);
+  }
+  //------------------------------------------------------
+  long longval(string var_name) const
+  {
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      return 0;
+    }
+    else
+    {
+      return stoi(it->second);
+    }
+  }
+  //------------------------------------------------------
+  long boolval(string var_name) const
+  {
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      return 0;
+    }
+    else
+    {
+      string s=it->second;
+        if (s=="true") return true;
+        if (s=="TRUE") return true;
+        if (s=="1") return true;
+        if (s=="false") return false;
+        if (s=="FALSE") return false;
+        if (s=="0") return false;
+        cout<<"Error "<< var_name << "="<<it->second<<" but a boolean was expected (true/false or 1/0)\n",exit(0);
+    }
+  }//------------------------------------------------------
+  string stringval(string var_name) const
+  {
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      return 0;
+    }
+    else
+      return (it->second);
+  }
+  //------------------------------------------------------
+  void PRint(ostream &o) const
+  {
+    for (map<string, string>::const_iterator it = begin(); it != end(); it++)
+    {
+      o << it->first << "=" << it->second << endl;
+    }
+  }
+  //------------------------------------------------------
+  void ReadArguments(int argc, char *argv[])
+  {
+    for (int n = 1; n < argc; n++)
+    {
+      string var_name(argv[n]);
+      map<string, string>::const_iterator it = find(var_name);
 
+      if (it != end())
+      {
+        n++;
+        if (n == argc)
+          cerr << "Error: missing value after " << var_name << endl, exit(0);
+        operator[](var_name) = string(argv[n]);
+      }
+      else
+      {
+        cerr << "Syntax error :" << var_name << endl;
+        cout << "List of command-line parameters :\n";
+        PRint(cout);
+        exit(0);
+      }
+    }
+  }
+};
 #endif

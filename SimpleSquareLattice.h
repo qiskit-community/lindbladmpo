@@ -10,7 +10,7 @@ public:
   vector<int> X, Y; // Real space coordinates
   vector<int> I, J; //list of bonds
   map<pair<int, int>, int> index;
-  Lattice2d(int Lx, int Ly, bool periodic = true) : N(Lx * Ly)
+  Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly)
   {
     bool up;
     int n = 0;
@@ -44,17 +44,24 @@ public:
       {
         pair<int, int> p(x, y);
         int ind = index[p];
-        if (Ly > 2)
+        // "Vertical" bonds (parallel to the y axis)
+        if (Ly > 1 && y + 1 < Ly)
         {
           I.push_back(ind);
-          J.push_back(index[pair<int, int>(x, (y + 1) % Ly)]);
+          J.push_back(index[pair<int, int>(x , y+1)]);
         }
+        if (Ly > 2 && y_periodic == true && y == Ly - 1)
+        {
+          I.push_back(ind);
+          J.push_back(index[pair<int, int>(x, 0)]);
+        }
+        // "Horizontal" bonds (parallel to the y axis)
         if (Lx > 1 && x + 1 < Lx)
         {
           I.push_back(ind);
-          J.push_back(index[pair<int, int>((x + 1) % Lx, y)]);
+          J.push_back(index[pair<int, int>(x + 1, y)]);
         }
-        if (Lx > 1 && periodic == true && x == Lx - 1)
+        if (Lx > 2 && x_periodic == true && x == Lx - 1)
         {
           I.push_back(ind);
           J.push_back(index[pair<int, int>(0, y)]);

@@ -23,11 +23,10 @@ int main(int argc, char *argv[])
   param.check();
   param.PRint(cout);
 
-  const int N = param.longval("N");
-  bool periodic = (param.longval("periodic") != 0);
   int Lx = param.longval("Lx");
   int Ly = param.longval("Ly");
-  Lattice2d lattice(Lx, Ly, periodic);
+  const int N = Lx*Ly;
+  Lattice2d lattice(Lx, Ly, param.boolval("periodic_x"),param.boolval("periodic_y"));
   SpinHalfSystem C(N);
   if (param.longval("read_wf") != 0 || param.longval("read_rho") != 0)
   {
@@ -294,22 +293,7 @@ int main(int argc, char *argv[])
 
   string name = param.FileName();
 
-  if (param.longval("up_init") != 0)
-    name += "_init=up";
-  if (param.longval("down_init") != 0)
-    name += "_init=down";
-  if (param.longval("rho_inf_init") != 0)
-    name += "_init=rho_inf";
-  if (param.longval("x_init") != 0)
-    name += "_init=x";
-  if (param.longval("y_init") != 0)
-    name += "_init=y";
-  if (param.longval("read_rho") != 0)
-    name += "_init=fromfile";
-
-  name += ".dat";
-
-  ofstream file_sz("sz_profile" + name); //This file will the full { <S^z(i)> i=1...N} profile as a function of time
+  ofstream file_sz("sz_profile_" + name); //This file will the full { <S^z(i)> i=1...N} profile as a function of time
   file_sz << "#\"t=time\"" << endl;
   file_sz << "#time\t1\t<S^z(1)>\t<S^x(1)>" << endl;
   file_sz << "#time\ti\t<S^z(i)>\t<S^x(i)>" << endl;
@@ -317,7 +301,7 @@ int main(int argc, char *argv[])
           << endl;
   file_sz.precision(15);
 
-  ofstream file_m("time_series" + name); //This file will contain various observables (in different columns) as a function of time
+  ofstream file_m("time_series_" + name); //This file will contain various observables (in different columns) as a function of time
   file_m << "#time\t<S^z>\t<S^x>\t<S^y>\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)"
          << "\t\\eta_{zz}\t\\eta_{xx}\t\\eta_{yy}\t\\eta_{xz}\t\\eta_{yz}\t\\eta_{xy}" << endl;
   file_m.precision(15);
