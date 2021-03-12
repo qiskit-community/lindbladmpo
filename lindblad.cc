@@ -15,8 +15,17 @@ using namespace std;
 //_____________________________________________________
 int main(int argc, char *argv[])
 {
+
   ModelParameters param;
+
+  //Read some input parameters from the command line (can be empty -> default values for all parameters):
   param.ReadArguments(argc, argv);
+
+  //If a filename is given as the parameter "inputfile" => some input parameters are read from that file
+  string inputfilename = param.stringval("inputfile");
+  if (inputfilename != "")
+    param.ReadFromFile(inputfilename);
+
   //Now param contains all the the parameters, default values (see SimulationParameters.h and ModelParameters.h) or those provided on the command-line
   cout << endl;
   cout.precision(10);
@@ -25,8 +34,8 @@ int main(int argc, char *argv[])
 
   int Lx = param.longval("Lx");
   int Ly = param.longval("Ly");
-  const int N = Lx*Ly;
-  Lattice2d lattice(Lx, Ly, param.boolval("periodic_x"),param.boolval("periodic_y"));
+  const int N = Lx * Ly;
+  Lattice2d lattice(Lx, Ly, param.boolval("periodic_x"), param.boolval("periodic_y"));
   SpinHalfSystem C(N);
   if (param.longval("read_wf") != 0 || param.longval("read_rho") != 0)
   {
@@ -293,7 +302,7 @@ int main(int argc, char *argv[])
 
   string name = param.FileName();
 
-  ofstream file_sz("sz_profile_" + name); //This file will the full { <S^z(i)> i=1...N} profile as a function of time
+  ofstream file_sz("sz_profile." + name); //This file will the full { <S^z(i)> i=1...N} profile as a function of time
   file_sz << "#\"t=time\"" << endl;
   file_sz << "#time\t1\t<S^z(1)>\t<S^x(1)>" << endl;
   file_sz << "#time\ti\t<S^z(i)>\t<S^x(i)>" << endl;
@@ -301,7 +310,7 @@ int main(int argc, char *argv[])
           << endl;
   file_sz.precision(15);
 
-  ofstream file_m("time_series_" + name); //This file will contain various observables (in different columns) as a function of time
+  ofstream file_m("time_series." + name); //This file will contain various observables (in different columns) as a function of time
   file_m << "#time\t<S^z>\t<S^x>\t<S^y>\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)"
          << "\t\\eta_{zz}\t\\eta_{xx}\t\\eta_{yy}\t\\eta_{xz}\t\\eta_{yz}\t\\eta_{xy}" << endl;
   file_m.precision(15);

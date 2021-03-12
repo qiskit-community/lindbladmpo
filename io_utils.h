@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <regex>
 using namespace itensor;
 using namespace std;
 //____________________________________________________________
@@ -105,13 +106,40 @@ class Parameters : public map<string, string>
 {
 public:
   //------------------------------------------------------
-void ReadFromFile(string filename) {
-  ifstream f(filename);
-  string line;
-  while (getline (filename, line)) {
-  // Output the text from the file
-  cout << line;
-}
+  void ReadFromFile(string filename)
+  {
+    ifstream file(filename);
+    if (!file) cerr<<"Error: unable to open the file "<<filename<<endl,exit(0);
+    else cout<<"Reading parameters from the file "<<filename<<endl;
+    string line;
+    while (getline(file, line))
+    {
+      line = regex_replace(line, regex("\\s+"), "");// remove white spaces using a regular expression
+      if (line != "")
+      {
+        string delimiter = "=";
+        size_t position = 0;
+        string var_name;
+        position = line.find(delimiter);
+        if (position != string::npos)
+        {
+          var_name = line.substr(0, position);
+          string var_value = line.erase(0, position + delimiter.length());
+
+          map<string, string>::const_iterator it = find(var_name);
+          if (it != end())
+            operator[](var_name) = var_value;
+          else
+            cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n", exit(0);
+        }
+        else
+        {
+          cout << "Warning: the input line :"
+               << line << " has been ignored (no '=')." << endl;
+        }
+      }
+    }
+  }
   //------------------------------------------------------
   double val(string var_name) const
   {
@@ -149,16 +177,22 @@ void ReadFromFile(string filename) {
     }
     else
     {
-      string s=it->second;
-        if (s=="true") return true;
-        if (s=="TRUE") return true;
-        if (s=="1") return true;
-        if (s=="false") return false;
-        if (s=="FALSE") return false;
-        if (s=="0") return false;
-        cout<<"Error "<< var_name << "="<<it->second<<" but a boolean was expected (true/false or 1/0)\n",exit(0);
+      string s = it->second;
+      if (s == "true")
+        return true;
+      if (s == "TRUE")
+        return true;
+      if (s == "1")
+        return true;
+      if (s == "false")
+        return false;
+      if (s == "FALSE")
+        return false;
+      if (s == "0")
+        return false;
+      cout << "Error " << var_name << "=" << it->second << " but a boolean was expected (true/false or 1/0)\n", exit(0);
     }
-  }//------------------------------------------------------
+  } //------------------------------------------------------
   string stringval(string var_name) const
   {
     map<string, string>::const_iterator it = find(var_name);
@@ -195,7 +229,7 @@ void ReadFromFile(string filename) {
       }
       else
       {
-        cerr << "Syntax error :" << var_name << endl;
+        cerr << "Syntax error, the input parameter " << var_name << " does not exist in this model.\n";
         cout << "List of command-line parameters :\n";
         PRint(cout);
         exit(0);

@@ -57,7 +57,7 @@ public:
             double Delta = val("Delta");
             double gamma = val("gamma");
             double tau = val("tau");
-            string name = "_Lx=" + to_string(Lx) + "_Ly=" + to_string(Ly) + "_Delta=" + to_string(Delta) + "_Omega=" + to_string(Omega) + "_J=" + to_string(J) + "_Gamma=" + to_string(gamma) //
+            string name = "Lx=" + to_string(Lx) + "_Ly=" + to_string(Ly) + "_Delta=" + to_string(Delta) + "_Omega=" + to_string(Omega) + "_J=" + to_string(J) + "_Gamma=" + to_string(gamma) //
                           + "_tau=" + to_string(tau) + "_chi=" + to_string(longval("MaxDimRho")) + "_Time=" + to_string(val("T"));
 
             if (longval("up_init") != 0)
