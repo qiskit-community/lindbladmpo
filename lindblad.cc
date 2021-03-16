@@ -435,12 +435,13 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (param.val("write_rho") != 0)
+  string fname=param.stringval("save_state_file");
+  if (fname != "")
   {
-    writeToFile("siteops_file", C.siteops);
-    writeToFile("rho_file", C.rho);
-    writeToFile("sites_file", C.sites);
-    cout << "the density matrix rho was written to disk, in files 'rho_file', 'siteops_file' and 'sites_file'.\n";
+    string f1=fname+".ops";writeToFile(f1, C.siteops);
+    string f2=fname+".rho";writeToFile(f2, C.rho);
+    string f3=fname+".sites";writeToFile(f3, C.sites);
+    cout << "the state was written to disk, in files "<<f1<<", "<<f2<<" and "<<f3<<".\n";
   }
   cout << endl;
   return 0;

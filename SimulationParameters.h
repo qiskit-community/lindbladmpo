@@ -41,7 +41,7 @@ public:
         operator[]("read_wf") = "0";          //set to "1" if you want to read a previous wave-function from disk, as the stinitial state
         operator[]("write_wf") = "0";         //set to "1" if you do not want to save the final wave-function to disk
         operator[]("read_rho") = "0";         //set to "1" if you want to read a previous density matrix from disk, as the starting point
-        operator[]("write_rho") = "0";        //set to "1" if you want to save the final density matrix to disk, after evolving for a time T
+        operator[]("save_state_file") = "";   //If not equal to "" the state (density matrix rho) will be saved to disk. 
         operator[]("rho_inf_init") = "0";     //Set to "1" if you want to start from rho=identity (infinite temperature density matrix)
         operator[]("b_force_rho_trace") = "1";  // We do rho/=trace{rho} at every time step, to keep trace[rho]=1, irrespectively of finite-step errors
         operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors
