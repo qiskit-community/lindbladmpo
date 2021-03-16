@@ -35,12 +35,28 @@ inline double char2double(char *a)
   char *end_ptr;
   const double x = strtod(a, &end_ptr);
   if (end_ptr == a || ('\0' != *end_ptr))
-    cout << endl
+    cerr << endl
          << "ERROR :" << a
          << " is not a valid format for a double."
          << endl,
         exit(0);
   return x;
+}
+//____________________________________________________________
+vector<string> &split(const string &s, char delimiter,vector<std::string> &elems) {
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, delimiter)) {
+        if (item.length() > 0) {
+            elems.push_back(item);
+            }
+    }
+    return elems;
+}
+vector<string> split(const string &s, char delimiter) {
+    vector<string> elems;
+    split(s, delimiter, elems);
+    return elems;
 }
 //____________________________________________________________
 class Parameters_old : public map<string, double>
@@ -51,7 +67,7 @@ public:
     map<string, double>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
       return 0;
     }
     else
@@ -88,12 +104,12 @@ public:
       {
         n++;
         if (n == argc)
-          cerr << "Error: missing value after " << var_name << endl, exit(0);
+          cerr << "Error: missing value after " << var_name << endl, exit(1);
         operator[](var_name) = char2double(argv[n]);
       }
       else
       {
-        cerr << "Syntax error :" << var_name << endl;
+        cerr << "Error :" << var_name << endl;
         cout << "List of command-line parameters :\n";
         PRint(cout);
         exit(0);
@@ -110,13 +126,14 @@ public:
   // variable1 = value_of_variable_1
   // variable2 = value_of_variable_2
   // ...
-  // At this stage all values are strings (without any space)
-  // and they are added to the Parameters object.
-  // Any line without any '=' sign is ignored
-  // All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h)
-  // Note: the methods Parameters::val, Parameters::longval, Parameters::boolval, and Parameters::stringval can later be used to retrieve these values as
+  //
+  // * All spaces are ignored by the parser
+  // * Any line without any '=' sign is ignored
+  // * All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h). 
+  // At this stage all values are strings, and they are added to the Parameters object.
+  // The methods Parameters::val, Parameters::longval, Parameters::boolval, and Parameters::stringval can later be used to retrieve these values as
   // double, long, bool and string.
-  // TODO: add support for vectors: vector_variable = x1,x2,x3,x4,x5,...
+
   void ReadFromFile(string filename)
   {
     ifstream file(filename);
@@ -141,7 +158,7 @@ public:
           if (it != end())
             operator[](var_name) = var_value;
           else
-            cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n", exit(0);
+            cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n", exit(1);
         }
         else
         {
@@ -157,7 +174,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -169,7 +186,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -183,7 +200,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -201,7 +218,7 @@ public:
         return false;
       if (s == "0")
         return false;
-      cout << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false, TRUE/FALSE or or 1/0\n", exit(0);
+      cout << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false, TRUE/FALSE or or 1/0\n", exit(1);
     }
   } //------------------------------------------------------
   string stringval(string var_name) const
@@ -209,7 +226,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -235,17 +252,72 @@ public:
       {
         n++;
         if (n == argc)
-          cerr << "Error: missing value after " << var_name << endl, exit(0);
+          cerr << "Error: missing value after " << var_name << endl, exit(1);
         operator[](var_name) = string(argv[n]);
       }
       else
       {
-        cerr << "Syntax error, the input parameter " << var_name << " does not exist in this model.\n";
+        cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n";
         cout << "List of command-line parameters :\n";
         PRint(cout);
-        exit(0);
+        exit(1);
       }
     }
+  }
+  //------------------------------------------------------
+  // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
+  vector<double> doublevec(string var_name) const
+  { 
+    vector<double> double_vec;
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+    }
+    else
+    {
+      vector<string> str_vec;
+      cout<<"string V="<<it->second<<endl;
+      str_vec=split(it->second, ',');
+      for(auto& s: str_vec) {
+        double x;
+         try {
+          x=stod(s);
+        }
+        catch(...) {
+          cerr<<"Error: was expecting a double and got "<<s<<endl,exit(1);
+        }
+        double_vec.push_back(x);
+      }
+    }
+    return double_vec;
+  }
+  //------------------------------------------------------
+  // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
+  vector<long> longvec(string var_name) const
+  { 
+    vector<long> long_vec;
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+    }
+    else
+    {
+      vector<string> str_vec;
+      str_vec=split(it->second, ',');
+      for(auto& s: str_vec) {
+        long i;
+        try {
+          i=stoi(s);
+        }
+        catch(...) {
+          cerr<<"Error: was expecting a long int and got "<<s<<endl,exit(1);
+        }
+        long_vec.push_back(i);
+      }
+    }
+    return long_vec;
   }
 };
 #endif
