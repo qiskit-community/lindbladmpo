@@ -33,6 +33,7 @@ public:
         operator[]("Ly") = "1";
 
         operator[]("outputfilename") = "auto"; //if "auto", a name is generated using the most inportant parameters of the model (see FileName() below)
+        
     }
     void check()
     {
@@ -41,9 +42,9 @@ public:
         const int N = Lx * Ly;
 
         if (Lx < 1 || Ly < 1)
-            cout << "Error in the lattice parameters Lx=" << Lx << " Ly=" << Ly << endl, exit(0);
+            cerr << "Error in the lattice parameters Lx=" << Lx << " Ly=" << Ly << endl, exit(1);
         if (N < 1)
-            cout << "Error, this code assumes that the system has at least 1 site.\n", exit(0);
+            cerr << "Error, this code assumes that the system has at least 1 site.\n", exit(1);
     }
     string FileName() //This string can be used to construct the prefix of the output file names, so that it contain the most important parameters of the simulation
     {
@@ -51,7 +52,7 @@ public:
         {
             int Lx = longval("Lx");
             int Ly = longval("Ly");
-            double U = val("U");
+            //double U = val("U");
             double J = val("J");
             double Omega = val("Omega");
             double Delta = val("Delta");

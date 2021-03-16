@@ -39,7 +39,7 @@ inline double char2double(char *a)
          << "ERROR :" << a
          << " is not a valid format for a double."
          << endl,
-        exit(0);
+        exit(1);
   return x;
 }
 //____________________________________________________________
@@ -67,7 +67,7 @@ public:
     map<string, double>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -82,7 +82,7 @@ public:
     }
     else
     {
-      cout << "Error, parameter " << var_name << "=" << v << " is not a long" << endl, exit(0);
+      cerr << "Error, parameter " << var_name << "=" << v << " is not a long" << endl, exit(1);
       return 0;
     }
   }
@@ -112,7 +112,7 @@ public:
         cerr << "Error :" << var_name << endl;
         cout << "List of command-line parameters :\n";
         PRint(cout);
-        exit(0);
+        exit(1);
       }
     }
   }
@@ -137,7 +137,7 @@ public:
   void ReadFromFile(string filename)
   {
     ifstream file(filename);
-    if (!file) cerr<<"Error: unable to open the file "<<filename<<endl,exit(0);
+    if (!file) cerr<<"Error: unable to open the file "<<filename<<endl,exit(1);
     else cout<<"Reading parameters from the file "<<filename<<endl;
     string line;
     while (getline(file, line))
@@ -174,7 +174,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -186,7 +186,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -200,7 +200,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -218,7 +218,7 @@ public:
         return false;
       if (s == "0")
         return false;
-      cout << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false, TRUE/FALSE or or 1/0\n", exit(1);
+      cerr << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false, TRUE/FALSE or or 1/0\n", exit(1);
     }
   } //------------------------------------------------------
   string stringval(string var_name) const
@@ -226,7 +226,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -272,7 +272,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cout << "Error: Parameter " << var_name << " is not defined.\n", exit(0);
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
     }
     else
     {

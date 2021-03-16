@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
   bool psi_defined = false;
 
   if (param.longval("read_wf") != 0 && param.longval("read_rho") != 0)
-    cout << "Conflict in parameters (read_wf+read_rho): should I read psi or rho from the disk?\n", exit(0);
+    cerr << "Error: conflict in parameters (read_wf+read_rho): should I read psi or rho from the disk?\n", exit(1);
 
   if (param.longval("rho_inf_init") == 0)
   {
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         else
         {
           if (param.longval("up_init") != 0 && param.longval("down_init") != 0)
-            cout << "Error: conflicting initialization options for the DMRG:up_init and  down_init.\n", exit(0);
+            cerr << "Error: conflicting initialization options for the DMRG:up_init and  down_init.\n", exit(1);
 
           if (param.longval("up_init") != 0)
           {
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
   if (psi_defined)
   {
     if (fabs(tr - 1) > 1e-1 || fabs(tr2 - 1) > 1e-1)
-      cout << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
+      cerr << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
     //Check a few simple observables, using rho and psi
     vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
     double err = 0;
@@ -231,9 +231,9 @@ int main(int argc, char *argv[])
         Cplx with_psi = PureStateObs(opname, psi, i, C.sites);
         err += fabs(with_rho - with_psi);
         if (fabs(with_rho - with_psi) > 1e-2)
-          cout << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
+          cerr << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
                << "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << endl,
-              exit(0);
+              exit(1);
       }
     }
     err /= N * ops.size();
