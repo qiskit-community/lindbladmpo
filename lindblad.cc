@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
   int Lx = param.longval("Lx");
   int Ly = param.longval("Ly");
   const int N = Lx * Ly;
-  Lattice2d lattice(Lx, Ly, param.boolval("periodic_x"), param.boolval("periodic_y"));
+  Lattice2d lattice(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
   SpinHalfSystem C(N);
   if (param.longval("read_wf") != 0 || param.longval("read_rho") != 0)
   {
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
         //Some data about this time step
         cout << "\nt=" << n * tau << "\t----------------------------\n";
 
-        if (param.longval("MakeRhoHermitian") != 0)
+        if (param.longval("b_force_rho_Hermitian") != 0)
           C.MakeRhoHermitian(argsRho);
 
         const Cplx tr2 = C.trace_rho2();
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
       Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
       if (fabs(z - 1) > 1e-2)
         cout << "Warning: Tr[rho]<>1 :" << z << endl;
-      if (param.val("CorrectTraceRho") != 0)
+      if (param.val("b_force_rho_trace") != 0)
         C.rho /= z;
     }
   }

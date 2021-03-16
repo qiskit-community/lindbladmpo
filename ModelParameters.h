@@ -27,8 +27,8 @@ public:
         operator[]("y_init") = "0"; //Initial state = spins pointing in the y direction
 
         //Lattice
-        operator[]("periodic_x") = "false"; // if true -> periodic boundary conditions in the x direction (Warining: potential huge cost in terms of bond dimension)
-        operator[]("periodic_y") = "false"; // if true -> periodic boundary conditions in the y direction
+        operator[]("b_periodic_x") = "false"; // if true -> periodic boundary conditions in the x direction (Warining: potential huge cost in terms of bond dimension)
+        operator[]("b_periodic_y") = "false"; // if true -> periodic boundary conditions in the y direction
         operator[]("Lx") = "4";
         operator[]("Ly") = "1";
 
