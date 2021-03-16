@@ -106,6 +106,17 @@ class Parameters : public map<string, string>
 {
 public:
   //------------------------------------------------------
+  // The method 'ReadFromFile reads an input file (specified by its name) which should be of the following (text) format:
+  // variable1 = value_of_variable_1
+  // variable2 = value_of_variable_2
+  // ...
+  // At this stage all values are strings (without any space)
+  // and they are added to the Parameters object.
+  // Any line without any '=' sign is ignored
+  // All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h)
+  // Note: the methods Parameters::val, Parameters::longval, Parameters::boolval, and Parameters::stringval can later be used to retrieve these values as
+  // double, long, bool and string.
+  // TODO: add support for vectors: vector_variable = x1,x2,x3,x4,x5,...
   void ReadFromFile(string filename)
   {
     ifstream file(filename);
@@ -190,7 +201,7 @@ public:
         return false;
       if (s == "0")
         return false;
-      cout << "Error " << var_name << "=" << it->second << " but a boolean was expected (true/false or 1/0)\n", exit(0);
+      cout << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false, TRUE/FALSE or or 1/0\n", exit(0);
     }
   } //------------------------------------------------------
   string stringval(string var_name) const
