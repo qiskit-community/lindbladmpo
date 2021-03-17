@@ -71,7 +71,7 @@ public:
                 name += "_init=x";
             if (longval("y_init") != 0)
                 name += "_init=y";
-            if (longval("read_rho") != 0)
+            if (stringval("load_state_file") != "")
                 name += "_init=fromfile";
 
             name += ".dat";

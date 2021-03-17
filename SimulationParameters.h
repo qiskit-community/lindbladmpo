@@ -38,10 +38,19 @@ public:
         operator[]("LDLconv") = "5e-4";  //convergence criterium on L^dagger * L -- this is a relative value, so the DMRG stops when |dE/E|< LDLconv. In an exact calculation of the steady state E=0
         operator[]("sweepsRho") = "999"; //maximum number of sweeps in the DMRG (to get the initial density matrix as the ground-state of L^dagger*L)
 
-        operator[]("read_wf") = "0";          //set to "1" if you want to read a previous wave-function from disk, as the stinitial state
-        operator[]("write_wf") = "0";         //set to "1" if you do not want to save the final wave-function to disk
-        operator[]("read_rho") = "0";         //set to "1" if you want to read a previous density matrix from disk, as the starting point
-        operator[]("save_state_file") = "";   //If not equal to "" the state (density matrix rho) will be saved to disk. 
+        //If not equal to "" the initial state is a pure state (wavefunction) that will be read from the disk.
+        operator[]("load_purestate_file") = "";
+        //If not equal to "" the initial state is a pure state (wavefunction) that will be read from the disk.
+        operator[]("save_purestate_file") = "";
+        
+        //If not equal to "" the initial state (density matrix rho) will be read from the disk.
+        // Give a filename if you want to read a previous density matrix from disk, as the initial state of the time evolution. 
+        operator[]("load_state_file") = "";                                                          
+        
+        //If not equal to "" the state (density matrix rho) will be saved to disk.
+        //Note that initial state is in fact stored in three files, with names names *_N=*.obs, *_N=*.sites and*_N=*.rho
+        operator[]("save_state_file") = "";   
+                                              
         operator[]("rho_inf_init") = "0";     //Set to "1" if you want to start from rho=identity (infinite temperature density matrix)
         operator[]("b_force_rho_trace") = "1";  // We do rho/=trace{rho} at every time step, to keep trace[rho]=1, irrespectively of finite-step errors
         operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors

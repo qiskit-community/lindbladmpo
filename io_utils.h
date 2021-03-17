@@ -191,7 +191,14 @@ public:
     }
     else
     {
-      return stoi(it->second);
+      long i;
+      try {
+          i=stoi(it->second);
+        }
+        catch(...) {
+          cerr<<"Error: was expecting a long int and instead got '"<<it->second<<"'\n",exit(1);
+        }
+      return i;
     }
   }
   //------------------------------------------------------
@@ -285,7 +292,7 @@ public:
           x=stod(s);
         }
         catch(...) {
-          cerr<<"Error: was expecting a double and got "<<s<<endl,exit(1);
+          cerr<<"Error: was expecting a double and instead got "<<s<<endl,exit(1);
         }
         double_vec.push_back(x);
       }
@@ -312,7 +319,7 @@ public:
           i=stoi(s);
         }
         catch(...) {
-          cerr<<"Error: was expecting a long int and got "<<s<<endl,exit(1);
+          cerr<<"Error: was expecting a long int and instead got '"<<s<<"'\n",exit(1);
         }
         long_vec.push_back(i);
       }

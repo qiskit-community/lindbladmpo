@@ -37,15 +37,26 @@ int main(int argc, char *argv[])
   const int N = Lx * Ly;
   Lattice2d lattice(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
   SpinHalfSystem C(N);
-  if (param.longval("read_wf") != 0 || param.longval("read_rho") != 0)
-  {
-    readFromFile("sites_file", C.sites);
-    readFromFile("siteops_file", C.siteops);
-    cout << "C.sites and C.siteops were read from 'sites_file' and 'siteops_file'.\n";
-    C.rho = MPS(C.siteops);
+ 
+ if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
+    cerr << "Error, conflict in parameters:load_purestate_file="<<param.stringval("load_purestate_file")
+         <<" and load_state_file="<<param.stringval("load_purestate_file")<<". They should not be both defined\n", exit(1);
+ if (param.stringval("load_purestate_file") != "" || param.stringval("load_state_file") != "") {
+    string fname;
+    if (param.stringval("load_purestate_file") != "") fname=param.stringval("load_purestate_file");
+    if (param.stringval("load_state_file") != "") fname=param.stringval("load_state_file");
+    fname+="_N="+to_string(N);
+    string f1=fname+".ops";
+    string f3=fname+".sites";
+    cout<< "Opening '"<<f1<<"' and '"<<f3<<"'...";cout.flush();
+    readFromFile(f3, C.sites);
+    readFromFile(f1, C.siteops);
+    cout << "done.\n";
+    C.rho = MPS(C.siteops);//Rho is still undefined but its structure is initialized using C.siteops
     C.Lindbladian = AutoMPO(C.siteops);
     C.LindbladianDag = AutoMPO(C.siteops);
   }
+  
   C.ConstructIdentity(); //Construct the density matrix corresponding to inifinite temperature (~ Identity)
 
   auto args = Args("Cutoff", param.val("Cutoff"), "MaxDim", param.longval("MaxDim"));
@@ -110,15 +121,13 @@ int main(int argc, char *argv[])
   MPS psi;
   bool psi_defined = false;
 
-  if (param.longval("read_wf") != 0 && param.longval("read_rho") != 0)
-    cerr << "Error: conflict in parameters (read_wf+read_rho): should I read psi or rho from the disk?\n", exit(1);
-
+  
   if (param.longval("rho_inf_init") == 0)
   {
-    if (param.longval("read_rho") == 0)
+    if (param.stringval("load_state_file") == "")
 
     { //Start from a wave-function (pure state)
-      if (param.longval("read_wf") == 0)
+      if (param.stringval("load_purestate_file") == "")
       {
         // Set the initial wavefunction matrix product state
         auto initState = InitState(C.sites);
@@ -162,19 +171,27 @@ int main(int argc, char *argv[])
 
         const double energy = dmrg(psi, H0, sweeps, obs, "Quiet");
         cout << "Initial energy=" << energy << endl;
-        if (param.val("write_wf") != 0)
+        if (param.stringval("save_purestate_file") != "")
         {
-          writeToFile("sites_file", C.sites);
-          writeToFile("siteops_file", C.siteops);
-          writeToFile("psi_file", psi);
-          cout << "the final wave-function was written to disk.\n";
+          string fname=param.stringval("save_purestate_file");
+          fname+="_N="+to_string(N);
+          string f1=fname+".ops";writeToFile(f1, C.siteops);
+          string f2=fname+".psi";writeToFile(f2, C.rho);
+          string f3=fname+".sites";writeToFile(f3, C.sites);
+           writeToFile(f3, C.sites);
+          writeToFile(f1, C.siteops);
+          writeToFile(f2, psi);
+          cout << "the final pure state was written to disk, in files "<<f1<<", "<<f2<<" and "<<f3<<".\n";
         }
       }
       else
       { //read psi from a file
-        cout << "Read the initial wave-function from file...";
+        string fname=param.stringval("load_purestate_file");
+        fname+="_N="+to_string(N)+".psi";
         psi = MPS(C.sites);
-        readFromFile("psi_file", psi);
+        cout << "Read the initial pure state (wave-function) from file '"<<fname<<"'...";cout.flush();
+        readFromFile(fname, psi);
+        cout<<"done.\n";
       }
       psi_defined = true;
 
@@ -185,9 +202,12 @@ int main(int argc, char *argv[])
     }
     else
     { //Read the density matrix from disk
-      cout << "Read the initial rho from file...";
+      
+      string fname=param.stringval("load_state_file");
+      fname+="_N="+to_string(N)+".rho";
+      cout << "Read the initial rho from the file '"<<fname<<"'...";
       cout.flush();
-      readFromFile("rho_file", C.rho);
+      readFromFile(fname, C.rho);
       cout << "done.\n";
       if (param.val("InitialOrthoRho") != 0)
       {
@@ -259,7 +279,7 @@ int main(int argc, char *argv[])
     auto sweeps = Sweeps(param.longval("sweepsRho"));
     //Specify max number of states kept each sweep
     const int m = param.longval("MaxDimRho");
-    if (param.longval("read_rho") != 0)
+    if (param.stringval("load_state_file") != "")
     { //if we are starting from some previous rho, start with the largest allowed bond dimension
       sweeps.maxdim() = m;
     }
@@ -435,9 +455,10 @@ int main(int argc, char *argv[])
     }
   }
 
-  string fname=param.stringval("save_state_file")+"_N="+to_string(N);
+  string fname=param.stringval("save_state_file");
   if (fname != "")
   {
+    fname+="_N="+to_string(N);
     string f1=fname+".ops";writeToFile(f1, C.siteops);
     string f2=fname+".rho";writeToFile(f2, C.rho);
     string f3=fname+".sites";writeToFile(f3, C.sites);
