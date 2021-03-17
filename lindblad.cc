@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
   double ttotal = param.val("T");
   const int nt = int(ttotal / tau + (1e-9 * (ttotal / tau)));
 
-  string name = param.FileName();
+  string name = param.stringval("outputfile");
 
   ofstream file_sz("sz_profile." + name); //This file will the full { <S^z(i)> i=1...N} profile as a function of time
   file_sz << "#\"t=time\"" << endl;

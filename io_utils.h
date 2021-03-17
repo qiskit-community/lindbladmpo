@@ -300,8 +300,35 @@ public:
     return double_vec;
   }
   //------------------------------------------------------
-  // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
+  // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<long>
   vector<long> longvec(string var_name) const
+  { 
+    vector<long> long_vec;
+    map<string, string>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+    }
+    else
+    {
+      vector<string> str_vec;
+      str_vec=split(it->second, ',');
+      for(auto& s: str_vec) {
+        long i;
+        try {
+          i=stoi(s);
+        }
+        catch(...) {
+          cerr<<"Error: was expecting a long int and instead got '"<<s<<"'\n",exit(1);
+        }
+        long_vec.push_back(i);
+      }
+    }
+    return long_vec;
+  }
+  //------------------------------------------------------
+  // The method below converts a string of the type hello,thanks,home,car into a vector<string>
+  vector<long> stringvec(string var_name) const
   { 
     vector<long> long_vec;
     map<string, string>::const_iterator it = find(var_name);

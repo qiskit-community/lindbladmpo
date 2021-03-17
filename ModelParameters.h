@@ -31,8 +31,6 @@ public:
         operator[]("b_periodic_y") = "false"; // if true -> periodic boundary conditions in the y direction
         operator[]("Lx") = "4";
         operator[]("Ly") = "1";
-
-        operator[]("outputfilename") = "auto"; //if "auto", a name is generated using the most inportant parameters of the model (see FileName() below)
         
     }
     void check()
@@ -46,42 +44,7 @@ public:
         if (N < 1)
             cerr << "Error, this code assumes that the system has at least 1 site.\n", exit(1);
     }
-    string FileName() //This string can be used to construct the prefix of the output file names, so that it contain the most important parameters of the simulation
-    {
-        if (stringval("outputfilename") == "auto")
-        {
-            int Lx = longval("Lx");
-            int Ly = longval("Ly");
-            //double U = val("U");
-            double J = val("J");
-            double Omega = val("Omega");
-            double Delta = val("Delta");
-            double gamma = val("gamma");
-            double tau = val("tau");
-            string name = "Lx=" + to_string(Lx) + "_Ly=" + to_string(Ly) + "_Delta=" + to_string(Delta) + "_Omega=" + to_string(Omega) + "_J=" + to_string(J) + "_Gamma=" + to_string(gamma) //
-                          + "_tau=" + to_string(tau) + "_chi=" + to_string(longval("MaxDimRho")) + "_Time=" + to_string(val("T"));
-
-            if (longval("up_init") != 0)
-                name += "_init=up";
-            if (longval("down_init") != 0)
-                name += "_init=down";
-            if (longval("rho_inf_init") != 0)
-                name += "_init=rho_inf";
-            if (longval("x_init") != 0)
-                name += "_init=x";
-            if (longval("y_init") != 0)
-                name += "_init=y";
-            if (stringval("load_state_file") != "")
-                name += "_init=fromfile";
-
-            name += ".dat";
-            return name;
-        }
-        else
-        {
-            return stringval("outputfilename");
-        }
-    }
+    
 };
 
 //____________________________________________________________________

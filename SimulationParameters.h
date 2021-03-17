@@ -57,7 +57,7 @@ public:
         operator[]("InitialOrthoRho") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation
     
         operator[]("inputfile") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones)
-    
+        operator[]("outputfile") = "out"; //Prefix of the names of the files where results (observables) are written
     }
 };
 //____________________________________________________________________
