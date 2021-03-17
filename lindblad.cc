@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
   auto args = Args("Cutoff", param.val("Cutoff"), "MaxDim", param.longval("MaxDim"));
 
-  //Note on the option below: if we write "Normalize=true" (default for fitapplyMPO)
+  //Note on the option below: if we  "Normalize=true" (default for fitapplyMPO)
   //we would normalize rho such that Tr[rho^2]=1, (norm of the MPS)
   //which is of course not appropriate for a density matrix.
   //auto argsRho=args;
@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  string fname=param.stringval("save_state_file");
+  string fname=param.stringval("save_state_file")+"_N="+to_string(N);
   if (fname != "")
   {
     string f1=fname+".ops";writeToFile(f1, C.siteops);
