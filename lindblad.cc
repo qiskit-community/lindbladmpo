@@ -37,26 +37,31 @@ int main(int argc, char *argv[])
   const int N = Lx * Ly;
   Lattice2d lattice(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
   SpinHalfSystem C(N);
- 
- if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
-    cerr << "Error, conflict in parameters:load_purestate_file="<<param.stringval("load_purestate_file")
-         <<" and load_state_file="<<param.stringval("load_purestate_file")<<". They should not be both defined\n", exit(1);
- if (param.stringval("load_purestate_file") != "" || param.stringval("load_state_file") != "") {
+
+  if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
+    cerr << "Error, conflict in parameters:load_purestate_file=" << param.stringval("load_purestate_file")
+         << " and load_state_file=" << param.stringval("load_purestate_file") << ". They should not be both defined\n",
+        exit(1);
+  if (param.stringval("load_purestate_file") != "" || param.stringval("load_state_file") != "")
+  {
     string fname;
-    if (param.stringval("load_purestate_file") != "") fname=param.stringval("load_purestate_file");
-    if (param.stringval("load_state_file") != "") fname=param.stringval("load_state_file");
-    fname+="_N="+to_string(N);
-    string f1=fname+".ops";
-    string f3=fname+".sites";
-    cout<< "Opening '"<<f1<<"' and '"<<f3<<"'...";cout.flush();
+    if (param.stringval("load_purestate_file") != "")
+      fname = param.stringval("load_purestate_file");
+    if (param.stringval("load_state_file") != "")
+      fname = param.stringval("load_state_file");
+    fname += "_N=" + to_string(N);
+    string f1 = fname + ".ops";
+    string f3 = fname + ".sites";
+    cout << "Opening '" << f1 << "' and '" << f3 << "'...";
+    cout.flush();
     readFromFile(f3, C.sites);
     readFromFile(f1, C.siteops);
     cout << "done.\n";
-    C.rho = MPS(C.siteops);//Rho is still undefined but its structure is initialized using C.siteops
+    C.rho = MPS(C.siteops); //Rho is still undefined but its structure is initialized using C.siteops
     C.Lindbladian = AutoMPO(C.siteops);
     C.LindbladianDag = AutoMPO(C.siteops);
   }
-  
+
   C.ConstructIdentity(); //Construct the density matrix corresponding to inifinite temperature (~ Identity)
 
   auto args = Args("Cutoff", param.val("Cutoff"), "MaxDim", param.longval("MaxDim"));
@@ -121,7 +126,6 @@ int main(int argc, char *argv[])
   MPS psi;
   bool psi_defined = false;
 
-  
   if (param.longval("rho_inf_init") == 0)
   {
     if (param.stringval("load_state_file") == "")
@@ -173,25 +177,29 @@ int main(int argc, char *argv[])
         cout << "Initial energy=" << energy << endl;
         if (param.stringval("save_purestate_file") != "")
         {
-          string fname=param.stringval("save_purestate_file");
-          fname+="_N="+to_string(N);
-          string f1=fname+".ops";writeToFile(f1, C.siteops);
-          string f2=fname+".psi";writeToFile(f2, C.rho);
-          string f3=fname+".sites";writeToFile(f3, C.sites);
-           writeToFile(f3, C.sites);
+          string fname = param.stringval("save_purestate_file");
+          fname += "_N=" + to_string(N);
+          string f1 = fname + ".ops";
+          writeToFile(f1, C.siteops);
+          string f2 = fname + ".psi";
+          writeToFile(f2, C.rho);
+          string f3 = fname + ".sites";
+          writeToFile(f3, C.sites);
+          writeToFile(f3, C.sites);
           writeToFile(f1, C.siteops);
           writeToFile(f2, psi);
-          cout << "the final pure state was written to disk, in files "<<f1<<", "<<f2<<" and "<<f3<<".\n";
+          cout << "the final pure state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
         }
       }
       else
       { //read psi from a file
-        string fname=param.stringval("load_purestate_file");
-        fname+="_N="+to_string(N)+".psi";
+        string fname = param.stringval("load_purestate_file");
+        fname += "_N=" + to_string(N) + ".psi";
         psi = MPS(C.sites);
-        cout << "Read the initial pure state (wave-function) from file '"<<fname<<"'...";cout.flush();
+        cout << "Read the initial pure state (wave-function) from file '" << fname << "'...";
+        cout.flush();
         readFromFile(fname, psi);
-        cout<<"done.\n";
+        cout << "done.\n";
       }
       psi_defined = true;
 
@@ -202,10 +210,10 @@ int main(int argc, char *argv[])
     }
     else
     { //Read the density matrix from disk
-      
-      string fname=param.stringval("load_state_file");
-      fname+="_N="+to_string(N)+".rho";
-      cout << "Read the initial rho from the file '"<<fname<<"'...";
+
+      string fname = param.stringval("load_state_file");
+      fname += "_N=" + to_string(N) + ".rho";
+      cout << "Read the initial rho from the file '" << fname << "'...";
       cout.flush();
       readFromFile(fname, C.rho);
       cout << "done.\n";
@@ -321,20 +329,70 @@ int main(int argc, char *argv[])
   const int nt = int(ttotal / tau + (1e-9 * (ttotal / tau)));
 
   string name = param.stringval("outputfile");
+  //-----------------------------------------------------
+  // Some preparation/checks for the 1-qbit observables
+  ofstream file_1q(name + ".1q_obs.dat");
+  file_1q << "#time_t\tsite_i\t";
+  auto components = param.stringvec("1q_components");
+  for (auto &s : components)
+  {
+    if (s.length() != 1)
+      cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+    char c = tolower(s[0]);
+    if (c != 'x' && c != 'y' && c != 'z')
+      cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+    file_1q << "\t<sigma^" << c << "(i)>_t";
+  }
+  file_1q << endl;
+  file_1q.precision(15);
+  //-----------------------------------------------------
+  // Some preparation/checks for the 2-qbit observables
+  ofstream file_2q(name + ".2q_obs.dat");
+  file_2q << "#time_t\tsite_i\tsite_j\t";
+  file_2q.precision(15);
+  vector<long> sit2 = param.longvec("2q_sites");
+  if (sit2.size() % 2 == 1)
+    cerr << "Error: the list of sites given in the parameter `2q_sites` should have an even length.\n", exit(1);
 
-  ofstream file_sz("sz_profile." + name); //This file will the full { <S^z(i)> i=1...N} profile as a function of time
-  file_sz << "#\"t=time\"" << endl;
-  file_sz << "#time\t1\t<S^z(1)>\t<S^x(1)>" << endl;
-  file_sz << "#time\ti\t<S^z(i)>\t<S^x(i)>" << endl;
-  file_sz << "#time\tN\t<S^z(N)>\t<S^x(N)>" << endl
-          << endl;
-  file_sz.precision(15);
+  if (sit2.size() == 0)
+  { //If no sites are given explicitely we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
+    for (int i = 1; i <= N; i++)
+      for (int j = 1; j <= N; j++)
+      {
+        if (i != j)
+          sit2.push_back(i), sit2.push_back(j);
+      }
+  }
+  for (unsigned int n = 0; n < sit2.size(); n += 2)
+  {
+    const int i = sit2[n], j = sit2[n + 1];
+    if (i < 1 || i > N)
+      cerr << "Error: site i=" << i << " found in list `2q_sites`.\n", exit(1);
+    if (j < 1 || j > N)
+      cerr << "Error: site i=" << i << " found in list `2q_sites`.\n", exit(1);
+  }
 
-  ofstream file_m("time_series." + name); //This file will contain various observables (in different columns) as a function of time
-  file_m << "#time\t<S^z>\t<S^x>\t<S^y>\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)"
-         << "\t\\eta_{zz}\t\\eta_{xx}\t\\eta_{yy}\t\\eta_{xz}\t\\eta_{yz}\t\\eta_{xy}" << endl;
-  file_m.precision(15);
+  auto components2 = param.stringvec("2q_components");
+  for (auto &s : components2)
+  {
+    if (s.length() != 2)
+      cerr << "Error: " << s << " is an unknown 2-qbit component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
+    for (int n = 0; n <= 1; n++)
+    {
+      char c = tolower(s[n]);
+      if (c != 'x' && c != 'y' && c != 'z')
+        cerr << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
+    }
+    file_2q << "\t"
+            << "\t<sigma^" << char(tolower(s[0])) << "(i)sigma^" << char(tolower(s[1])) << "(j)>_t";
+  }
+  file_2q << endl;
+  //-----------------------------------------------------
 
+  ofstream file_ent(name + ".entropy.dat");
+  file_ent << "#time\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)" << endl;
+  file_ent.precision(15);
+  //-----------------------------------------------------
   const int obs = param.longval("obs");
   for (int n = 0; n <= nt; n++)
   {
@@ -356,86 +414,64 @@ int main(int argc, char *argv[])
         const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
         cout << "\tTrace[rho]=" << C.trace_rho() << "\tTr{rho^2} =" << tr2 << "\tRényi Entropy S_2 =" << S_2
              << "\tCenter-bond dimension for rho:" << bd << "\tMax bond dimension of rho:" << bd_max
-             << "\n\tOperator Space Entropy @center bond :" << osee;
-
-        cout << "\n\tMagnetization:\n\t\t";
+             << "\n\tOperator Space Entropy @center bond :" << osee << endl;
+        file_ent << t << " \t" << S_2 << " \t" << osee << " \t" << bd << " \t" << bd_max << endl;
+        //-----------------------------------------------------------------------------------------
         {
-          file_sz << "\"t=" << t << "\"\n";
-          for (int i = 1; i <= N; i++)
-          {
-            const Cplx sz = C.Expect("Sz", i);
-            if (abs(sz.imag()) > 1e-3)
-              cout << "Warning: <Sz(" << i << ")>=" << sz << " is not real\n";
-            const Cplx sx = C.Expect("Sx", i);
-            if ((i == 1) || abs(i - N / 2) < 1 || i == N)
-              cout << "Sz(" << i << ")=" << sz << "\t";
-            file_sz << t << "\t" << i - N / 2 << "\t" << sz.real() << "\t" << sx.real() << endl;
+          int count = 0;
+          //compute the 1-q  observables and write them to file_1q
+          vector<long> sit = param.longvec("1q_sites");
+          if (sit.size() == 0)
+          { //If no sites are given explicitely we consider all: 1,...,N
+            sit.resize(N);
+            iota(sit.begin(), sit.end(), 1);
           }
+          for (long &i : sit)
+          {
+            file_1q << t << "\t" << i << "\t";
+            for (auto &s : components)
+            {
+              Cplx expectation_value;
+              if (tolower(s[0]) == 'x' )
+                expectation_value = C.Expect("Sx", i);
+              if (tolower(s[0])  == 'y')
+                expectation_value = C.Expect("Sy", i);
+              if (tolower(s[0])  == 'z')
+                expectation_value = C.Expect("Sz", i);
+              if (abs(expectation_value.imag()) > 1e-3)
+                cout << "Warning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real\n";
+              file_1q << "\t" << expectation_value.real();
+              count++;
+            }
+            file_1q << endl;
+          }
+          cout << "\n\t" << count << " 1-qbit expectation values have been written in to a file.";
+          file_1q << endl; //Skip a line between each time step
+          file_1q.flush();
         }
-        double sz_tot = 0, sz_center = 0, sza = 0, szb = 0, sxa = 0, sxb = 0, sya = 0, syb = 0,
-               szsz = 0, sxsx = 0, sysy = 0, sysz = 0, sxsz = 0, sxsy = 0;
-        const int center_site = N / 2;
-        int a = N / 2, b = a + 1;
-        if (a < 1)
-          a = 1;
-        if (b > N)
-          b = N;
+        //-----------------------------------------------------------------------------------------
         {
-          for (int i = 1; i <= N; i++)
+          int count = 0;
+          //compute the 2-q  observables and write them to file_2q
+
+          for (unsigned int n = 0; n < sit2.size(); n += 2)
           {
-            const double s = C.Expect("Sz", i).real();
-            sz_tot += s;
-            if (i == center_site)
-              sz_center += s;
-            if (i == a)
-              sza = s, sxa = C.Expect("Sx", i).real(), sya = C.Expect("Sy", i).real();
-            if (i == b)
-              szb = s, sxb = C.Expect("Sx", i).real(), syb = C.Expect("Sy", i).real();
+            const int i = sit2[n], j = sit2[n + 1];
+            file_2q << t << "\t" << i << "\t" << j << "\t";
+            //Loop over components
+
+            Cplx expectation_value = C.Expect("Sx", i, "Sx", j);
+            if (abs(expectation_value.imag()) > 1e-3)
+              cout << "Warning: <S^x(" << i << ")S^x(" << j << ")>=" << expectation_value << " is not real.\n";
+            file_2q << "\t" << expectation_value.real();
+            file_2q << endl;
+            count++;
           }
-          cout << "<Sz_center>=" << sz_center << "\t"
-               << "<Sz_tot>=" << sz_tot
-               << "\n\t\t<n_center>=" << sz_center + 0.5 << "\t"
-               << "<n>=" << sz_tot / N + 0.5
-               << "\n\t\t<Sz(a=" << a << ")>=" << sza << "\t<Sz(b=" << b << ")>=" << szb
-               << "\n\t\t<Sx(a=" << a << ")>=" << sxa << "\t<Sx(b=" << b << ")>=" << sxb
-               << "\n\t\t<Sy(a=" << a << ")>=" << sya << "\t<Sy(b=" << b << ")>=" << syb;
-          cout << "\n\tCorrelations:";
-
-          //Two-point correlations
-          szsz = C.Expect("Sz", a, "Sz", b).real();
-          cout << "\n\t\t<Sz(a)Sz(b)>=" << szsz << "\t<Sz(a)Sz(b)>^c=" << szsz - sza * szb;
-          sxsx = C.Expect("Sx", a, "Sx", b).real();
-          cout << "\n\t\t<Sx(a)Sx(b)>=" << sxsx << "\t<Sx(a)Sx(b)>^c=" << sxsx - sxa * sxb;
-          sysy = C.Expect("Sy", a, "Sy", b).real();
-          cout << "\n\t\t<Sy(a)Sy(b)>=" << sysy << "\t<Sy(a)Sy(b)>^c=" << sysy - sya * syb;
-
-          sxsz = C.Expect("Sx", a, "Sz", b).real();
-          cout << "\n\t\t<Sx(a)Sz(b)>=" << sxsz << "\t<Sx(a)Sz(b)>^c=" << sxsz - sxa * szb;
-          sysz = C.Expect("Sy", a, "Sz", b).real();
-          cout << "\n\t\t<Sy(a)Sz(b)>=" << sysz << "\t<Sy(a)Sz(b)>^c=" << sysz - sya * szb;
-          sxsy = C.Expect("Sx", a, "Sy", b).real();
-          cout << "\n\t\t<Sx(a)Sy(b)>=" << sxsy << "\t<Sx(a)Sy(b)>^c=" << sxsy - sxa * syb << endl;
+          cout << "\n\t" << count << " 2-qbit expectation values (correlations) have been written to a file.\n";
+          file_2q << endl; //Skip a line between each time step
+          file_2q.flush();
         }
-        file_sz << endl
-                << endl;
-        file_sz.flush();
-
-        file_m << t << "\t"
-               << C.Expect("Sz", center_site).real() << "\t"  //col 2
-               << C.Expect("Sx", center_site).real() << "\t"  // 3
-               << -C.Expect("Sy", center_site).real() << "\t" //4
-               << S_2 << "\t"                                 //5
-               << osee << "\t"                                //6
-               << bd << "\t"                                  //7
-               << bd_max << "\t"                              //8
-               << szsz - sza * szb << "\t"                    //9
-               << sxsx - sxa * sxb << "\t"                    //10
-               << sysy - sya * syb << "\t"                    //11
-               << sxsz - sxa * szb << "\t"                    //12
-               << -sysz + sya * szb << "\t"                   //13
-               << -sxsy + sxa * syb << "\t"                   //14
-               << endl;
-        file_m.flush();
+        //-----------------------------------------------------------------------------------------
       }
       else
       {
@@ -443,7 +479,6 @@ int main(int argc, char *argv[])
         cout.flush();
       }
     }
-
     if (n < nt)
     {
       TE.evolve(C.rho);
@@ -455,14 +490,17 @@ int main(int argc, char *argv[])
     }
   }
 
-  string fname=param.stringval("save_state_file");
+  string fname = param.stringval("save_state_file");
   if (fname != "")
   {
-    fname+="_N="+to_string(N);
-    string f1=fname+".ops";writeToFile(f1, C.siteops);
-    string f2=fname+".rho";writeToFile(f2, C.rho);
-    string f3=fname+".sites";writeToFile(f3, C.sites);
-    cout << "the state was written to disk, in files "<<f1<<", "<<f2<<" and "<<f3<<".\n";
+    fname += "_N=" + to_string(N);
+    string f1 = fname + ".ops";
+    writeToFile(f1, C.siteops);
+    string f2 = fname + ".rho";
+    writeToFile(f2, C.rho);
+    string f3 = fname + ".sites";
+    writeToFile(f3, C.sites);
+    cout << "the state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
   }
   cout << endl;
   return 0;

@@ -275,7 +275,7 @@ public:
   // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
   vector<double> doublevec(string var_name) const
   { 
-    vector<double> double_vec;
+    vector<double> vec;
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
@@ -294,16 +294,16 @@ public:
         catch(...) {
           cerr<<"Error: was expecting a double and instead got "<<s<<endl,exit(1);
         }
-        double_vec.push_back(x);
+        vec.push_back(x);
       }
     }
-    return double_vec;
+    return vec;
   }
   //------------------------------------------------------
   // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<long>
   vector<long> longvec(string var_name) const
   { 
-    vector<long> long_vec;
+    vector<long> vec;
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
@@ -321,16 +321,16 @@ public:
         catch(...) {
           cerr<<"Error: was expecting a long int and instead got '"<<s<<"'\n",exit(1);
         }
-        long_vec.push_back(i);
+        vec.push_back(i);
       }
     }
-    return long_vec;
+    return vec;
   }
   //------------------------------------------------------
   // The method below converts a string of the type hello,thanks,home,car into a vector<string>
-  vector<long> stringvec(string var_name) const
+  vector<string> stringvec(string var_name) const
   { 
-    vector<long> long_vec;
+    vector<string> vec;
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
@@ -338,20 +338,11 @@ public:
     }
     else
     {
-      vector<string> str_vec;
-      str_vec=split(it->second, ',');
-      for(auto& s: str_vec) {
-        long i;
-        try {
-          i=stoi(s);
-        }
-        catch(...) {
-          cerr<<"Error: was expecting a long int and instead got '"<<s<<"'\n",exit(1);
-        }
-        long_vec.push_back(i);
-      }
+      vector<string> str_vec=split(it->second, ',');
+      for(auto& s: str_vec)
+               vec.push_back(s);
     }
-    return long_vec;
+    return vec;
   }
 };
 #endif

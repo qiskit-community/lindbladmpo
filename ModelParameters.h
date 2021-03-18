@@ -29,9 +29,17 @@ public:
         //Lattice
         operator[]("b_periodic_x") = "false"; // if true -> periodic boundary conditions in the x direction (Warining: potential huge cost in terms of bond dimension)
         operator[]("b_periodic_y") = "false"; // if true -> periodic boundary conditions in the y direction
-        operator[]("Lx") = "4";
+        operator[]("Lx") = "4"; //Smmall system by default
         operator[]("Ly") = "1";
-        
+
+        //1-Qbit observables
+        operator[]("1q_components") = "x,y,z"; // Vector of components
+        operator[]("1q_sites") = ""; // Vector of long integers. If left empty => equivalent to 1,2,3,...,N
+
+        //2-Qbit observables
+        // Vector of components. Each element should have two letters. For instance XY means that <sigma^x(i)sigma^y(j)> will be computed for the pairs i,j specified in the argument "2q_sites".
+        operator[]("2q_components") = "xx,yy,zz"; 
+        operator[]("2q_sites") = ""; // Vector of long integers i1,j1,i2,j2,.... If left empty => equivalent to all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1 
     }
     void check()
     {
