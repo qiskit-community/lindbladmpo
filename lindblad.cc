@@ -338,10 +338,10 @@ int main(int argc, char *argv[])
   {
     if (s.length() != 1)
       cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
-    char c = tolower(s[0]);
-    if (c != 'x' && c != 'y' && c != 'z')
+    char c = toupper(s[0]);
+    if (c != 'X' && c != 'Y' && c != 'Z')
       cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
-    file_1q << "\t<sigma^" << c << "(i)>_t";
+    file_1q << "\t" << c;
   }
   file_1q << endl;
   file_1q.precision(15);
@@ -379,12 +379,12 @@ int main(int argc, char *argv[])
       cerr << "Error: " << s << " is an unknown 2-qbit component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
     for (int n = 0; n <= 1; n++)
     {
-      char c = tolower(s[n]);
-      if (c != 'x' && c != 'y' && c != 'z')
+      char c = toupper(s[n]);
+      if (c != 'X' && c != 'Y' && c != 'Z')
         cerr << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
     }
     file_2q << "\t"
-            << "\t<sigma^" << char(tolower(s[0])) << "(i)sigma^" << char(tolower(s[1])) << "(j)>_t";
+            << "\t" << char(toupper(s[0])) << char(toupper(s[1]));
   }
   file_2q << endl;
   //-----------------------------------------------------
