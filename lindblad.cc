@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
       {
         const double t = n * tau;
         //Some data about this time step
-        cout << "\nt=" << n * tau << "\t----------------------------\n";
+        cout << "\ntime t=" << n * tau << "\t----------------------------\n";
 
         if (param.longval("b_force_rho_Hermitian") != 0)
           C.MakeRhoHermitian(argsRho);
@@ -413,13 +413,13 @@ int main(int argc, char *argv[])
         const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
         const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
         cout << "\tTrace[rho]=" << C.trace_rho() << "\tTr{rho^2} =" << tr2 << "\tRényi Entropy S_2 =" << S_2
-             << "\tCenter-bond dimension for rho:" << bd << "\tMax bond dimension of rho:" << bd_max
+             << "\n\tCenter-bond dimension for rho:" << bd << "\tMax bond dimension of rho:" << bd_max
              << "\n\tOperator Space Entropy @center bond :" << osee << endl;
         file_ent << t << " \t" << S_2 << " \t" << osee << " \t" << bd << " \t" << bd_max << endl;
         //-----------------------------------------------------------------------------------------
-        {
+        {//compute the 1-q  observables and write them to file_1q
+          cout<<"\n\tObservables:";
           int count = 0;
-          //compute the 1-q  observables and write them to file_1q
           vector<long> sit = param.longvec("1q_sites");
           if (sit.size() == 0)
           { //If no sites are given explicitely we consider all: 1,...,N
@@ -445,15 +445,14 @@ int main(int argc, char *argv[])
             }
             file_1q << endl;
           }
-          cout << "\n\t" << count << " 1-qbit expectation values have been written in to a file.";
+          cout << "\n\t" << count << " 1-qbit expectation values have been computed and written in to a file.";
           file_1q << endl; //Skip a line between each time step
           file_1q.flush();
         }
         //-----------------------------------------------------------------------------------------
         {
-          int count = 0;
           //compute the 2-q  observables and write them to file_2q
-
+          int count = 0;
           for (unsigned int n = 0; n < sit2.size(); n += 2)
           {
             const int i = sit2[n], j = sit2[n + 1];
@@ -467,7 +466,7 @@ int main(int argc, char *argv[])
             file_2q << endl;
             count++;
           }
-          cout << "\n\t" << count << " 2-qbit expectation values (correlations) have been written to a file.\n";
+          cout << "\n\t" << count << " 2-qbit expectation values (correlations) have been computed and written to a file.\n";
           file_2q << endl; //Skip a line between each time step
           file_2q.flush();
         }
