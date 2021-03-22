@@ -11,7 +11,15 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     // -----------------------------------------------------------
     // We first construct the Hamiltonian (unitary evolution) terms
     const int N = C.N;
-    const double U = param.val("U");
+    const double U = param.vecval("U");
+    vector<double> h_x = param.doublevec("h_x");
+	int h_x_len = h_x.size();
+	if (h_x_len == 1)
+	{
+		h_x = vector<double>(N, h_x[0]);
+	}
+	else if (h_x_len != N)
+        cerr << "Error in the Hamiltonian x parameters vector h_x, inconsistent length " << endl, exit(1);
     const double J = param.val("J");
     const double Omega = param.val("Omega");
     const double Delta = param.val("Delta");
@@ -39,7 +47,8 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         //Uniform magnetic field everywhere:
         for (int j = 1; j <= N; ++j)
         {
-            auto_L += 2 * Omega, "Sx", j;
+//            auto_L += 2 * Omega, "Sx", j;
+            auto_L += h_x[j - 1], "Sx", j;
             auto_L += Delta, "Sz", j;
 
             auto_L += -2 * Omega, "_Sx", j;

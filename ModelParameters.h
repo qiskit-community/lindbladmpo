@@ -17,6 +17,7 @@ public:
         //Parameters of the Hamiltonian part of the model [Same notations & conventions as in https://doi.org/10.1103/PhysRevA.93.023821
         operator[]("U") = "0";       //Sz-Sz Interaction strength U*Sz*Sz
         operator[]("J") = "1";       //Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy)
+        operator[]("h_x") = "0";     // magnetic field in the x direction. Note: h_x(sigma^+ + sigma^-)/2 = h_x*sigma^x/2 = h_x*S^x
         operator[]("Omega") = "0.5"; //magnetic field in the x direction. Note: Omega(sigma^+ + sigma^-) = Omega*sigma^x = 2*Omega*S^x
         operator[]("Delta") = "0";   // magnetic field in the z direction  H=Delta*S^z
 
