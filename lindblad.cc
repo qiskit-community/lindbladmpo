@@ -29,13 +29,30 @@ int main(int argc, char *argv[])
   //Now param contains all the the parameters, default values (see SimulationParameters.h and ModelParameters.h) or those provided on the command-line
   cout << endl;
   cout.precision(10);
-  param.check();
+  //param.check();
   param.PRint(cout);
 
   int Lx = param.longval("Lx");
   int Ly = param.longval("Ly");
-  const int N = Lx * Ly;
-  Lattice2d lattice(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
+  int N;
+  Lattice2d lattice;
+  if (Lx < 0 || Ly < 0)
+    cerr << "Error, invalid (Lx,Ly)=" << Lx << "," << Ly << ".\n", exit(1);
+  if (Lx > 0 && Ly > 0)
+  {
+    //Square lattice
+    N = Lx * Ly;
+    lattice = Lattice2d(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
+  }
+  else
+  {
+    //User-defined lattice
+    N = param.longval("N");
+    if (N < 1)
+      cerr << "Error, invalid N=" << N << ".\n", exit(1);
+    lattice = Lattice2d(N, param.longvec("Asites"), param.longvec("Bsites"));
+  }
+
   SpinHalfSystem C(N);
 
   if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
@@ -342,6 +359,17 @@ int main(int argc, char *argv[])
     if (c != 'X' && c != 'Y' && c != 'Z')
       cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
   }
+  vector<long> sit = param.longvec("1q_sites");
+  if (sit.size() == 0)
+  { //If no sites are given explicitely we consider all: 1,...,N
+    sit.resize(N);
+    iota(sit.begin(), sit.end(), 1);
+  }
+  for (int i : sit)
+  {
+    if (i < 1 || i > N)
+      cerr << "Error: invalid site i=" << i << " found in list `1q_sites`.\n", exit(1);
+  }
   file_1q.precision(15);
   //-----------------------------------------------------
   // Some preparation/checks for the 2-qbit observables
@@ -365,9 +393,9 @@ int main(int argc, char *argv[])
   {
     const int i = sit2[n], j = sit2[n + 1];
     if (i < 1 || i > N)
-      cerr << "Error: site i=" << i << " found in list `2q_sites`.\n", exit(1);
+      cerr << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
     if (j < 1 || j > N)
-      cerr << "Error: site i=" << i << " found in list `2q_sites`.\n", exit(1);
+      cerr << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
   }
 
   auto components2 = param.stringvec("2q_components");
@@ -414,12 +442,7 @@ int main(int argc, char *argv[])
         { //compute the 1-q  observables and write them to file_1q
           cout << "\n\tObservables:";
           int count = 0;
-          vector<long> sit = param.longvec("1q_sites");
-          if (sit.size() == 0)
-          { //If no sites are given explicitely we consider all: 1,...,N
-            sit.resize(N);
-            iota(sit.begin(), sit.end(), 1);
-          }
+
           for (long &i : sit)
           {
             for (auto &s : components)
@@ -433,8 +456,8 @@ int main(int argc, char *argv[])
                 expectation_value = C.Expect("Sz", i);
               if (abs(expectation_value.imag()) > 1e-3)
                 cout << "Warning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real\n";
-              file_1q << "#" << char(toupper(s[0])) << "\t" << t << "\t" <<i
-                      << "\t" << expectation_value.real()<<endl;
+              file_1q << "#" << char(toupper(s[0])) << "\t" << t << "\t" << i
+                      << "\t" << expectation_value.real() << endl;
               count++;
             }
             file_1q << endl;

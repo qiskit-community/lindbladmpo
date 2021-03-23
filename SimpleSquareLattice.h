@@ -1,7 +1,7 @@
 #ifndef _SIMPLESQUARELATTICE_
 #define _SIMPLESQUARELATTICE_
 //____________________________________________________________
-//Super basic square lattice class, to keep track of the site positions, bonds, etc.
+//Super basic lattice class
 //_____________________________________________________
 class Lattice2d
 {
@@ -10,6 +10,32 @@ public:
   vector<int> X, Y; // Real space coordinates
   vector<int> I, J; //list of bonds
   map<pair<int, int>, int> index;
+  Lattice2d(){};
+  //Constructor of some arbitrary lattice using two list of sites
+  Lattice2d(int N_, vector<long> A, vector<long> B): N(N_)
+  {
+    cout<<"A="<<A<<"\nB="<<B<<endl;
+    if (N < 1)
+      cerr << "Error: the number of sites N=" << N_ << " should be >= 1.\n", exit(1);
+    const unsigned int n = A.size();
+    if (n != B.size())
+      cerr << "Error: the two lists of sites have size " << A.size() << " and " << B.size() << " but they should be identical.\n", exit(1);
+    //Loop over the bonds
+    for (unsigned int i = 0; i < n; i++)
+    {
+      if (A[i] < 1 || A[i] > N)
+        cerr << "Error, site number " << A[i] << " is not in [1,...,N=" << N << "].\n", exit(1);
+      if (B[i] < 1 || B[i] > N)
+        cerr << "Error, site number " << B[i] << " is not in [1,...,N=" << N << "].\n", exit(1);
+      I.push_back(A[i]);
+      J.push_back(B[i]);
+    }
+    cout << "User-defined lattice with " << N << " qbits and " << n << " bonds.\n";
+    cout << "List of bonds:\n";
+    cout << "\t"<<I << endl;
+    cout << "\t"<<J << endl;
+  }
+  // Creation of a Lx*L square lattice with or without periodic boundary conditions in the x and y direction
   Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly)
   {
     bool up;
@@ -48,7 +74,7 @@ public:
         if (Ly > 1 && y + 1 < Ly)
         {
           I.push_back(ind);
-          J.push_back(index[pair<int, int>(x , y+1)]);
+          J.push_back(index[pair<int, int>(x, y + 1)]);
         }
         if (Ly > 2 && y_periodic == true && y == Ly - 1)
         {
@@ -67,7 +93,8 @@ public:
           J.push_back(index[pair<int, int>(0, y)]);
         }
       }
-    cout << "Bonds:\n";
+    cout << "Square lattice of size Lx=" << Lx << "*Ly=" << Ly << "=" << N << " qbits.\n";
+    cout << "List of bonds:\n";
     cout << I << endl;
     cout << J << endl;
   }

@@ -284,7 +284,6 @@ public:
     else
     {
       vector<string> str_vec;
-      cout<<"string V="<<it->second<<endl;
       str_vec=split(it->second, ',');
       for(auto& s: str_vec) {
         double x;
