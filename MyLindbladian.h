@@ -11,7 +11,7 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     // -----------------------------------------------------------
     // We first construct the Hamiltonian (unitary evolution) terms
     const int N = C.N;
-    const double U = param.vecval("U");
+    const double U = param.val("U");
     vector<double> h_x = param.doublevec("h_x");
 	int h_x_len = h_x.size();
 	if (h_x_len == 1)
@@ -19,7 +19,7 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 		h_x = vector<double>(N, h_x[0]);
 	}
 	else if (h_x_len != N)
-        cerr << "Error in the Hamiltonian x parameters vector h_x, inconsistent length " << endl, exit(1);
+        cerr << "Error in the Hamiltonian, the vector parameter h_x, has inconsistent length " << endl, exit(1);
     const double J = param.val("J");
     const double Omega = param.val("Omega");
     const double Delta = param.val("Delta");

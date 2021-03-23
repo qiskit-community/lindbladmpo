@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
   //-----------------------------------------------------
   // Some preparation/checks for the 1-qbit observables
   ofstream file_1q(name + ".1q_obs.dat");
-  file_1q << "#time_t\tsite_i\t";
+  file_1q << "#Component\ttime_t\tsite_i\tExpectationValue" << endl;
   auto components = param.stringvec("1q_components");
   for (auto &s : components)
   {
@@ -341,14 +341,12 @@ int main(int argc, char *argv[])
     char c = toupper(s[0]);
     if (c != 'X' && c != 'Y' && c != 'Z')
       cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
-    file_1q << "\t" << c;
   }
-  file_1q << endl;
   file_1q.precision(15);
   //-----------------------------------------------------
   // Some preparation/checks for the 2-qbit observables
   ofstream file_2q(name + ".2q_obs.dat");
-  file_2q << "#time_t\tsite_i\tsite_j\t";
+  file_2q << "#Component\ttime_t\tsite_i\tsite_j\tExpectationValue" << endl;
   file_2q.precision(15);
   vector<long> sit2 = param.longvec("2q_sites");
   if (sit2.size() % 2 == 1)
@@ -383,12 +381,8 @@ int main(int argc, char *argv[])
       if (c != 'X' && c != 'Y' && c != 'Z')
         cerr << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
     }
-    file_2q << "\t"
-            << "\t" << char(toupper(s[0])) << char(toupper(s[1]));
   }
-  file_2q << endl;
   //-----------------------------------------------------
-
   ofstream file_ent(name + ".entropy.dat");
   file_ent << "#time\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)" << endl;
   file_ent.precision(15);
@@ -417,8 +411,8 @@ int main(int argc, char *argv[])
              << "\n\tOperator Space Entropy @center bond :" << osee << endl;
         file_ent << t << " \t" << S_2 << " \t" << osee << " \t" << bd << " \t" << bd_max << endl;
         //-----------------------------------------------------------------------------------------
-        {//compute the 1-q  observables and write them to file_1q
-          cout<<"\n\tObservables:";
+        { //compute the 1-q  observables and write them to file_1q
+          cout << "\n\tObservables:";
           int count = 0;
           vector<long> sit = param.longvec("1q_sites");
           if (sit.size() == 0)
@@ -428,19 +422,19 @@ int main(int argc, char *argv[])
           }
           for (long &i : sit)
           {
-            file_1q << t << "\t" << i << "\t";
             for (auto &s : components)
             {
               Cplx expectation_value;
-              if (tolower(s[0]) == 'x' )
+              if (tolower(s[0]) == 'x')
                 expectation_value = C.Expect("Sx", i);
-              if (tolower(s[0])  == 'y')
+              if (tolower(s[0]) == 'y')
                 expectation_value = C.Expect("Sy", i);
-              if (tolower(s[0])  == 'z')
+              if (tolower(s[0]) == 'z')
                 expectation_value = C.Expect("Sz", i);
               if (abs(expectation_value.imag()) > 1e-3)
                 cout << "Warning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real\n";
-              file_1q << "\t" << expectation_value.real();
+              file_1q << "#" << char(toupper(s[0])) << "\t" << t << "\t" <<i
+                      << "\t" << expectation_value.real()<<endl;
               count++;
             }
             file_1q << endl;
@@ -456,15 +450,20 @@ int main(int argc, char *argv[])
           for (unsigned int n = 0; n < sit2.size(); n += 2)
           {
             const int i = sit2[n], j = sit2[n + 1];
-            file_2q << t << "\t" << i << "\t" << j << "\t";
+
             //Loop over components
 
-            Cplx expectation_value = C.Expect("Sx", i, "Sx", j);
-            if (abs(expectation_value.imag()) > 1e-3)
-              cout << "Warning: <S^x(" << i << ")S^x(" << j << ")>=" << expectation_value << " is not real.\n";
-            file_2q << "\t" << expectation_value.real();
-            file_2q << endl;
-            count++;
+            for (auto &s : components2)
+            {
+              string c1("S"), c2("S");
+              c1 += char(tolower(s[0]));
+              c2 += char(tolower(s[1]));
+              Cplx expectation_value = C.Expect(c1, i, c2, j);
+              if (abs(expectation_value.imag()) > 1e-3)
+                cout << "Warning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
+              file_2q << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << t << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
+              count++;
+            }
           }
           cout << "\n\t" << count << " 2-qbit expectation values (correlations) have been computed and written to a file.\n";
           file_2q << endl; //Skip a line between each time step

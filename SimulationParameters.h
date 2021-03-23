@@ -56,7 +56,7 @@ public:
         operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors
         operator[]("InitialOrthoRho") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation
     
-        operator[]("inputfile") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones)
+        operator[]("inputfile") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones). If empty => 
         operator[]("outputfile") = "out"; //Prefix of the names of the files where results (observables) are written
     }
 };
