@@ -54,7 +54,7 @@ class SpinHalfSystem {
   AutoMPO LindbladianDag;
   
   //Adds a single-spin term to the Lindbladian above
-  void AddSingleSpinBath(double GammaPlus,double GammaMinus,int site);
+  void AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site);
   
   //Trace of rho
   complex<double> trace_rho() const;
