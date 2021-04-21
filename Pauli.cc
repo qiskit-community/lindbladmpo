@@ -427,7 +427,7 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
   Lindbladian += -z * 0.5, "projDn", site;
 
   z = GammaDephasing * Cplx_i;
-  Lindbladian += z, "_SzSz", site;
+  Lindbladian += z, "Sz_Sz", site;
   Lindbladian += -z * 0.5, "_Id", site;
   Lindbladian += -z * 0.5, "Id", site;
 
@@ -443,7 +443,7 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
   LindbladianDag += -z * 0.5, "projDn", site;
 
   z = -GammaDephasing * Cplx_i;
-  Lindbladian += z, "_SzSz", site;
+  Lindbladian += z, "Sz_Sz", site;
   Lindbladian += -z * 0.5, "_Id", site;
   Lindbladian += -z * 0.5, "Id", site;
 
