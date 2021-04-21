@@ -13,13 +13,23 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     const unsigned int N = C.N;
     const unsigned int num_bonds=L.I.size();
     vector<double> h_x = param.doublevec("h_x");
+    vector<double> h_y = param.doublevec("h_y");
+    vector<double> h_z = param.doublevec("h_z");
     unsigned int h_x_len = h_x.size();
+    unsigned int h_y_len = h_y.size();
+    unsigned int h_z_len = h_z.size();
     if (h_x_len != 1 && h_x_len != N)
         cerr << "Error: the paramter h_x has " << h_x_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
-    if (h_x_len == N)
-    {
+    if (h_y_len != 1 && h_y_len != N)
+        cerr << "Error: the paramter h_y has " << h_y_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+    if (h_z_len != 1 && h_z_len != N)
+        cerr << "Error: the paramter h_z has " << h_z_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+    if (h_x_len == 1)
         h_x = vector<double>(N, h_x[0]);
-    }
+    if (h_y_len == 1)
+        h_y = vector<double>(N, h_y[0]);
+    if (h_z_len == 1)
+        h_z = vector<double>(N, h_z[0]);
     vector<double> J = param.doublevec("J");
     if (J.size() != 1 && J.size() != num_bonds)
         cerr << "Error: the paramter J has " << J.size() << " values  but  1 or " << num_bonds << " value(s) were expected.\n", exit(1);
@@ -34,8 +44,6 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     {
         J_z = vector<double>(num_bonds, J_z[0]);
     }
-
-    const double Delta = param.val("Delta");
 
     cout << "SetHamiltonian with N=" << N << endl;
     for (int dag = 0; dag <= 1; dag++)
@@ -60,16 +68,44 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         //Magnetic field terms:
         for ( int j = 1; j <= N; ++j)
         {
-            auto_L += h_x[j - 1], "Sx", j;
-            auto_L += Delta, "Sz", j;
-
-            auto_L += - h_x[j - 1], "_Sx", j;
-            auto_L += -Delta, "_Sz", j;
+			if (h_x[j - 1] != 0.)
+			{
+				auto_L += h_x[j - 1], "Sx", j;
+				auto_L += - h_x[j - 1], "_Sx", j;
+			}
+			if (h_y[j - 1] != 0.)
+			{
+				auto_L += h_y[j - 1], "Sy", j;
+				auto_L += - h_y[j - 1], "_Sy", j;
+			}
+			if (h_z[j - 1] != 0.)
+			{
+				auto_L += h_z[j - 1], "Sz", j;
+				auto_L += - h_z[j - 1], "_Sz", j;
+			}
         }
     }
     // -----------------------------------------------------------
     // Dissipative terms
 
+    vector<double> g_0 = param.doublevec("g_0");
+    vector<double> g_1 = param.doublevec("g_1");
+    vector<double> g_2 = param.doublevec("g_2");
+    unsigned int g_0_len = g_0.size();
+    unsigned int g_1_len = g_1.size();
+    unsigned int g_2_len = g_2.size();
+    if (g_0_len != 1 && g_0_len != N)
+        cerr << "Error: the paramter g_0 has " << g_0_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+    if (g_1_len != 1 && g_1_len != N)
+        cerr << "Error: the paramter g_1 has " << g_1_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+    if (g_2_len != 1 && g_2_len != N)
+        cerr << "Error: the paramter g_2 has " << g_2_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+    if (g_0_len == 1)
+        g_0 = vector<double>(N, g_0[0]);
+    if (g_1_len == 1)
+        g_1 = vector<double>(N, g_1[0]);
+    if (g_2_len == 1)
+        g_2 = vector<double>(N, g_2[0]);
     const double gamma = param.val("gamma");
     cout << "Strength of the Lindblad terms, gamma=" << gamma << endl;
 
@@ -77,7 +113,9 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         // AddSingleSpinBath:
         // The first argument (here =0) is related to dissipative processes where a spin goes from down to up
         // The 2n  argument (here = gamma * 0.5) is related to dissipative processes where a spin goes from up  to down
-        C.AddSingleSpinBath(0, gamma * 0.5, i);
+        // OLD: C.AddSingleSpinBath(0, gamma * 0.5, i);
+        C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], i);
+		// TODO: Coefficients and order, dephasing.
 }
 //____________________________________________________________________
 

@@ -18,8 +18,8 @@ public:
         operator[]("J") = "1";       //Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single value, or a list of values
         operator[]("J_z") = "1";       //Sz-Sz Interaction strength. This parameter can either be a single value, or a list of values
         operator[]("h_x") = "0";     // magnetic field in the x direction. Note: h_x(sigma^+ + sigma^-)/2 = h_x*sigma^x/2 = h_x*S^x
-        operator[]("Omega") = "0.5"; //magnetic field in the x direction. Note: Omega(sigma^+ + sigma^-) = Omega*sigma^x = 2*Omega*S^x
-        operator[]("Delta") = "0";   // magnetic field in the z direction  H=Delta*S^z
+        operator[]("h_y") = "0";     // magnetic field in the y direction. Note:                            h_y*sigma^y/2 = h_y*S^y
+        operator[]("h_z") = "0";     // magnetic field in the z direction. Note:                            h_z*sigma^z/2 = h_z*S^z
 
         //Losses / dissipation
         operator[]("gamma") = "1.0"; //Strength of the "loss term"

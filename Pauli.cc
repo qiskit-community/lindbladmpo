@@ -150,6 +150,13 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(uu, du_, 0.5);
     Op.set(ud, dd_, 0.5);
   }
+  else if (opname == "Sz_Sz")
+  {
+    Op.set(dd_, dd, +0.25);
+    Op.set(du_, du, -0.25);
+    Op.set(ud_, ud, -0.25);
+    Op.set(uu_, uu, +0.25);
+  }
   else if (opname == "_S-S+")
   {
     //Op.set(uu, dd_, 1.0);
@@ -179,6 +186,14 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   {
     Op.set(dd_, dd, 1.0);
     Op.set(du_, du, 1.0);
+  }
+  else if (opname == "Id")
+  {
+	  // TODO
+  }
+  else if (opname == "_Id")
+  {
+	  // TODO
   }
   else
   {
@@ -397,28 +412,41 @@ Cplx SpinHalfSystem::Expect(const string &opname1, int i1, const string &opname2
   return (re);
 }
 
-void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, int site)
+void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site)
 {
+  // TODO possibly worth if'ing over 0 rates
+  
   Cplx z = GammaMinus * Cplx_i;
-  Lindbladian += 2 * z, "_S-S+", site;
-  Lindbladian += -z, "_projUp", site;
-  Lindbladian += -z, "projUp", site;
+  Lindbladian += z, "_S-S+", site;
+  Lindbladian += -z * 0.5, "_projUp", site;
+  Lindbladian += -z * 0.5, "projUp", site;
 
   z = GammaPlus * Cplx_i;
-  Lindbladian += 2 * z, "_S+S-", site;
-  Lindbladian += -z, "_projDn", site;
-  Lindbladian += -z, "projDn", site;
+  Lindbladian += z, "_S+S-", site;
+  Lindbladian += -z * 0.5, "_projDn", site;
+  Lindbladian += -z * 0.5, "projDn", site;
+
+  z = GammaDephasing * Cplx_i;
+  Lindbladian += z, "_SzSz", site;
+  Lindbladian += -z * 0.5, "_Id", site;
+  Lindbladian += -z * 0.5, "Id", site;
 
   // L^dagger
   z = -GammaMinus * Cplx_i;
-  LindbladianDag += 2 * z, "_S+S-", site;
-  LindbladianDag += -z, "_projUp", site;
-  LindbladianDag += -z, "projUp", site;
+  LindbladianDag += z, "_S+S-", site;
+  LindbladianDag += -z * 0.5, "_projUp", site;
+  LindbladianDag += -z * 0.5, "projUp", site;
 
   z = -GammaPlus * Cplx_i;
-  LindbladianDag += 2 * z, "_S-S+", site;
-  LindbladianDag += -z, "_projDn", site;
-  LindbladianDag += -z, "projDn", site;
+  LindbladianDag += z, "_S-S+", site;
+  LindbladianDag += -z * 0.5, "_projDn", site;
+  LindbladianDag += -z * 0.5, "projDn", site;
+
+  z = -GammaDephasing * Cplx_i;
+  Lindbladian += z, "_SzSz", site;
+  Lindbladian += -z * 0.5, "_Id", site;
+  Lindbladian += -z * 0.5, "Id", site;
+
 }
 //_____________________________________________________
 
