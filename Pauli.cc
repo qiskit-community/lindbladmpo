@@ -189,11 +189,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Id")
   {
-	  // TODO
-  }
-  else if (opname == "_Id")
-  {
-	  // TODO
+    Op.set(dd_, dd, 1);
+    Op.set(du_, du, 1);
+    Op.set(ud_, ud, 1);
+    Op.set(uu_, uu, 1);
   }
   else
   {
