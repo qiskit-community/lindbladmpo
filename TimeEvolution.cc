@@ -4,7 +4,7 @@ void TimeEvolver::init(double tau, const AutoMPO &auto_L, Args args, int ord)
 {
     order = ord;
     if (order > 4 || order < 2)
-        cerr << "Error, TrotterOrder=" << order << " not implemented.\n", exit(1);
+        cerr << "Error, Trotter_order=" << order << " not implemented.\n", exit(1);
 
     argsApplyMPOtoRho = args; //Take the options given
     argsApplyMPOtoRho.add("Method", "Fit");

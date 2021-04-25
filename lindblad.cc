@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
   //Read some input parameters from the command line (can be empty -> default values for all parameters):
   param.ReadArguments(argc, argv);
 
-  //If a filename is given as the parameter "inputfile" => some input parameters are read from that file
-  string inputfilename = param.stringval("inputfile");
+  //If a filename is given as the parameter "input_file" => some input parameters are read from that file
+  string inputfilename = param.stringval("input_file");
   if (inputfilename != "")
     param.ReadFromFile(inputfilename);
 
@@ -32,12 +32,12 @@ int main(int argc, char *argv[])
   //param.check();
   param.PRint(cout);
 
-  int Lx = param.longval("Lx");
-  int Ly = param.longval("Ly");
+  int Lx = param.longval("l_x");
+  int Ly = param.longval("l_y");
   int N;
   Lattice2d lattice;
   if (Lx < 0 || Ly < 0)
-    cerr << "Error, invalid (Lx,Ly)=" << Lx << "," << Ly << ".\n", exit(1);
+    cerr << "Error, invalid (l_x, l_y)=" << Lx << "," << Ly << ".\n", exit(1);
   if (Lx > 0 && Ly > 0)
   {
     //Square lattice
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     N = param.longval("N");
     if (N < 1)
       cerr << "Error, invalid N=" << N << ".\n", exit(1);
-    lattice = Lattice2d(N, param.longvec("Asites"), param.longvec("Bsites"));
+    lattice = Lattice2d(N, param.longvec("A_bond_indices"), param.longvec("B_bond_indices"));
   }
 
   SpinHalfSystem C(N);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
   C.ConstructIdentity(); //Construct the density matrix corresponding to inifinite temperature (~ Identity)
 
-  auto args = Args("Cutoff", param.val("Cutoff"), "MaxDim", param.longval("MaxDim"));
+  auto args = Args("Cutoff", param.val("cut_off_psi"), "MaxDim", param.longval("max_dim_psi"));
 
   //Note on the option below: if we  "Normalize=true" (default for fitapplyMPO)
   //we would normalize rho such that Tr[rho^2]=1, (norm of the MPS)
@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
 
   auto argsRho = args;
   argsRho.add("Normalize", false);
-  argsRho.add("MaxDim", param.longval("MaxDimRho"));
-  argsRho.add("Cutoff", param.val("CutoffRho"));
+  argsRho.add("MaxDim", param.longval("max_dim_rho"));
+  argsRho.add("Cutoff", param.val("cut_off_psi"));
 
   //-----------------------------------------------------
   //Hamiltonian used to define the initial (pure) state at t=0 (its ground-state)
@@ -183,10 +183,10 @@ int main(int argc, char *argv[])
         psi = MPS(initState);
         auto sweeps = Sweeps(param.longval("sweeps"));
         //Specify max number of states kept each sweep
-        const int m = param.longval("MaxDim");
+        const int m = param.longval("max_dim_psi");
         //We specify bvelow how the max. bond dimension should be increased along the DMRG sweeps
         sweeps.maxdim() = min(5, m), min(5, m), min(10, m), min(10, m), min(10, m), min(20, m), min(20, m), min(50, m), min(50, m), min(100, m), min(100, m), min(200, m), min(200, m), m;
-        sweeps.cutoff() = param.val("Cutoff");
+        sweeps.cutoff() = param.val("cut_off_psi");
         //Run the DMRG algorithm
         MyDMRGObserver obs(psi, param.val("energy")); //Convergence criterium on the energy passed to the DMRGObserver
 
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
       {
         cout << "C.rho.orthogonalize...";
         cout.flush();
-        C.rho.orthogonalize(Args("Cutoff", param.val("CutoffRho"), "MaxDim", param.longval("MaxDimRho")));
+        C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
         cout << "done.\n";
         cout.flush();
       }
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
     cout << "Maximum bond dimension of L^dag*L (MPO):" << maxLinkDim(LDL) << endl;
     auto sweeps = Sweeps(param.longval("sweepsRho"));
     //Specify max number of states kept each sweep
-    const int m = param.longval("MaxDimRho");
+    const int m = param.longval("max_dim_rho");
     if (param.stringval("load_state_file") != "")
     { //if we are starting from some previous rho, start with the largest allowed bond dimension
       sweeps.maxdim() = m;
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
       min(400, m), min(400, m), min(400, m),
       min(500, m), min(500, m), min(500, m), m;
     }
-    sweeps.cutoff() = param.val("CutoffRho");
+    sweeps.cutoff() = param.val("cut_off_rho");
     //Run the DMRG
     //Convergence criterium on the energy passed to the DMRGObserver.
     //3rd argument=true in the constructor of MyDMRGObserver => relative variations |dE/E| are considered
@@ -336,16 +336,16 @@ int main(int argc, char *argv[])
   cout.flush();
 
   const double tau = param.val("tau");
-  const int o = param.val("TrotterOrder");
+  const int o = param.val("Trotter_order");
   TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
   TE.init(tau, C.Lindbladian, argsRho, o);
   cout << "done.\n";
   cout.flush();
   cout << "Largest bond dimension of exp(tau*L)  (MPO):" << maxLinkDim(TE.expL1) << endl;
-  double ttotal = param.val("T");
+  double ttotal = param.val("t_final");
   const int nt = int(ttotal / tau + (1e-9 * (ttotal / tau)));
 
-  string name = param.stringval("outputfile");
+  string name = param.stringval("output_file");
   //-----------------------------------------------------
   // Some preparation/checks for the 1-qbit observables
   ofstream file_1q(name + ".1q_obs.dat");
@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
   file_ent << "#time\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)" << endl;
   file_ent.precision(15);
   //-----------------------------------------------------
-  const int obs = param.longval("obs");
+  const int obs = param.longval("output_step");
   for (int n = 0; n <= nt; n++)
   {
     if (obs > 0)

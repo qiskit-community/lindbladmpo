@@ -35,7 +35,7 @@ public:
     cout << "\t"<<I << endl;
     cout << "\t"<<J << endl;
   }
-  // Creation of a Lx*L square lattice with or without periodic boundary conditions in the x and y direction
+  // Creation of a Lx*Ly square lattice with or without periodic boundary conditions in the x and y direction
   Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly)
   {
     bool up;
@@ -93,7 +93,7 @@ public:
           J.push_back(index[pair<int, int>(0, y)]);
         }
       }
-    cout << "Square lattice of size Lx=" << Lx << "*Ly=" << Ly << "=" << N << " qbits.\n";
+    cout << "Square lattice of size l_x=" << Lx << "*l_y=" << Ly << "=" << N << " qubits.\n";
     cout << "List of bonds:\n";
     cout << I << endl;
     cout << J << endl;

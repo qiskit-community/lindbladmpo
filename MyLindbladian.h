@@ -106,16 +106,16 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         g_1 = vector<double>(N, g_1[0]);
     if (g_2_len == 1)
         g_2 = vector<double>(N, g_2[0]);
-    const double gamma = param.val("gamma");
-    cout << "Strength of the Lindblad terms, gamma=" << gamma << endl;
+    // OLD: const double gamma = param.val("gamma");
+    // cout << "Strength of the Lindblad terms, gamma=" << gamma << endl;
 
     for (int i = 1; i <= N; i++)
         // AddSingleSpinBath:
-        // The first argument (here =0) is related to dissipative processes where a spin goes from down to up
-        // The 2n  argument (here = gamma * 0.5) is related to dissipative processes where a spin goes from up  to down
-        // OLD: C.AddSingleSpinBath(0, gamma * 0.5, i);
+        // The first argument is the rate of dissipative processes where a spin goes from down to up
+        // The second argument is the rate of dissipative processes where a spin goes from up to down
+        // The third argument is the rate of energy-conserving (pure) dephasing processes
         C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], i);
-		// TODO: Coefficients and order, dephasing.
+        // OLD: C.AddSingleSpinBath(0, gamma * 0.5, i);
 }
 //____________________________________________________________________
 
