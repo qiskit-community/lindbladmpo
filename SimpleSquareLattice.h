@@ -10,11 +10,14 @@ public:
   vector<int> X, Y; // Real space coordinates
   vector<int> I, J; //list of bonds
   map<pair<int, int>, int> index;
+  bool predefined;
+  bool predefined_chain;
+
   Lattice2d(){};
   //Constructor of some arbitrary lattice using two list of sites
-  Lattice2d(int N_, vector<long> A, vector<long> B): N(N_)
+  Lattice2d(int N_, vector<long> A, vector<long> B) : N(N_), predefined(false), predefined_chain(false)
   {
-    cout<<"A="<<A<<"\nB="<<B<<endl;
+    cout << "A=" << A << "\nB=" << B << endl;
     if (N < 1)
       cerr << "Error: the number of sites N=" << N_ << " should be >= 1.\n", exit(1);
     const unsigned int n = A.size();
@@ -32,12 +35,13 @@ public:
     }
     cout << "User-defined lattice with " << N << " qbits and " << n << " bonds.\n";
     cout << "List of bonds:\n";
-    cout << "\t"<<I << endl;
-    cout << "\t"<<J << endl;
+    cout << "\t" << I << endl;
+    cout << "\t" << J << endl;
   }
   // Creation of a Lx*Ly square lattice with or without periodic boundary conditions in the x and y direction
-  Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly)
+  Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly), predefined(true)
   {
+    predefined_chain = (Ly == 1) ? (true) : (false);
     bool up;
     int n = 0;
     for (int x = 0; x < Lx; x++)
