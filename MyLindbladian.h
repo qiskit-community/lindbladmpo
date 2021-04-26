@@ -19,11 +19,11 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     unsigned int h_y_len = h_y.size();
     unsigned int h_z_len = h_z.size();
 
-    if (h_x_len != 1 && !L.predefined_chain)
+    if (h_x_len != 1 && L.predefined_chain)
         cerr << "Error: the paramter h_x has " << h_x_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_x should be uniform for such a lattice.\n", exit(1);
-    if (h_y_len != 1 && !L.predefined_chain)
+    if (h_y_len != 1 && L.predefined_chain)
         cerr << "Error: the paramter h_y has " << h_y_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_y should be uniform for such a lattice.\n", exit(1);
-    if (h_z_len != 1 && !L.predefined_chain)
+    if (h_z_len != 1 && L.predefined_chain)
         cerr << "Error: the paramter h_z has " << h_z_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_z should be uniform for such a lattice.\n", exit(1);
 
     vector<double> g_0 = param.doublevec("g_0");
@@ -33,11 +33,11 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     unsigned int g_1_len = g_1.size();
     unsigned int g_2_len = g_2.size();
 
-    if (g_0_len != 1 && !L.predefined_chain)
+    if (g_0_len != 1 && L.predefined_chain)
         cerr << "Error: the paramter g_0 has " << g_0_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_0 should be uniform for such a lattice.\n", exit(1);
-    if (g_1_len != 1 && !L.predefined_chain)
+    if (g_1_len != 1 && L.predefined_chain)
         cerr << "Error: the paramter g_1 has " << g_1_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_1 should be uniform for such a lattice.\n", exit(1);
-    if (g_2_len != 1 && !L.predefined_chain)
+    if (g_2_len != 1 && L.predefined_chain)
         cerr << "Error: the paramter g_2 has " << g_2_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_2 should be uniform for such a lattice.\n", exit(1);
 
     if (h_x_len != 1 && h_x_len != N)
