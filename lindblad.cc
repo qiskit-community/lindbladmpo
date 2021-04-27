@@ -225,6 +225,7 @@ int main(int argc, char *argv[])
 
   //-----------------------------------------------------
   // Compute Lindblad^dagger * Lindblad
+  /* 
   if (param.longval("dmrgLDL") == 1)
   {
     MPO LD = toMPO(C.LindbladianDag);
@@ -265,6 +266,7 @@ int main(int argc, char *argv[])
     Cplx z = C.trace_rho();
     C.rho /= z; //Normalize rho so that Tr[rho]=1 (otherwise we would have Tr[rho^2]=MPS norm=1)
   }
+  */
   //-----------------------------------------------------
   cout << "Compute exp(i*tau*Linblad) as an MPO... ";
   cout.flush();
