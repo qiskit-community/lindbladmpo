@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 
   C.ConstructIdentity(); //Construct the density matrix corresponding to inifinite temperature (~ Identity)
 
-  auto args = Args("Cutoff", param.val("cut_off_psi"), "MaxDim", param.longval("max_dim_psi"));
+//  auto args = Args("Cutoff", param.val("cut_off_psi"), "MaxDim", param.longval("max_dim_psi"));
 
   //Note on the option below: if we  "Normalize=true" (default for fitapplyMPO)
   //we would normalize rho such that Tr[rho^2]=1, (norm of the MPS)
@@ -86,10 +86,10 @@ int main(int argc, char *argv[])
   //auto argsRho=args;
   //argsRho.add("Normalize",false);argsRho.add("MaxDim",param.longval("MaxDimRho"));argsRho.add("Cutoff",param.longval("CutoffRho"));
 
-  auto argsRho = args;
+  auto argsRho = Args();
   argsRho.add("Normalize", false);
   argsRho.add("MaxDim", param.longval("max_dim_rho"));
-  argsRho.add("Cutoff", param.val("cut_off_psi"));
+  argsRho.add("Cutoff", param.val("cut_off_rho"));
 
   vector<string> a_init = param.stringvec("init_Pauli_state");
   unsigned int a_init_len = a_init.size();
