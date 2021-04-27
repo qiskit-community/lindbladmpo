@@ -120,11 +120,11 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-        // Set the initial wavefunction matrix product state
+    // Set the initial wavefunction matrix product state
 		auto initState = InitState(C.sites);
-		for (int i = 1; i <= N; ++i) // Start the DMRG from all spins up
-			initState.set(i, "Up");
-        psi = MPS(initState);
+		for (int i = 1; i <= N; ++i) // Start with all spins up
+		initState.set(i, "Up");
+    psi = MPS(initState);
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
@@ -152,15 +152,17 @@ int main(int argc, char *argv[])
           auto spin_ind = siteIndex(psi, site_number);
           if (site_number == 1)
           {
-			  // TODO missing assignment
             Index ri = rightLinkIndex(psi, site_number);
+            psi.ref(site_number).set(spin_ind = 1, ri = 1, Cplx(R0, I0));
+            psi.ref(site_number).set(spin_ind = 2, ri = 1, Cplx(R1, I1));
             cout << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, ri = 1) << endl;
             cout << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, ri = 1) << endl;
           }
           if (site_number == N)
           {
-			  // TODO missing assignment
             Index li = leftLinkIndex(psi, site_number);
+            psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
+            psi.ref(site_number).set(spin_ind = 2, li = 1, Cplx(R1, I1));
             cout << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, li = 1) << endl;
             cout << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, li = 1) << endl;
           }
@@ -174,6 +176,7 @@ int main(int argc, char *argv[])
             cout << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << endl;
           }
         }
+    psi.orthogonalize(Args("Cutoff", 1e-6, "MaxDim", 1));
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
