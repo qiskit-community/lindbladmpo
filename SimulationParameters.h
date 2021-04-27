@@ -22,9 +22,23 @@ public:
         operator[]("cut_off_rho") = "1e-9"; //maximum truncation error  for density matrices
         operator[]("b_force_rho_trace") = "1";  // We do rho/=trace{rho} at every time step, to keep trace[rho]=1, irrespectively of finite-step errors
         operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors
+        operator[]("b_initial_rho_orthogonalization") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation
 
-        //Initial state
-        operator[]("x_init") = "0";    //Initial state = spins pointing in the x direction
+        //If not equal to "" the initial state (density matrix rho) will be read from the disk.
+        // Give a filename if you want to read a previous density matrix from disk, as the initial state of the time evolution. 
+        operator[]("load_state_file") = "";                                                                  
+        //If not equal to "" the state (density matrix rho) will be saved to disk.
+        //Note that initial state is in fact stored in three files, with names names *_N=*.obs, *_N=*.sites and*_N=*.rho
+        operator[]("save_state_file") = "";   
+                                              
+        operator[]("input_file") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones). If empty => 
+        operator[]("output_file") = "out"; //Prefix of the names of the files where observables are written
+
+    }
+};
+
+        //OLD initial state settings
+/*        operator[]("x_init") = "0";    //Initial state = spins pointing in the x direction
         operator[]("y_init") = "0";    //Initial state = spins pointing in the y direction
         operator[]("xm_init") = "0";    //Initial state = spins pointing in the -x direction
         operator[]("ym_init") = "0";    //Initial state = spins pointing in the -y direction
@@ -40,25 +54,10 @@ public:
         operator[]("dmrgLDL") = "0";     //Set to "1" if you want to do some DMRG sweeps to minimize Ldagger*L (L:Lindbladian), to get (or approach) the steady state
         operator[]("LDLconv") = "5e-4";  //convergence criterium on L^dagger * L -- this is a relative value, so the DMRG stops when |dE/E|< LDLconv. In an exact calculation of the steady state E=0
         operator[]("sweepsRho") = "999"; //maximum number of sweeps in the DMRG (to get the initial density matrix as the ground-state of L^dagger*L)
-
         //If not equal to "" the initial state is a pure state (wavefunction) that will be read from the disk.
         operator[]("load_purestate_file") = "";
         //If not equal to "" the initial state is a pure state (wavefunction) that will be read from the disk.
         operator[]("save_purestate_file") = "";
-        
-        //If not equal to "" the initial state (density matrix rho) will be read from the disk.
-        // Give a filename if you want to read a previous density matrix from disk, as the initial state of the time evolution. 
-        operator[]("load_state_file") = "";                                                          
-        
-        //If not equal to "" the state (density matrix rho) will be saved to disk.
-        //Note that initial state is in fact stored in three files, with names names *_N=*.obs, *_N=*.sites and*_N=*.rho
-        operator[]("save_state_file") = "";   
-                                              
-        operator[]("InitialOrthoRho") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation
-    
-        operator[]("input_file") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones). If empty => 
-        operator[]("output_file") = "out"; //Prefix of the names of the files where observables are written
-    }
-};
+*/
 //____________________________________________________________________
 #endif

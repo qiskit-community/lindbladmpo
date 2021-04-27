@@ -94,162 +94,99 @@ int main(int argc, char *argv[])
   argsRho.add("MaxDim", param.longval("max_dim_rho"));
   argsRho.add("Cutoff", param.val("cut_off_psi"));
 
-  //-----------------------------------------------------
-  //Hamiltonian used to define the initial (pure) state at t=0 (its ground-state)
-  // in the examples below (xm_init, ...) H0 is simply a external magnetic field,
-  // but more complicated interactions can alo be considered
-  AutoMPO ampo(C.sites);
+  vector<string> a_init = param.stringvec("init_Pauli_state");
+  unsigned int a_init_len = a_init.size();
+  if (a_init_len != 1 && a_init_len != N)
+	cerr << "Error: the paramter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+  if (a_init_len == 1)
+	a_init = vector<string>(N, a_init[0]);
 
-  if (param.val("xm_init") != 0)
-  {
-    // To initialize the system in a state whera all spins point in the -x direction,
-    // we simply construct an Hamiltonian H0 with a magnetic field pointing in the x direction
-    for (int j = 1; j <= N; ++j)
-      ampo += +1.0, "Sx", j;
-  }
-  else
-  {
-    if (param.val("y_init") != 0)
-    {
-      // To initialize the system in a state whera all spins point in the x direction,
-      // we simply construct an Hamiltonian H0 with a magnetic field pointing in the -y direction
-      for (int j = 1; j <= N; ++j)
-        ampo += -1.0, "Sy", j;
-    }
-    else
-    {
-      if (param.val("x_init") != 0)
-      {
-        // To initialize the system in a state whera all spins point in the x direction,
-        // we simply construct an Hamiltonian H0 with a magnetic field pointing in the x direction
-        for (int j = 1; j <= N; ++j)
-          ampo += -1.0, "Sx", j;
-      }
-      else
-      {
-        if (param.val("ym_init") != 0)
-        {
-          // To initialize the system in a state whera all spins point in the -y direction,
-          // we simply construct an Hamiltonian H0 with a magnetic field pointing in the y direction
-          for (int j = 1; j <= N; ++j)
-            ampo += 1.0, "Sy", j;
-        }
-      }
-    }
-  }
-  auto H0 = toMPO(ampo);
-
-  //-----------------------------------------------------
   MPS psi;
   bool psi_defined = false;
+  if (param.stringval("load_state_file") != "")
+	{ //Read the density matrix from disk
 
-  if (param.longval("rho_inf_init") == 0)
-  {
-    if (param.stringval("load_state_file") == "")
-
-    { //Start from a wave-function (pure state)
-      if (param.stringval("load_purestate_file") == "")
-      {
+	  string fname = param.stringval("load_state_file");
+	  fname += "_N=" + to_string(N) + ".rho";
+	  cout << "Read the initial rho from the file '" << fname << "'...";
+	  cout.flush();
+	  readFromFile(fname, C.rho);
+	  cout << "done.\n";
+	  if (param.val("b_initial_rho_orthogonalization") != 0)
+	  {
+		cout << "C.rho.orthogonalize...";
+		cout.flush();
+		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
+		cout << "done.\n";
+		cout.flush();
+	  }
+	}
+	else
+	{
         // Set the initial wavefunction matrix product state
-        auto initState = InitState(C.sites);
-
-        if (param.longval("up_init") == 0 && param.longval("down_init") == 0)
-        {
-          for (int i = 1; i <= N; ++i)
-          { // Start the DMRG from the Néel state (|Néel> = |up|down|up|down|up|...> )
-            if (i % 2 == 1)
-              initState.set(i, "Dn");
-            else
-              initState.set(i, "Up");
-          }
-        }
-        else
-        {
-          if (param.longval("up_init") != 0 && param.longval("down_init") != 0)
-            cerr << "Error: conflicting initialization options for the DMRG:up_init and  down_init.\n", exit(1);
-
-          if (param.longval("up_init") != 0)
-          {
-            for (int i = 1; i <= N; ++i) // Start the DMRG from all spins up
-              initState.set(i, "Up");
-          }
-          if (param.longval("down_init") != 0)
-          {
-            for (int i = 1; i <= N; ++i) // Start the DMRG from all spins Down
-              initState.set(i, "Dn");
-          }
-        }
-        //Find the ground-state of H0. THis will be the initial state of the time evolution
+		auto initState = InitState(C.sites);
+		if (param.longval("up_init") != 0)
+		{
+			for (int i = 1; i <= N; ++i) // Start the DMRG from all spins up
+			initState.set(i, "Up");
+		}
         psi = MPS(initState);
-        auto sweeps = Sweeps(param.longval("sweeps"));
-        //Specify max number of states kept each sweep
-        const int m = param.longval("max_dim_psi");
-        //We specify bvelow how the max. bond dimension should be increased along the DMRG sweeps
-        sweeps.maxdim() = min(5, m), min(5, m), min(10, m), min(10, m), min(10, m), min(20, m), min(20, m), min(50, m), min(50, m), min(100, m), min(100, m), min(200, m), min(200, m), m;
-        sweeps.cutoff() = param.val("cut_off_psi");
-        //Run the DMRG algorithm
-        MyDMRGObserver obs(psi, param.val("energy")); //Convergence criterium on the energy passed to the DMRGObserver
-
-        const double energy = dmrg(psi, H0, sweeps, obs, "Quiet");
-        cout << "Initial energy=" << energy << endl;
-        if (param.stringval("save_purestate_file") != "")
+		double sqrt05 = pow(.5, .5);
+		for (int site_number = 1; site_number <= N; site_number++)
         {
-          string fname = param.stringval("save_purestate_file");
-          fname += "_N=" + to_string(N);
-          string f1 = fname + ".ops";
-          writeToFile(f1, C.siteops);
-          string f2 = fname + ".psi";
-          writeToFile(f2, C.rho);
-          string f3 = fname + ".sites";
-          writeToFile(f3, C.sites);
-          writeToFile(f3, C.sites);
-          writeToFile(f1, C.siteops);
-          writeToFile(f2, psi);
-          cout << "the final pure state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
+		  string s_init = a_init[site_number - 1];
+		  double R0 = .0, I0 = .0, R1 = .0, I1 = .0;
+		  if (s_init == "+z")
+			  R0 = 1.;
+		  else if (s_init == "-z")
+			  R1 = 1.;
+		  else if (s_init == "+x")
+			  R0 = R1 = sqrt05;
+		  else if (s_init == "+y")
+			  R0 = I1 = sqrt05;
+		  else if (s_init == "-x")
+		  {
+			  R0 = sqrt05;
+			  R1 = -sqrt05;
+		  }
+		  else if (s_init == "-y")
+		  {
+			  R0 = sqrt05;
+			  I1 = -sqrt05;
+		  }
+
+          auto spin_ind = siteIndex(psi, site_number);
+          if (site_number == 1)
+          {
+			  // TODO missing assignment
+            Index ri = rightLinkIndex(psi, site_number);
+            cout << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, ri = 1) << endl;
+            cout << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, ri = 1) << endl;
+          }
+          if (site_number == N)
+          {
+			  // TODO missing assignment
+            Index li = leftLinkIndex(psi, site_number);
+            cout << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, li = 1) << endl;
+            cout << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, li = 1) << endl;
+          }
+          if (site_number > 1 && site_number < N)
+          {
+            Index li = leftLinkIndex(psi, site_number);
+            Index ri = rightLinkIndex(psi, site_number);
+            psi.ref(site_number).set(spin_ind = 1, li = 1, ri = 1, Cplx(R0, I0));
+            psi.ref(site_number).set(spin_ind = 2, li = 1, ri = 1, Cplx(R1, I1));
+            cout << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << endl;
+            cout << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << endl;
+          }
         }
-      }
-      else
-      { //read psi from a file
-        string fname = param.stringval("load_purestate_file");
-        fname += "_N=" + to_string(N) + ".psi";
-        psi = MPS(C.sites);
-        cout << "Read the initial pure state (wave-function) from file '" << fname << "'...";
-        cout.flush();
-        readFromFile(fname, psi);
-        cout << "done.\n";
-      }
-      psi_defined = true;
-
-      //Compute the density matrix rho associated to the pure state |psi>
-      C.psi2rho(psi, argsRho);
-      cout << "psi2rho done.\n";
-      cout.flush();
-    }
-    else
-    { //Read the density matrix from disk
-
-      string fname = param.stringval("load_state_file");
-      fname += "_N=" + to_string(N) + ".rho";
-      cout << "Read the initial rho from the file '" << fname << "'...";
-      cout.flush();
-      readFromFile(fname, C.rho);
-      cout << "done.\n";
-      if (param.val("InitialOrthoRho") != 0)
-      {
-        cout << "C.rho.orthogonalize...";
-        cout.flush();
-        C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
-        cout << "done.\n";
-        cout.flush();
-      }
-    }
-  }
-  else
-  {
-    //Start from rho ~ identity (infinite temperature density matrix)
-    cout << "Initialize rho ~ identity (infinite temperature density matrix).\n";
-    C.rho = C.Identity;
-  }
+		psi_defined = true;
+		//Compute the density matrix rho associated to the pure state |psi>
+		C.psi2rho(psi, argsRho);
+		cout << "psi2rho done.\n";
+		cout.flush();
+	}
+  
   Cplx tr = C.trace_rho();
   cout << "Tr{rho} before re-normalization: " << tr << endl;
   C.rho /= tr; //Normalize rho so that Tr[rho]=1 (otherwise we would have Tr[rho^2]=MPS norm=1)
@@ -526,3 +463,160 @@ int main(int argc, char *argv[])
   cout << endl;
   return 0;
 }
+
+// Old initialization code
+/*
+  //-----------------------------------------------------
+  //Hamiltonian used to define the initial (pure) state at t=0 (its ground-state)
+  // in the examples below (xm_init, ...) H0 is simply a external magnetic field,
+  // but more complicated interactions can alo be considered
+  AutoMPO ampo(C.sites);
+
+  if (param.val("xm_init") != 0)
+  {
+    // To initialize the system in a state whera all spins point in the -x direction,
+    // we simply construct an Hamiltonian H0 with a magnetic field pointing in the x direction
+    for (int j = 1; j <= N; ++j)
+      ampo += +1.0, "Sx", j;
+  }
+  else
+  {
+    if (param.val("y_init") != 0)
+    {
+      // To initialize the system in a state whera all spins point in the x direction,
+      // we simply construct an Hamiltonian H0 with a magnetic field pointing in the -y direction
+      for (int j = 1; j <= N; ++j)
+        ampo += -1.0, "Sy", j;
+    }
+    else
+    {
+      if (param.val("x_init") != 0)
+      {
+        // To initialize the system in a state whera all spins point in the x direction,
+        // we simply construct an Hamiltonian H0 with a magnetic field pointing in the x direction
+        for (int j = 1; j <= N; ++j)
+          ampo += -1.0, "Sx", j;
+      }
+      else
+      {
+        if (param.val("ym_init") != 0)
+        {
+          // To initialize the system in a state whera all spins point in the -y direction,
+          // we simply construct an Hamiltonian H0 with a magnetic field pointing in the y direction
+          for (int j = 1; j <= N; ++j)
+            ampo += 1.0, "Sy", j;
+        }
+      }
+    }
+  }
+  auto H0 = toMPO(ampo);
+
+
+  if (param.longval("rho_inf_init") == 0)
+  {
+    if (param.stringval("load_state_file") == "")
+
+    { //Start from a wave-function (pure state)
+      if (param.stringval("load_purestate_file") == "")
+      {
+        // Set the initial wavefunction matrix product state
+        auto initState = InitState(C.sites);
+
+        if (param.longval("up_init") == 0 && param.longval("down_init") == 0)
+        {
+          for (int i = 1; i <= N; ++i)
+          { // Start the DMRG from the Néel state (|Néel> = |up|down|up|down|up|...> )
+            if (i % 2 == 1)
+              initState.set(i, "Dn");
+            else
+              initState.set(i, "Up");
+          }
+        }
+        else
+        {
+          if (param.longval("up_init") != 0 && param.longval("down_init") != 0)
+            cerr << "Error: conflicting initialization options for the DMRG:up_init and  down_init.\n", exit(1);
+
+          if (param.longval("up_init") != 0)
+          {
+            for (int i = 1; i <= N; ++i) // Start the DMRG from all spins up
+              initState.set(i, "Up");
+          }
+          if (param.longval("down_init") != 0)
+          {
+            for (int i = 1; i <= N; ++i) // Start the DMRG from all spins Down
+              initState.set(i, "Dn");
+          }
+        }
+        //Find the ground-state of H0. THis will be the initial state of the time evolution
+        psi = MPS(initState);
+        auto sweeps = Sweeps(param.longval("sweeps"));
+        //Specify max number of states kept each sweep
+        const int m = param.longval("max_dim_psi");
+        //We specify bvelow how the max. bond dimension should be increased along the DMRG sweeps
+        sweeps.maxdim() = min(5, m), min(5, m), min(10, m), min(10, m), min(10, m), min(20, m), min(20, m), min(50, m), min(50, m), min(100, m), min(100, m), min(200, m), min(200, m), m;
+        sweeps.cutoff() = param.val("cut_off_psi");
+        //Run the DMRG algorithm
+        MyDMRGObserver obs(psi, param.val("energy")); //Convergence criterium on the energy passed to the DMRGObserver
+
+        const double energy = dmrg(psi, H0, sweeps, obs, "Quiet");
+        cout << "Initial energy=" << energy << endl;
+        if (param.stringval("save_purestate_file") != "")
+        {
+          string fname = param.stringval("save_purestate_file");
+          fname += "_N=" + to_string(N);
+          string f1 = fname + ".ops";
+          writeToFile(f1, C.siteops);
+          string f2 = fname + ".psi";
+          writeToFile(f2, C.rho);
+          string f3 = fname + ".sites";
+          writeToFile(f3, C.sites);
+          writeToFile(f3, C.sites);
+          writeToFile(f1, C.siteops);
+          writeToFile(f2, psi);
+          cout << "the final pure state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
+        }
+      }
+      else
+      { //read psi from a file
+        string fname = param.stringval("load_purestate_file");
+        fname += "_N=" + to_string(N) + ".psi";
+        psi = MPS(C.sites);
+        cout << "Read the initial pure state (wave-function) from file '" << fname << "'...";
+        cout.flush();
+        readFromFile(fname, psi);
+        cout << "done.\n";
+      }
+      psi_defined = true;
+
+      //Compute the density matrix rho associated to the pure state |psi>
+      C.psi2rho(psi, argsRho);
+      cout << "psi2rho done.\n";
+      cout.flush();
+    }
+    else
+    { //Read the density matrix from disk
+
+      string fname = param.stringval("load_state_file");
+      fname += "_N=" + to_string(N) + ".rho";
+      cout << "Read the initial rho from the file '" << fname << "'...";
+      cout.flush();
+      readFromFile(fname, C.rho);
+      cout << "done.\n";
+      if (param.val("InitialOrthoRho") != 0)
+      {
+        cout << "C.rho.orthogonalize...";
+        cout.flush();
+        C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
+        cout << "done.\n";
+        cout.flush();
+      }
+    }
+  }
+  else
+  {
+    //Start from rho ~ identity (infinite temperature density matrix)
+    cout << "Initialize rho ~ identity (infinite temperature density matrix).\n";
+    C.rho = C.Identity;
+  }
+*/
