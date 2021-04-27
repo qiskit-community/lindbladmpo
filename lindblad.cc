@@ -55,17 +55,14 @@ int main(int argc, char *argv[])
 
   SpinHalfSystem C(N);
 
-  if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
-    cerr << "Error, conflict in parameters:load_purestate_file=" << param.stringval("load_purestate_file")
-         << " and load_state_file=" << param.stringval("load_purestate_file") << ". They should not be both defined\n",
-        exit(1);
-  if (param.stringval("load_purestate_file") != "" || param.stringval("load_state_file") != "")
+//  if (param.stringval("load_purestate_file") != "" || param.stringval("load_state_file") != "")
+  if (param.stringval("load_state_file") != "")
   {
     string fname;
-    if (param.stringval("load_purestate_file") != "")
-      fname = param.stringval("load_purestate_file");
-    if (param.stringval("load_state_file") != "")
-      fname = param.stringval("load_state_file");
+//    if (param.stringval("load_purestate_file") != "")
+//      fname = param.stringval("load_purestate_file");
+//    if (param.stringval("load_state_file") != "")
+    fname = param.stringval("load_state_file");
     fname += "_N=" + to_string(N);
     string f1 = fname + ".ops";
     string f3 = fname + ".sites";
@@ -466,6 +463,11 @@ int main(int argc, char *argv[])
 
 // Old initialization code
 /*
+  if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
+    cerr << "Error, conflict in parameters:load_purestate_file=" << param.stringval("load_purestate_file")
+         << " and load_state_file=" << param.stringval("load_purestate_file") << ". They should not be both defined\n",
+        exit(1);
+
   //-----------------------------------------------------
   //Hamiltonian used to define the initial (pure) state at t=0 (its ground-state)
   // in the examples below (xm_init, ...) H0 is simply a external magnetic field,
