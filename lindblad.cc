@@ -122,11 +122,8 @@ int main(int argc, char *argv[])
 	{
         // Set the initial wavefunction matrix product state
 		auto initState = InitState(C.sites);
-		if (param.longval("up_init") != 0)
-		{
-			for (int i = 1; i <= N; ++i) // Start the DMRG from all spins up
+		for (int i = 1; i <= N; ++i) // Start the DMRG from all spins up
 			initState.set(i, "Up");
-		}
         psi = MPS(initState);
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
