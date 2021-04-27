@@ -24,6 +24,7 @@ public:
         operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors
         operator[]("b_initial_rho_orthogonalization") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation
 
+        operator[]("init_Pauli_state") = "+z";                                                                  
         //If not equal to "" the initial state (density matrix rho) will be read from the disk.
         // Give a filename if you want to read a previous density matrix from disk, as the initial state of the time evolution. 
         operator[]("load_state_file") = "";                                                                  
