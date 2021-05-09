@@ -299,17 +299,20 @@ def execute_simulator(cygwin_bash, simulator_location, output_file_location, inp
     # print(call_string)
     simulator_process = subprocess.Popen(call_string, shell=True)
     time.sleep(10)
-    os.kill(simulator_process.pid, signal.SIGTERM)
+    # os.kill(simulator_process.pid, signal.SIGTERM)
     print("The simulator is running, the output will drop here:\n" + output_file_location)
 
 
 # given a simulation output file, this parses the file and creates an interactive variable (nested dictionary)
-def analyse_simulation_output(path_to_simulation_output):
+def analyse_simulation_output(oneq_output_path, twoq_output_path):
     result = {}
-    result['1q'] = read_1q_output_into_dict(path_to_simulation_output)
-    result['2q'] = read_2q_output_into_dict(path_to_simulation_output)
+    result['1q'] = read_1q_output_into_dict(oneq_output_path)
+    result['2q'] = read_2q_output_into_dict(twoq_output_path)
     return result
 
+
+print(analyse_simulation_output("C:/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/out.1q_obs.dat",
+                                "C:/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/out.2q_obs.dat"))
 
 dict_val = {'tau': 0.2, 't_final': 2, 'input_file': "newfile.txt"}
 create_inputfile_from_user_args(dict_val)
