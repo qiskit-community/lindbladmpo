@@ -1,4 +1,4 @@
-from Lindbladian-MPO-simulator.python.MPOLindbladSolver import MPOLindbladSolver
+from python.MPOLindbladSolver import MPOLindbladSolver
 '''
 sim.build_input_file(dict_val)
 sim.execute("C:/cygwin64/bin/bash.exe --login -i -c",
