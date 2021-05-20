@@ -29,7 +29,10 @@ class MPOLindbladSolver:
 				result (dictionary): the arguments for the simulator
 		"""
 
-		file = open(filename + ".1q_obs.dat", "r")
+		full_filename = filename + ".1q_obs.dat"
+		print("Loading 1-qubit observables from file:")
+		print(full_filename)
+		file = open(full_filename, "r")
 		result = {}
 		file.readline()
 		for line in file:
@@ -50,7 +53,10 @@ class MPOLindbladSolver:
 			Returns:
 				result (dictionary): the arguments for the simulator
 		"""
-		file = open(filename + ".2q_obs.dat", "r")
+		full_filename = filename + ".2q_obs.dat"
+		print("Loading 2-qubit observables from file:")
+		print(full_filename)
+		file = open(full_filename, "r")
 		result = {}
 		file.readline()
 		for line in file:
@@ -292,6 +298,8 @@ class MPOLindbladSolver:
 			file_name = parameters["input_file"]
 		else:
 			file_name = "input_file.txt"
+		print("Preparing solver input file:")
+		print(file_name)
 		file = open(file_name, "w")
 		for key in parameters.keys():
 			file.write(key + " = " + str(parameters[key]) + "\n")
@@ -308,20 +316,19 @@ class MPOLindbladSolver:
 			Returns:
 		"""
 		if s_cygwin_path:
-			call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
+			# call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
+			call_string = s_cygwin_path + " --login -c \""
 		else:
 			call_string = ''
 		call_string += s_simulator_path
 		if s_input_file:
 			call_string += " input_file " + str(s_input_file)
-		call_string += "; exit"
-		if s_cygwin_path:
-			call_string += "\"; exit"
 		print("Executing solver with command:")
-		print("\t" + call_string)
-		simulator_process = subprocess.Popen(call_string, shell=True)
-		time.sleep(10)
-		os.kill(simulator_process.pid, signal.SIGTERM)
+		print("\t" + call_string + "\n")
+
+		process = subprocess.Popen(call_string)
+		exit_code = process.wait()
+		print(f"Solver process terminated with exit code {exit_code}")
 
 	@staticmethod
 	def load_output(s_output_file):
@@ -334,4 +341,3 @@ class MPOLindbladSolver:
 		self.build_input_file(self.parameters)
 		self.execute(self.s_cygwin_path, self.s_simulator_path, self.s_input_file)
 		self.result = self.load_output(self.s_output_file)
-		print(self.result)
