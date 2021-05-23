@@ -89,9 +89,9 @@ class MPOLindbladSolver:
 		if ("l_x" in dict_in) and ("l_y" in dict_in):
 			if MPOLindbladSolver.is_int(dict_in["l_x"]) and MPOLindbladSolver.is_int(dict_in["l_y"]):
 				return dict_in["l_x"] * dict_in["l_y"]
-		elif "n_qubits" in dict_in:
-			if MPOLindbladSolver.is_int(dict_in["n_qubits"]):
-				return dict_in["n_qubits"]
+		elif "N" in dict_in:
+			if MPOLindbladSolver.is_int(dict_in["N"]):
+				return dict_in["N"]
 		return -1
 
 	@staticmethod
@@ -110,7 +110,7 @@ class MPOLindbladSolver:
 		check_msg = ""
 		for key in dict.keys(dict_in):
 
-			if key == "n_qubits":
+			if (key == "N") or (key == "l_x") or (key == "l_y"):
 				if not MPOLindbladSolver.is_int(dict_in[key]):
 					check_msg += "Error: " + key + " should be an integer\n"
 				else:
@@ -134,17 +134,17 @@ class MPOLindbladSolver:
 					if isinstance(dict_in[key], list):
 						number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
 						if number_of_qubits == -1:
-							check_msg += "Error: " + key + " could not be validated because 'n_qubits' (or alternatively l_x, l_y) are not defined properly\n"
+							check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, l_y) are not defined properly\n"
 						else:
 							if len(dict_in[key]) != number_of_qubits:
-								check_msg += "Error: " + key + " is not a float or a N_Qubits size list (of floats)\n"
+								check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
 							else:
 								for element in dict_in[key]:
 									if not MPOLindbladSolver.is_float(element):
-										check_msg += "Error: " + key + " is not a float or a N_Qubits size list (of floats)\n"
+										check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
 										break
 					else:
-						check_msg += "Error: " + key + " is not a float or a N_Qubits size list (of floats)\n"
+						check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
 
 			elif (key == "J_z") or (key == "J"):
 				if (dict_in[key] != "") and (not MPOLindbladSolver.is_float(dict_in[key])):
@@ -153,7 +153,7 @@ class MPOLindbladSolver:
 					else:
 						number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
 						if number_of_qubits == -1:
-							check_msg += "Error: " + key + " could not be validated because 'n_qubits' (or alternatively l_x, l_y) are not defined properly\n"
+							check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, l_y) are not defined properly\n"
 						else:
 							if len(dict_in[key]) != number_of_qubits:
 								check_msg += "Error: " + key + " should be either empty/const/square matrix in the size of qubits^2 (floats)\n"
@@ -171,7 +171,7 @@ class MPOLindbladSolver:
 												check_msg += "Error: " + key + " should be either empty/const/square matrix (floats)\n"
 												break
 
-			elif key == "init_pure_state":
+			elif key == "init_Pauli_state":
 				if not isinstance(dict_in[key], str):
 					check_msg += "Error: " + key + " is not a string\n"
 				else:
@@ -228,7 +228,7 @@ class MPOLindbladSolver:
 									check_msg += "Error: " + key + " only gets x,y,z (or a subset)\n"
 									break
 
-			elif key == "1q_sites":
+			elif key == "1q_indices":
 				if dict_in[key] != "":
 					if not isinstance(dict_in[key], list):
 						check_msg += "Error: " + key + " should be an integer list (1,2,3,4..)\n"
@@ -237,6 +237,11 @@ class MPOLindbladSolver:
 							if not MPOLindbladSolver.is_int(element):
 								check_msg += "Error: " + key + " should be an integer list (1,2,3,4..)\n"
 								break
+						number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
+						if number_of_qubits == -1:
+							check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, l_y) are not defined properly\n"
+						elif len(dict_in[key]) > number_of_qubits:
+							check_msg += "Error: " + key + " 's length should be smaller then the amount of qubits\n"
 
 			elif key == "2q_components":
 				if dict_in[key] != "":
@@ -265,7 +270,7 @@ class MPOLindbladSolver:
 									check_msg += "Error: " + key + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
 									break
 
-			elif key == "2q_sites":  # expecting an integer tuples list
+			elif key == "2q_indices":  # expecting an integer tuples list
 				if dict_in[key] != "":
 					if not isinstance(dict_in[key], list):
 						check_msg += "Error: " + key + " should be an list of tuples of size 2, containing integer\n"
@@ -278,6 +283,11 @@ class MPOLindbladSolver:
 									len(tup) != 2)):
 								check_msg += "Error: " + key + " should be an list of tuples of size 2, containing integers\n"
 								break
+						number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
+						if number_of_qubits == -1:
+							check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, l_y) are not defined properly\n"
+						elif len(dict_in[key]) > number_of_qubits**2:
+							check_msg += "Error: " + key + " 's length should be smaller then the amount of qubits\n"
 
 			else:
 				check_msg += "Error: " + "Error: user inserted invalid key (argument): " + key + "\n"
