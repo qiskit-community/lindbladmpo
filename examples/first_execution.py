@@ -1,19 +1,24 @@
 from python.MPOLindbladSolver import MPOLindbladSolver
-# crate the parameters dictionary
-dict_val = {'tau': 0.2, 't_final': 2,
-            'input_file': "C:/Users/HaggaiLanda/Box/Haggai/python/MPO/MPO.txt",
-            'output_file': "C:/Users/HaggaiLanda/Box/Haggai/python/MPO/MPO"}
+from qiskit.visualization.gate_map import *
+
+n_qubits = 5
+s_path = "C:/temp/"
+s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simulator/lindblad.exe"
+h_x = np.random.randn(n_qubits).tolist()
+h_y = np.random.randn(n_qubits).tolist()
+h_z = np.random.randn(n_qubits).tolist()
+g_1 = (0.1 * np.random.rand(n_qubits)).tolist()
+J = .5
+t_final = 10
+tau = 0.02
+
+# create the parameters dictionary
+dict_val = {'tau': tau, 't_final': t_final, 'N': n_qubits,
+            'h_x': h_x, 'h_x': h_y, 'h_x': h_z, 'g_1': g_1, 'J': J,
+            'input_file': s_path + "MPO.input",
+            'output_file': s_path + "MPO"}
 # initialize class - parameters, cygwin_path, simulator_path
-sim = MPOLindbladSolver(dict_val, "C:/cygwin64/bin/bash.exe",
-                        "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simulator/lindblad.exe")
+sim = MPOLindbladSolver(dict_val, "C:/cygwin64/bin/bash.exe", s_executable)
 
 # execute simulator
 sim.solve()
-
-
-'''
-sim.build_input_file(dict_val)
-sim.execute("C:/cygwin64/bin/bash.exe --login -i -c",
-                      "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator",
-                      "C:/Users/galvz/PycharmProjects/sim_func/newfile.txt")
-'''
