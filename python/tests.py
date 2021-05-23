@@ -208,6 +208,60 @@ def arg_check_4():
         print('output:\n', warng_out)
 
 
+
+
+
+
+
+def arg_check_5():
+    input_dict = {}
+    input_dict['N'] = 9
+    input_dict['t_final'] = "22"
+    input_dict['tau'] = "aaa"
+
+    input_dict['h_x'] = "aa1.111"
+    input_dict['h_y'] = "[2.222,       4,   2e-2, 777777,   -0.3]"
+    input_dict['h_z'] = "aa3.333"
+
+    input_dict['J_z'] = [[2, 5, 6, '7', 9],
+                         [4.55, -4.1, 12, -33, 10],
+                         [4.55, -1.1, 17, 0],
+                         [4.55, -4.1, 61, -33, 10],
+                         [4.55, -1.1, 11, -33, 10]]
+
+    input_dict['J'] = [[2, 5, '6', 7, 9],
+                       [4.55, -4.1, 11, -33, 11e-9],
+                       [4.55, -2.1, 11, 0, 10],
+                       [6.25, -3.1, 2e-5, -33, 10]]
+
+    input_dict['g_0'] = [2.222, 4]
+    input_dict['g_1'] = (-11, 22)
+    input_dict['g_2'] = "aaa"
+    input_dict['init_Pauli_state'] = "+a2"
+
+    input_dict['b_periodic_x'] = 0
+    input_dict['b_periodic_y'] = 1
+    input_dict['trotter_order'] = (3.99, 99)
+    input_dict['max_dim'] = 100.99
+    input_dict['max_dim_rho'] = 200.99
+    input_dict['cut_off'] = "1e-10"
+    input_dict['cut_off_rho'] = "1e-11"
+    input_dict['b_force_rho_trace'] = "False"
+    input_dict['b_force_rho_hermitian'] = 222
+    input_dict['output_step'] = 0.6
+    input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+    input_dict['1q_components'] = ["x", "y", "j"]
+    input_dict['1q_indices'] = [1, 3, 1, 5, 1, 2, 2, 2, 2, 2]
+    input_dict['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]
+    input_dict['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]
+
+    warng_out = MPOLindbladSolver.build_input_file(input_dict)
+    if (warng_out.count("Error") == 25):
+        print("Check 5 Passed")
+    else:
+        print("Check 5 Failed")
+        print('output:\n' + warng_out)
+
 #
 #   def second_check():
 #       input_dict = {}
@@ -284,3 +338,4 @@ arg_check_1()
 arg_check_2()
 arg_check_3()
 arg_check_4()
+arg_check_5()
