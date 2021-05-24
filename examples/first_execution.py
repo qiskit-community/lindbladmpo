@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Simulation parameters
-n_qubits = 16
+n_qubits = 17
 # s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
 # s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
 s_path = "C:/temp/"
@@ -13,14 +13,15 @@ s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simula
 b_save_figures = True
 fontsize = 16
 
-h_x = np.random.randn(n_qubits).tolist()
-h_y = np.random.randn(n_qubits).tolist()
-h_z = np.random.randn(n_qubits).tolist()
-g_1 = (0.1 * np.random.rand(n_qubits)).tolist()
-J = .5
+h_x = (0. * np.random.randn(n_qubits)).tolist()
+h_x[int(n_qubits / 2)] = 2.
+h_y = (0. * np.random.randn(n_qubits)).tolist()
+h_z = (0. * np.random.randn(n_qubits)).tolist()
+g_1 = (0.01 * np.random.rand(n_qubits)).tolist()
+J = 4
 t_final = 1
 tau = .02
-l_x = 0
+l_x = n_qubits
 
 # create the parameters dictionary
 dict_val = {'tau': tau, 't_final': t_final, 'N': n_qubits,
