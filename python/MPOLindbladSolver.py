@@ -123,12 +123,12 @@ class MPOLindbladSolver:
                     check_msg += "Error: " + key + " should be bigger/equal to 1 (integer)\n"
                     continue
 
-            elif (key == "t_final") or (key == "output_step"):
+            elif key == "output_step":
                 if not MPOLindbladSolver.is_int(dict_in[key]):
                     check_msg += "Error: " + key + " should be an integer\n"
                     continue
 
-            elif key == "tau":
+            elif (key == "t_final") or key == "tau":
                 if not MPOLindbladSolver.is_float(dict_in[key]):
                     check_msg += "Error: " + key + " is not a float\n"
                     continue
