@@ -1,7 +1,4 @@
 import subprocess
-import os
-import signal
-import time
 
 
 class MPOLindbladSolver:
@@ -22,13 +19,12 @@ class MPOLindbladSolver:
     @staticmethod
     def read_1q_output_into_dict(filename):
         """ Reads the 1 qubit output file and returns a dictionary with the values in the format:
-			key (tuple) = (qubit (int), Axis (string), time (float)) : value = expectation value (float)
-			Args:
-				filename (string): file location
-			Returns:
-				result (dictionary): the arguments for the simulator
+        key (tuple) = (qubit (int), Axis (string), time (float)) : value = expectation value (float)
+        Args:
+            filename (string): file location
+        Returns:
+            result (dictionary): the arguments for the simulator
 		"""
-
         full_filename = filename + ".1q_obs.dat"
         print("Loading 1-qubit observables from file:")
         print(full_filename)
@@ -47,11 +43,11 @@ class MPOLindbladSolver:
     @staticmethod
     def read_2q_output_into_dict(filename):
         """ Reads the 2 qubit output file and returns a dictionary with the values in the format:
-			key = (qubit1 (int), qubit2 (int), Axis1 (string), Axis2 (string) ,time (float)), value = expectation value (float)
-			Args:
-				filename (string): file location
-			Returns:
-				result (dictionary): the arguments for the simulator
+        key = (qubit1 (int), qubit2 (int), Axis1 (string), Axis2 (string) ,time (float)), value = expectation value (float)
+        Args:
+            filename (string): file location
+        Returns:
+            result (dictionary): the arguments for the simulator
 		"""
         full_filename = filename + ".2q_obs.dat"
         print("Loading 2-qubit observables from file:")
@@ -96,17 +92,15 @@ class MPOLindbladSolver:
 
     @staticmethod
     def check_argument_correctness(dict_in):
-        """
-		Returns a detailed Error message if dict_in arguments are not in the correct format.
-			Args:
-				dict_in: a dictionary with the parameters for the simulation, keys as arguments and values as values.
-			Returns:
-				A detailed Error message if dict_in arguments are not in the correct format (which is stated in the spec of the simulator).
-				else, returns "" (checks passed).
-			Raises:
-				Nothing, all issues will come out in the output returned.
+        """Returns a detailed Error message if dict_in arguments are not in the correct format.
+        Args:
+            dict_in: a dictionary with the parameters for the simulation, keys as arguments and values as values.
+        Returns:
+            A detailed Error message if dict_in arguments are not in the correct format (which is stated in the spec of the simulator).
+            else, returns "" (checks passed).
+        Raises:
+            Nothing, all issues will come out in the output returned.
 		"""
-
         check_msg = ""
         for key in dict.keys(dict_in):
             if key == "N":
@@ -302,9 +296,9 @@ class MPOLindbladSolver:
     @staticmethod
     def build_input_file(parameters):
         """ Writing the input parameters from the input dictionary to txt file
-			Args:
-				parameters (dictionary): the arguments for the simulator
-			Returns:
+        Args:
+            parameters (dictionary): the arguments for the simulator
+        Returns:
 		"""
         check_output = MPOLindbladSolver.check_argument_correctness(parameters)
         if check_output != "":
@@ -318,18 +312,18 @@ class MPOLindbladSolver:
         print(file_name)
         file = open(file_name, "w")
         for key in parameters.keys():
-            file.write(key + " = " + str(parameters[key]) + "\n")
+            file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
         file.close()
 
     @staticmethod
     def execute(s_cygwin_path, s_simulator_path, s_input_file=""):
         """ Execute the C++ simulator
-			Args:
-				s_cygwin_path (string): the address of the cygwin bash terminal execution
-				s_simulator_path (string): the address of the simulator .exe
-				s_input_file (string): input file location and name, if empty then the simulator is running on default values
+        Args:
+            s_cygwin_path (string): the address of the cygwin bash terminal execution
+            s_simulator_path (string): the address of the simulator .exe
+            s_input_file (string): input file location and name, if empty then the simulator is running on default values
 
-			Returns:
+        Returns:
 		"""
         if s_cygwin_path:
             # call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
