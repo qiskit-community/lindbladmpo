@@ -60,7 +60,7 @@ See also the following papers: https://arxiv.org/abs/2007.14822 . The library al
 
 * `lindblac.cc`: contains the main() function. This is where the initial state is constructed (the way the initial state is defined depends on the input parameters), and where the loop over the time steps is defined. It is also where the observable of interests are computed, and the input and outputs (simple prints to the standard output, or to files) are handled.
 
-Possible initial states: 1) A pure (product) state where all the spins point in a simple predefined direction ("x", "-x", "y", "-y", "z" (='up') of "-z" (='down')), 2) A pure state which is the ground-state of some user-defined Hamiltonian (denote by H0 in the code). This implies some DMRG sweeps to get the state from H0. 3) An inifinite-temperature (mixed) state, where the density matrix is proportionnal to the identity matrix 4) A mixed state which is read from the disk. Such a state may have been written to disk at the end of some previouslsimulation.
+Possible initial states: 1) A pure (product) state where all the spins point in a weel-defined direction 2) An inifinite-temperature (mixed) state, where the density matrix is proportionnal to the identity matrix 3) A mixed state which is read from the disk. Such a state may have been written to disk at the end of some previous simulation.
 
 * `Mylindbladian.h`: This is the place where the Lindbladian super-operator of the specific model to be simulated is defined. It takes the form of an `autoMPO` object of the iTensor library. Thanks to the use of the iTensor library, the terms in the Lindbladian can be defined in a simple way (using spin-1/2 operators and product of such operators), almost as if one was writing them with pen and paper.
 
