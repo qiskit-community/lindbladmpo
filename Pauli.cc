@@ -150,6 +150,14 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(uu, du_, 0.5);
     Op.set(ud, dd_, 0.5);
   }
+  else if (opname == "_Sy")
+  { 
+    Op = ITensor(s, sP); 
+    Op.set(dd, ud_, - Cplx_i*0.5);
+    Op.set(du, uu_, - Cplx_i*0.5);
+    Op.set(uu, du_, Cplx_i*0.5);
+    Op.set(ud, dd_, Cplx_i*0.5);
+  }
   else if (opname == "Sz_Sz")
   {
     Op.set(dd_, dd, +0.25);
