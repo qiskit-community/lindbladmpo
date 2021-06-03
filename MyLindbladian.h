@@ -19,27 +19,27 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     unsigned int h_y_len = h_y.size();
     unsigned int h_z_len = h_z.size();
 
-/*    if (h_x_len != 1 && L.predefined_chain)
+    if (h_x_len != 1 && L.predefined && !L.predefined_chain)
         cerr << "Error: the paramter h_x has " << h_x_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_x should be uniform for such a lattice.\n", exit(1);
-    if (h_y_len != 1 && L.predefined_chain)
+    if (h_y_len != 1 && L.predefined && !L.predefined_chain)
         cerr << "Error: the paramter h_y has " << h_y_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_y should be uniform for such a lattice.\n", exit(1);
-    if (h_z_len != 1 && L.predefined_chain)
+    if (h_z_len != 1 && L.predefined && !L.predefined_chain)
         cerr << "Error: the paramter h_z has " << h_z_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_z should be uniform for such a lattice.\n", exit(1);
-*/
+
     vector<double> g_0 = param.doublevec("g_0");
     vector<double> g_1 = param.doublevec("g_1");
     vector<double> g_2 = param.doublevec("g_2");
     unsigned int g_0_len = g_0.size();
     unsigned int g_1_len = g_1.size();
     unsigned int g_2_len = g_2.size();
-/*
-    if (g_0_len != 1 && L.predefined_chain)
+
+    if (g_0_len != 1 && L.predefined && !L.predefined_chain)
         cerr << "Error: the paramter g_0 has " << g_0_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_0 should be uniform for such a lattice.\n", exit(1);
-    if (g_1_len != 1 && L.predefined_chain)
+    if (g_1_len != 1 && L.predefined && !L.predefined_chain)
         cerr << "Error: the paramter g_1 has " << g_1_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_1 should be uniform for such a lattice.\n", exit(1);
-    if (g_2_len != 1 && L.predefined_chain)
+    if (g_2_len != 1 && L.predefined && !L.predefined_chain)
         cerr << "Error: the paramter g_2 has " << g_2_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_2 should be uniform for such a lattice.\n", exit(1);
-*/
+
     if (h_x_len != 1 && h_x_len != N)
         cerr << "Error: the paramter h_x has " << h_x_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (h_y_len != 1 && h_y_len != N)
@@ -132,14 +132,13 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         g_2 = vector<double>(N, g_2[0]);
     // OLD: const double gamma = param.val("gamma");
     // cout << "Strength of the Lindblad terms, gamma=" << gamma << endl;
-
+ 
     for (int i = 1; i <= N; i++)
         // AddSingleSpinBath:
         // The first argument is the rate of dissipative processes where a spin goes from down to up
         // The second argument is the rate of dissipative processes where a spin goes from up to down
         // The third argument is the rate of energy-conserving (pure) dephasing processes
         C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], i);
-    // OLD: C.AddSingleSpinBath(0, gamma * 0.5, i);
 }
 //____________________________________________________________________
 
