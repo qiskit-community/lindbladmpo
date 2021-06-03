@@ -398,7 +398,7 @@ int main(int argc, char *argv[])
             }
             file_1q << endl;
           }
-          cout << "\n\t" << count << " 1-qbit expectation values have been computed and written in to a file.";
+          cout << "\n\t" << count << " 1-qubit expectation values have been computed and written in to a file.";
           file_1q << endl; //Skip a line between each time step
           file_1q.flush();
         }
@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
               count++;
             }
           }
-          cout << "\n\t" << count << " 2-qbit expectation values (correlations) have been computed and written to a file.\n";
+          cout << "\n\t" << count << " 2-qubit expectation values (correlations) have been computed and written to a file.\n";
           file_2q << endl; //Skip a line between each time step
           file_2q.flush();
         }

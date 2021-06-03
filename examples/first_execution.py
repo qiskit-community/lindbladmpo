@@ -21,7 +21,7 @@ h_y = (0. * np.random.randn(n_qubits)).tolist()
 
 h_z = (5 * np.random.randn(n_qubits)).tolist()
 g_1 = (0.01 * np.random.rand(n_qubits)).tolist()
-J = 5
+J = 3
 t_final = 1.2
 tau = .02
 
@@ -63,7 +63,7 @@ solver = MPOLindbladSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executab
 solver.solve()
 
 n_t_steps = int(t_final/tau) + 1
-data = np.zeros(shape=(n_qubits, n_t_steps))
+data = np.zeros(shape=(n_qubits, n_t_steps), dtype = float)
 i = 0
 for key in solver.result['1q']:
 	if key[1] == 'Z':
@@ -79,7 +79,7 @@ if b_plaquette:
 
 fig, ax = plt.subplots(figsize = (14, 9))
 plt.rcParams.update({'font.size': fontsize})
-im = ax.imshow(2 * data, interpolation='none', aspect = 'auto')
+im = ax.imshow(data, interpolation='none', aspect = 'auto')
 divider = make_axes_locatable(ax)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(im, cax=cax)
