@@ -1,11 +1,344 @@
 from MPOLindbladSolver import MPOLindbladSolver
 
+import unittest
+
+
+class TestArgs(unittest.TestCase):
+    def arg_check_N_F1(self):
+        input_dict = {'N': "22"}
+        expected = "Error: N should be an integer\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_N_F2(self):
+        input_dict = {'N': -1}
+        expected = "Error: N should be bigger/equal to 1 (integer)\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_N_P(self):
+        input_dict = {'N': 20}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_t_final_F1(self):
+        input_dict = {'t_final': "20"}
+        expected = "Error: t_final is not a float\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_t_final_F2(self):
+        input_dict = {'t_final': -20}
+        expected = "Error: t_final must be bigger then 0\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_t_final_P(self):
+        input_dict = {'t_final': 20}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_tau_F1(self):
+        input_dict = {'tau': "20"}
+        expected = "Error: tau is not a float\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_tau_F2(self):
+        input_dict = {'tau': -20}
+        expected = "Error: tau must be bigger then 0\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_tau_P(self):
+        input_dict = {'tau': 20}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_l_x_F1(self):
+        input_dict = {'l_x': 3.3}
+        expected = "Error: l_x should be an integer\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_l_x_F2(self):
+        input_dict = {'l_x': -4}
+        expected = "Error: l_x should be bigger/equal to 1 (integer)\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_l_x_P(self):
+        input_dict = {'l_x': 4}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_l_y_F1(self):
+        input_dict = {'l_y': 3.3}
+        expected = "Error: l_y should be an integer\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_l_y_F2(self):
+        input_dict = {'l_y': -4}
+        expected = "Error: l_y should be bigger/equal to 1 (integer)\n"
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_l_y_P(self):
+        input_dict = {'l_y': 4}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_output_step_F1(self):
+        input_dict = {'output_step': 1.1}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_output_step_P(self):
+        input_dict = {'output_step': 1}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_h_x_F1(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_(self):
+        input_dict = {}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
+    def arg_check_Cross_tau_t_final_F1(self):
+        input_dict = {'t_final': 3, 'tau': 4}
+        expected = "" #fixme change to the error message after the check is created
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+    def arg_check_Cross_tau_t_final_P(self):
+        input_dict = {'t_final': 4, 'tau': 3}
+        expected = ""
+        out = MPOLindbladSolver.check_argument_correctness(input_dict)
+        self.assertEqual(expected, out)
+
 
 def arg_check_1():
     # this check should pass (no errors)
     input_dict = {}
     input_dict['N'] = 5
-    input_dict['t_final'] = 20
+    input_dict['t_final'] = 33
     input_dict['tau'] = 0.1
 
     input_dict['h_x'] = 1.111
@@ -28,8 +361,8 @@ def arg_check_1():
     input_dict['g_1'] = -99
     input_dict['g_2'] = -4e-10
     input_dict['init_Pauli_state'] = "+a"
-    #    input_dict['l_x'] =
-    #    input_dict['l_y'] =
+    input_dict['l_x'] = 5
+    input_dict['l_y'] = 1
     input_dict['b_periodic_x'] = True
     input_dict['b_periodic_y'] = False
     input_dict['trotter_order'] = 3
@@ -46,12 +379,12 @@ def arg_check_1():
     input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
     input_dict['2q_indices'] = [(1, 2), (3, 1), (2, 4), (3, 4)]
 
-    out = MPOLindbladSolver.check_argument_correctness(input_dict)
+    out = MPOLindbladSolver._check_argument_correctness(input_dict)
     if (out == ""):
         print("Check 1 Passed")
     else:
         print("Check 1 Failed")
-        print('output:\n', out)
+        print('output:\n'+ out)
 
 
 def arg_check_2():
@@ -149,6 +482,7 @@ def arg_check_3():
     input_dict['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]
 
     out = MPOLindbladSolver.check_argument_correctness(input_dict)
+    print("\n\n\n ignore::\n" + out + "\n\n\n")
     if out.count("Error") == 25:
         print("Check 3 Passed")
     else:
@@ -303,7 +637,7 @@ def arg_check_6():
     input_dict['output_step'] = 1
     input_dict['save_state_file'] = "C:\\output_of_my_simulation"
     input_dict['1q_components'] = ["x", "y", "z"]
-    input_dict['1q_indices'] = [1, 3, 4]
+    input_dict['1q_indices'] = [1, 2, 4]
     input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
     input_dict['2q_indices'] = [(1, 2), (3, 1), (2, 4), (3, 4)]
     try:
@@ -386,8 +720,8 @@ def arg_check_6():
 #
 
 arg_check_1()
-arg_check_2()
-arg_check_3()
-arg_check_4()
-arg_check_5()
-arg_check_6()
+#arg_check_2()
+#arg_check_3()
+#arg_check_4()
+#arg_check_5()
+#arg_check_6()
