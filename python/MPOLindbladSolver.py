@@ -145,7 +145,7 @@ class MPOLindbladSolver:
                     continue
                 number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
                 if number_of_qubits == -1:
-                    check_msg += "Error: " + key + "could not be validated because 'N' (or alternatively l_x, " \
+                    check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, " \
                                                    "l_y) are not defined properly\n "
                     continue
                 if len(dict_in[key]) != number_of_qubits:
