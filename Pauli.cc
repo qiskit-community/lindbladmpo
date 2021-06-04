@@ -5,16 +5,6 @@
 
 PauliSite::PauliSite() {}
 PauliSite::PauliSite(Index I) : s(I) {}
-/* itensor v2:
-  PauliSite::PauliSite(int j, Args const& args ) {
-  s = IQIndex(nameint("Pauli ",j),
-	      Index(nameint("uu ",j),1,Site),QN("Sz=",0),
-	      Index(nameint("du ",j),1,Site),QN("Sz=",-1),
-	      Index(nameint("ud ",j),1,Site),QN("Sz=",+1),
-	      Index(nameint("dd ",j),1,Site),QN("Sz=",0)
-	      );
-}
-*/
 // v3 with QN
 /*
 PauliSite::PauliSite(Args const &args)
@@ -82,10 +72,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   // A prefix _ indicate that the operator acts on the left of the density matrix
   if (opname == "Sz")
   {
-    Op.set(dd_, dd, -0.5);
-    Op.set(du_, du, +0.5);
-    Op.set(ud_, ud, -0.5);
-    Op.set(uu_, uu, +0.5);
+    Op.set(dd_, dd, -1.0);
+    Op.set(du_, du, +1.0);
+    Op.set(ud_, ud, -1.0);
+    Op.set(uu_, uu, +1.0);
   }
   else if (opname == "S+")
   {
@@ -98,35 +88,27 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(uu_, ud, 1.0);
   }
   else if (opname == "Sx")
-  { //0.5*(S^+ + S^-)
-    //mixedTensor call needed here
-    //because as an Tensor, Op would
-    //not have a well defined QN flux
-    //Op = mixedIQTensor(s,sP); //itensor v2
-    //Op = ITensor(s,sP); //itensor v3
-    Op.set(ud_, uu, 0.5);
-    Op.set(dd_, du, 0.5);
-    Op.set(du_, dd, 0.5);
-    Op.set(uu_, ud, 0.5);
+  {
+	//Op = ITensor(s,sP); //itensor v3
+    Op.set(ud_, uu, 1.0);
+    Op.set(dd_, du, 1.0);
+    Op.set(du_, dd, 1.0);
+    Op.set(uu_, ud, 1.0);
   }
   else if (opname == "Sy")
   {
-    //mixedTensor call needed here
-    //because as an Tensor, Op would
-    //not have a well defined QN flux
-    //Op = mixedTensor(s,sP);//itensor v2
     Op = ITensor(s, sP); //itensor v3 ???
-    Op.set(ud_, uu, -0.5 * Cplx_i);
-    Op.set(dd_, du, -0.5 * Cplx_i);
-    Op.set(du_, dd, 0.5 * Cplx_i);
-    Op.set(uu_, ud, 0.5 * Cplx_i);
+    Op.set(ud_, uu, -Cplx_i);
+    Op.set(dd_, du, -Cplx_i);
+    Op.set(du_, dd, Cplx_i);
+    Op.set(uu_, ud, Cplx_i);
   }
   else if (opname == "_Sz")
   {
-    Op.set(dd, dd_, -0.5);
-    Op.set(du, du_, -0.5);
-    Op.set(ud, ud_, +0.5);
-    Op.set(uu, uu_, +0.5);
+    Op.set(dd, dd_, -1.0);
+    Op.set(du, du_, -1.0);
+    Op.set(ud, ud_, +1.0);
+    Op.set(uu, uu_, +1.0);
   }
   else if (opname == "_S+")
   {
@@ -139,31 +121,27 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(ud, dd_, 1.0);
   }
   else if (opname == "_Sx")
-  { //0.5*(S^+ + S^-)
-    //mixedTensor call needed here
-    //because as an Tensor, Op would
-    //not have a well defined QN flux
-    //Op = mixedTensor(s,sP);//itensor v2
+  {
     Op = ITensor(s, sP); //itensor v3
-    Op.set(dd, ud_, 0.5);
-    Op.set(du, uu_, 0.5);
-    Op.set(uu, du_, 0.5);
-    Op.set(ud, dd_, 0.5);
+    Op.set(dd, ud_, 1.0);
+    Op.set(du, uu_, 1.0);
+    Op.set(uu, du_, 1.0);
+    Op.set(ud, dd_, 1.0);
   }
   else if (opname == "_Sy")
   { 
     Op = ITensor(s, sP); 
-    Op.set(dd, ud_, - Cplx_i*0.5);
-    Op.set(du, uu_, - Cplx_i*0.5);
-    Op.set(uu, du_, Cplx_i*0.5);
-    Op.set(ud, dd_, Cplx_i*0.5);
+    Op.set(dd, ud_, -Cplx_i);
+    Op.set(du, uu_, -Cplx_i);
+    Op.set(uu, du_, Cplx_i);
+    Op.set(ud, dd_, Cplx_i);
   }
   else if (opname == "Sz_Sz")
   {
-    Op.set(dd_, dd, +0.25);
-    Op.set(du_, du, -0.25);
-    Op.set(ud_, ud, -0.25);
-    Op.set(uu_, uu, +0.25);
+    Op.set(dd_, dd, +1.0);
+    Op.set(du_, du, -1.0);
+    Op.set(ud_, ud, -1.0);
+    Op.set(uu_, uu, +1.0);
   }
   else if (opname == "_S-S+")
   {
@@ -197,10 +175,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Id")
   {
-    Op.set(dd_, dd, 1);
-    Op.set(du_, du, 1);
-    Op.set(ud_, ud, 1);
-    Op.set(uu_, uu, 1);
+    Op.set(dd_, dd, 1.0);
+    Op.set(du_, du, 1.0);
+    Op.set(ud_, ud, 1.0);
+    Op.set(uu_, uu, 1.0);
   }
   else
   {
