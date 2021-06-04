@@ -118,7 +118,7 @@ class MPOLindbladSolver:
         #                   '2q_components': ["XX", "XY", "XZ", "YY", "YZ", "ZZ"], '2q_indices': [(1, 2), (3, 1), (2, 4), (3, 4)]}
 
         for key in dict.keys(dict_in):
-            if dict_in[key] == "":  # ignore empty entrances
+            if "" == dict_in[key]:  # ignore empty entrances
                 continue
             flag_continue = False
 
