@@ -64,34 +64,29 @@ class MPOLindbladSolver:
         return result
 
     @staticmethod
+    # checks if the value is int (for cleaner code)
     def _is_int(value):
         return isinstance(value, int)
 
     @staticmethod
+    # checks if the value is a float (for cleaner code)
     def _is_float(value):
+        # in python terms the value <4> is not float type, in the simulator context float can also be a python int:
         return isinstance(value, float) or isinstance(value, int)
 
     @staticmethod
-    def _is_a_float_list(lst):
-        if not isinstance(lst, list):
-            return False
-        for element in lst:
-            if not MPOLindbladSolver.is_float(element):
-                return False
-        return True
-
-    @staticmethod
+    # returns the number of qubits based on the given parameters, returns -1 if found an error
     def _get_number_of_qubits(dict_in):
         if ("l_x" in dict_in) and ("l_y" in dict_in):
-            if MPOLindbladSolver.is_int(dict_in["l_x"]) and MPOLindbladSolver.is_int(dict_in["l_y"]):
+            if MPOLindbladSolver._is_int(dict_in["l_x"]) and MPOLindbladSolver._is_int(dict_in["l_y"]):
                 return dict_in["l_x"] * dict_in["l_y"]
         elif "N" in dict_in:
-            if MPOLindbladSolver.is_int(dict_in["N"]):
+            if MPOLindbladSolver._is_int(dict_in["N"]):
                 return dict_in["N"]
         return -1
 
     @staticmethod
-    def check_argument_correctness(dict_in):
+    def _check_argument_correctness(dict_in):
         """Returns a detailed Error message if dict_in arguments are not in the correct format.
         Args:
             dict_in: a dictionary with the parameters for the simulation, keys as arguments and values as values.
@@ -102,7 +97,7 @@ class MPOLindbladSolver:
             Nothing, all issues will come out in the output returned.
 		"""
         check_msg = ""
-        #fixme for a better checking, assign the default values to any missing key \
+        # fixme for a better checking, assign the default values to any missing key \
         # as in the simulator it will be assigned anyway.. just remember to handle l_x l_y and N correctly (if N exists lx lx ignored)\
         # template: \
         # input_dict = {'N': 5, 't_final': 33, 'tau': 0.1, 'h_x': 1.111, 'h_y': [2.222, 4, 2e-2, 777777, -0.3], 'h_z': 3.333,
@@ -128,7 +123,7 @@ class MPOLindbladSolver:
             flag_continue = False
 
             if key == "N":
-                if not MPOLindbladSolver.is_int(dict_in[key]):
+                if not MPOLindbladSolver._is_int(dict_in[key]):
                     check_msg += "Error: " + key + " should be an integer\n"
                     continue
                 if dict_in[key] <= 0:
@@ -136,7 +131,7 @@ class MPOLindbladSolver:
                     continue
 
             elif (key == "t_final") or key == "tau":
-                if not MPOLindbladSolver.is_float(dict_in[key]):
+                if not MPOLindbladSolver._is_float(dict_in[key]):
                     check_msg += "Error: " + key + " is not a float\n"
                     continue
                 if dict_in[key] <= 0:
@@ -144,7 +139,7 @@ class MPOLindbladSolver:
                     continue
 
             elif (key == "l_x") or (key == "l_y"):
-                if not MPOLindbladSolver.is_int(dict_in[key]):
+                if not MPOLindbladSolver._is_int(dict_in[key]):
                     check_msg += "Error: " + key + " should be an integer\n"
                     continue
                 if dict_in[key] < 0:
@@ -152,18 +147,21 @@ class MPOLindbladSolver:
                     continue
 
             elif key == "output_step":
-                if not MPOLindbladSolver.is_int(dict_in[key]):
+                if not MPOLindbladSolver._is_int(dict_in[key]):
                     check_msg += "Error: " + key + " should be an integer\n"
+                    continue
+                if dict_in[key] < 0:
+                    check_msg += "Error: " + key + " should be bigger/equal to 0 (integer)\n"
                     continue
 
             elif (key == "h_x") or (key == "h_y") or (key == "h_z") or \
                     (key == "g_0") or (key == "g_1") or (key == "g_2"):
-                if MPOLindbladSolver.is_float(dict_in[key]):
+                if MPOLindbladSolver._is_float(dict_in[key]):
                     continue
                 if not isinstance(dict_in[key], list):
                     check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
                     continue
-                number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
+                number_of_qubits = MPOLindbladSolver._get_number_of_qubits(dict_in)
                 if number_of_qubits == -1:
                     check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, " \
                                                    "l_y) are not defined properly\n "
@@ -172,7 +170,7 @@ class MPOLindbladSolver:
                     check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
                     continue
                 for element in dict_in[key]:
-                    if not MPOLindbladSolver.is_float(element):
+                    if not MPOLindbladSolver._is_float(element):
                         check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
                         flag_continue = False
                         break
@@ -180,12 +178,12 @@ class MPOLindbladSolver:
                     continue
 
             elif (key == "J_z") or (key == "J"):
-                if MPOLindbladSolver.is_float(dict_in[key]):
+                if MPOLindbladSolver._is_float(dict_in[key]):
                     continue
                 if not isinstance(dict_in[key], list):
                     check_msg += "Error: " + key + " should be either empty/const/square matrix (floats)\n"
                     continue
-                number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
+                number_of_qubits = MPOLindbladSolver._get_number_of_qubits(dict_in)
                 if number_of_qubits == -1:
                     check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, " \
                                                    "l_y) are not defined properly\n"
@@ -206,7 +204,7 @@ class MPOLindbladSolver:
                         flag_continue = True
                         break
                     for val in lst:
-                        if not MPOLindbladSolver.is_float(val):
+                        if not MPOLindbladSolver._is_float(val):
                             check_msg += "Error: " + key + " should be either empty/const/square " \
                                                            "matrix (floats)\n"
                             flag_continue = True
@@ -231,18 +229,18 @@ class MPOLindbladSolver:
                     continue
 
             elif key == "trotter_order":
-                if ((not MPOLindbladSolver.is_int(dict_in[key])) and dict_in[key] != 2 and dict_in[key] != 3 and
+                if ((not MPOLindbladSolver._is_int(dict_in[key])) and dict_in[key] != 2 and dict_in[key] != 3 and
                         dict_in[key] != 4):
                     check_msg += "Error: " + key + " should be 2,3 or 4\n"
                     continue
 
             elif (key == "max_dim") or (key == "max_dim_rho"):  # int
-                if not MPOLindbladSolver.is_int(dict_in[key]):
+                if not MPOLindbladSolver._is_int(dict_in[key]):
                     check_msg += "Error: " + key + " should be an integer\n"
                     continue
 
             elif (key == "cut_off") or (key == "cut_off_rho"):
-                if not MPOLindbladSolver.is_float(dict_in[key]):
+                if not MPOLindbladSolver._is_float(dict_in[key]):
                     check_msg += "Error: " + key + " is not a small float format (ae-b where a and b are numbers)\n"
                     continue
 
@@ -285,13 +283,13 @@ class MPOLindbladSolver:
                     if not isinstance(dict_in[key], list):
                         check_msg += "Error: " + key + " should be an integer list (1,2,3,4..)\n"
                         continue
-                    number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
+                    number_of_qubits = MPOLindbladSolver._get_number_of_qubits(dict_in)
                     if number_of_qubits == -1:
                         check_msg += "Error: " + key + "could not be validated because 'N' (or alternatively l_x, " \
                                                        "l_y) are not defined properly\n"
                         continue
                     for element in dict_in[key]:
-                        if not MPOLindbladSolver.is_int(element):
+                        if not MPOLindbladSolver._is_int(element):
                             check_msg += "Error: " + key + " should be an integer list (1,2,3,4..)\n"
                             flag_continue = True
                             break
@@ -350,7 +348,7 @@ class MPOLindbladSolver:
                 if not isinstance(dict_in[key], list):
                     check_msg += "Error: " + key + " should be an list of tuples of size 2, containing integer\n"
                     continue
-                number_of_qubits = MPOLindbladSolver.get_number_of_qubits(dict_in)
+                number_of_qubits = MPOLindbladSolver._get_number_of_qubits(dict_in)
                 if number_of_qubits == -1:
                     check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, " \
                                                    "l_y) are not defined properly\n"
@@ -361,7 +359,7 @@ class MPOLindbladSolver:
                                                        "integer\n "
                         flag_continue = True
                         break
-                    if ((not MPOLindbladSolver.is_int(tup[0])) or (not MPOLindbladSolver.is_int(tup[1])) or (
+                    if ((not MPOLindbladSolver._is_int(tup[0])) or (not MPOLindbladSolver._is_int(tup[1])) or (
                             len(tup) != 2)):
                         check_msg += "Error: " + key + " should be an list of tuples of size 2, containing " \
                                                        "integers\n "
@@ -383,9 +381,21 @@ class MPOLindbladSolver:
                     continue
 
             else:
-                check_msg += "Error: " + "user inserted invalid key (argument): " + key + "\n"
-        #fixme add check for tau smaller then t_final \
-        # its already in the tests
+                check_msg += "Error: invalid key (parameter) inserted: " + key + "\n"
+        # End of: "for key in dict.keys(dict_in)"
+        # More cross-parameter checks:
+        if ("t_final" in dict_in) and ("tau" in dict_in):
+            if (MPOLindbladSolver._is_float(dict_in["tau"])) and (MPOLindbladSolver._is_float(dict_in["t_final"])):
+                if (dict_in["tau"] > 0) and (dict_in["t_final"] > 0):
+                    if dict_in["tau"] > dict_in["t_final"]:
+                        check_msg += "Error: t_final (total time) is smaller then tau (time step for time evolution)\n"
+                    elif "output_step" in dict_in:  #fixme: is this check relevant ? ( output_step*tau < t_final) if not, delete the whole elif
+                        if MPOLindbladSolver._is_int(dict_in["output_step"]):
+                            if dict_in["output_step"] > 0:
+                                if dict_in["output_step"] * dict_in["tau"] > dict_in["t_final"]:
+                                    check_msg += "Error: Output_step multiplied by tau, is bigger then t_final (output " \
+                                                 "step in units of tau, times tau is bigger then the simulation " \
+                                                 "time)\n "
         return check_msg
 
     @staticmethod
@@ -395,10 +405,10 @@ class MPOLindbladSolver:
             parameters (dictionary): the arguments for the simulator
         Returns:
 		"""
-        check_output = MPOLindbladSolver.check_argument_correctness(parameters)
+        check_output = MPOLindbladSolver._check_argument_correctness(parameters)
         if check_output != "":
             print(check_output)
-            raise Exception(check_output)
+            raise Exception(check_output)   #fixme: is there a problem with this exception ? if raised, it stops the run for me and not generate an input file as intended (you said it wont stop the input file generation)
         if "input_file" in parameters.keys():
             file_name = parameters["input_file"]
         else:
@@ -437,8 +447,8 @@ class MPOLindbladSolver:
 
     @staticmethod
     def load_output(s_output_file):
-        result = {'1q': MPOLindbladSolver.read_1q_output_into_dict(s_output_file),
-                  '2q': MPOLindbladSolver.read_2q_output_into_dict(s_output_file)}
+        result = {'1q': MPOLindbladSolver._read_1q_output_into_dict(s_output_file),
+                  '2q': MPOLindbladSolver._read_2q_output_into_dict(s_output_file)}
         return result
 
     def solve(self):

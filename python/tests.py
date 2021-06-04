@@ -332,14 +332,18 @@ class TestArgs(unittest.TestCase):
         expected = ""
         out = MPOLindbladSolver.check_argument_correctness(input_dict)
         self.assertEqual(expected, out)
+        # self.assertRegexpMatches() use this with "Error" for failing cases to allow changes to the messages ?
+        # yet Error will have to exist, it will be just a flag something else
+        self.assertTrue()
 
 
 def arg_check_1():
     # this check should pass (no errors)
     input_dict = {}
     input_dict['N'] = 5
-    input_dict['t_final'] = 33
-    input_dict['tau'] = 0.1
+    input_dict['t_final'] = 20
+    input_dict['tau'] = 3
+    input_dict['output_step'] = 5
 
     input_dict['h_x'] = 1.111
     input_dict['h_y'] = [2.222, 4, 2e-2, 777777, -0.3]
@@ -372,7 +376,6 @@ def arg_check_1():
     input_dict['cut_off_rho'] = 1e-11
     input_dict['b_force_rho_trace'] = False
     input_dict['b_force_rho_hermitian'] = True
-    input_dict['output_step'] = 1
     input_dict['save_state_file'] = "C:\\output_of_my_simulation"
     input_dict['1q_components'] = ["x", "y", "z"]
     input_dict['1q_indices'] = [1, 3, 4]
@@ -430,7 +433,7 @@ def arg_check_2():
     input_dict['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]  # this should fail
     input_dict['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]  # this should fail
 
-    out = MPOLindbladSolver.check_argument_correctness(input_dict)
+    out = MPOLindbladSolver._check_argument_correctness(input_dict)
     if out.count("Error") == 13:
         print("Check 2 Passed")
     else:
@@ -481,8 +484,7 @@ def arg_check_3():
     input_dict['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]
     input_dict['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]
 
-    out = MPOLindbladSolver.check_argument_correctness(input_dict)
-    print("\n\n\n ignore::\n" + out + "\n\n\n")
+    out = MPOLindbladSolver._check_argument_correctness(input_dict)
     if out.count("Error") == 25:
         print("Check 3 Passed")
     else:
@@ -535,7 +537,7 @@ def arg_check_4():
     input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
     input_dict['2q_indices'] = [(1, 2), (3, 2), (2, 4)]
 
-    out = MPOLindbladSolver.check_argument_correctness(input_dict)
+    out = MPOLindbladSolver._check_argument_correctness(input_dict)
     if (out == ""):
         print("Check 4 Passed")
     else:
@@ -544,8 +546,6 @@ def arg_check_4():
 
 
 def arg_check_5():
-    # fixme understand how to suppress the function's prints so we will not get unwanted prints in
-    #  the test
     input_dict = {}
     input_dict['N'] = 5
     input_dict['t_final'] = 20
@@ -720,8 +720,8 @@ def arg_check_6():
 #
 
 arg_check_1()
-#arg_check_2()
-#arg_check_3()
-#arg_check_4()
-#arg_check_5()
-#arg_check_6()
+arg_check_2()
+arg_check_3()
+arg_check_4()
+arg_check_5()
+arg_check_6()
