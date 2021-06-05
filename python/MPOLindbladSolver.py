@@ -233,7 +233,7 @@ class MPOLindbladSolver:
                         check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
                                                        "list/np.array) in the size of number_of_qubits^2 of floats\n"
                         continue
-                    if dict_in[key].shape[0]**2 != dict_in[key].size:           # square matrix
+                    if dict_in[key].shape[0]**2 != dict_in[key].size:
                         check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
                                                        "list/np.array) in the size of number_of_qubits^2 of floats\n"
                         continue
