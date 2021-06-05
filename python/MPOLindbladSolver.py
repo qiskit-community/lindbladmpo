@@ -1,4 +1,5 @@
 import subprocess
+import numpy as np
 
 
 class MPOLindbladSolver:
@@ -72,7 +73,7 @@ class MPOLindbladSolver:
     # checks if the value is a float (for cleaner code)
     def _is_float(value):
         # in python terms the value <4> is not float type, in the simulator context float can also be a python int:
-        return isinstance(value, float) or isinstance(value, int)
+        return isinstance(value, (float, int))
 
     @staticmethod
     # returns the number of qubits based on the given parameters, returns -1 if found an error
@@ -158,68 +159,102 @@ class MPOLindbladSolver:
                     (key == "g_0") or (key == "g_1") or (key == "g_2"):
                 if MPOLindbladSolver._is_float(dict_in[key]):
                     continue
-                if not isinstance(dict_in[key], list):
-                    check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
-                    continue
                 number_of_qubits = MPOLindbladSolver._get_number_of_qubits(dict_in)
                 if number_of_qubits == -1:
                     check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, " \
                                                    "l_y) are not defined properly\n "
                     continue
-                if len(dict_in[key]) != number_of_qubits:
-                    check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
-                    continue
-                for element in dict_in[key]:
-                    if not MPOLindbladSolver._is_float(element):
-                        check_msg += "Error: " + key + " is not a float or a N size list (of floats)\n"
-                        flag_continue = False
-                        break
-                if flag_continue:
+                if isinstance(dict_in[key], list):
+                    if len(dict_in[key]) != number_of_qubits:
+                        check_msg += "Error: " + key + " is not a float / N size list / numpy array (of floats)\n"
+                        continue
+                    for element in dict_in[key]:
+                        if not MPOLindbladSolver._is_float(element):
+                            check_msg += "Error: " + key + " is not a float / N size list / numpy array (of floats)\n"
+                            flag_continue = True
+                            break
+                    if flag_continue:
+                        continue
+                elif isinstance(dict_in[key], np.ndarray):
+                    if (str((dict_in[key]).dtype).find("int") == -1) and (str((dict_in[key]).dtype).find("float") == -1):
+                        check_msg += "Error: " + key + " is not a float / N size list / numpy array (of floats)\n"
+                        continue
+                    if dict_in[key].size == 1:
+                        continue
+                    if(dict_in[key].shape[0] != number_of_qubits) or (dict_in[key].shape[0] != dict_in[key].size):
+                        check_msg += "Error: " + key + " is not a float / N size list / numpy array (of floats)\n"
+                        continue
+                else:
+                    check_msg += "Error: " + key + " is not a float / N size list / numpy array (of floats)\n"
                     continue
 
             elif (key == "J_z") or (key == "J"):
                 if MPOLindbladSolver._is_float(dict_in[key]):
-                    continue
-                if not isinstance(dict_in[key], list):
-                    check_msg += "Error: " + key + " should be either empty/const/square matrix (floats)\n"
                     continue
                 number_of_qubits = MPOLindbladSolver._get_number_of_qubits(dict_in)
                 if number_of_qubits == -1:
                     check_msg += "Error: " + key + " could not be validated because 'N' (or alternatively l_x, " \
                                                    "l_y) are not defined properly\n"
                     continue
-                if len(dict_in[key]) != number_of_qubits:
-                    check_msg += "Error: " + key + " should be either empty/const/square matrix in the " \
-                                                   "size of qubits^2 (floats)\n"
-                    continue
-                for lst in dict_in[key]:
-                    if not isinstance(lst, list):
-                        check_msg += "Error: " + key + " should be either empty/const/square matrix (" \
-                                                       "floats)\n"
-                        flag_continue = True
-                        break
-                    if len(lst) != number_of_qubits:
-                        check_msg += "Error: " + key + " should be either empty/const/square matrix in " \
-                                                       "the size of qubits^2 (floats)\n"
-                        flag_continue = True
-                        break
-                    for val in lst:
-                        if not MPOLindbladSolver._is_float(val):
-                            check_msg += "Error: " + key + " should be either empty/const/square " \
-                                                           "matrix (floats)\n"
+                if isinstance(dict_in[key], list):
+                    if len(dict_in[key]) != number_of_qubits:
+                        check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                       "list/np.array) in the size of number_of_qubits^2 of floats\n"
+                        continue
+                    for lst in dict_in[key]:
+                        if not isinstance(lst, list):
+                            check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                        "list/np.array) in the size of number_of_qubits^2 of floats\n"
                             flag_continue = True
                             break
+                        if len(lst) != number_of_qubits:
+                            check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                        "list/np.array) in the size of number_of_qubits^2 of floats\n"
+                            flag_continue = True
+                            break
+                        for val in lst:
+                            if not MPOLindbladSolver._is_float(val):
+                                check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
+                                flag_continue = True
+                                break
+                        if flag_continue:
+                            break
                     if flag_continue:
-                        break
-                if flag_continue:
+                        continue
+                elif isinstance(dict_in[key], np.ndarray):
+                    if (str((dict_in[key]).dtype).find("int") == -1) and (str((dict_in[key]).dtype).find("float") == -1):
+                        check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                       "list/np.array) in the size of number_of_qubits^2 of floats\n"
+                        continue
+                    if dict_in[key].size == 1:
+                        continue
+                    if dict_in[key].shape[0] != number_of_qubits:
+                        check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                       "list/np.array) in the size of number_of_qubits^2 of floats\n"
+                        continue
+                    if dict_in[key].shape[0]**2 != dict_in[key].size:           # square matrix
+                        check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                       "list/np.array) in the size of number_of_qubits^2 of floats\n"
+                        continue
+                else:
+                    check_msg += "Error: " + key + " should be a constant, or a square matrix (nested " \
+                                                   "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     continue
 
             elif key == "init_Pauli_state":
                 if not isinstance(dict_in[key], str):
                     check_msg += "Error: " + key + " is not a string\n"
                     continue
-                if len(dict_in[key]) != 2:
+                str_as_lst = list(dict_in[key])
+                if len(str_as_lst) != 2:
                     check_msg += "Error: " + key + " is a string but not of length 2 !\n"
+                    continue
+                if (str_as_lst[0] != '+') and (str_as_lst[0] != "-"):
+                    check_msg += "Error: " + key + " can only be one of these: +x, -x, +y, -y, +z, -z\n"
+                    continue
+                if (str_as_lst[1] != "x") and (str_as_lst[1] != "y") and (str_as_lst[1] != "z"):
+                    check_msg += "Error: " + key + " can only be one of these: +x, -x, +y, -y, +z, -z\n"
                     continue
 
             elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
@@ -246,6 +281,7 @@ class MPOLindbladSolver:
 
             elif key == "save_state_file":
                 pass  # fixme: add a check for windows/linux/mac path string validation
+                      # allow only letters, numbers and underscore ? _   (should be enough)
             elif key == "output_file":
                 pass
             elif key == "input_file":
@@ -389,7 +425,7 @@ class MPOLindbladSolver:
                 if (dict_in["tau"] > 0) and (dict_in["t_final"] > 0):
                     if dict_in["tau"] > dict_in["t_final"]:
                         check_msg += "Error: t_final (total time) is smaller then tau (time step for time evolution)\n"
-                    elif "output_step" in dict_in:  #fixme: is this check relevant ? ( output_step*tau < t_final) if not, delete the whole elif
+                    elif "output_step" in dict_in:  # fixme: is this check relevant ? ( output_step*tau < t_final) if not, delete the whole elif
                         if MPOLindbladSolver._is_int(dict_in["output_step"]):
                             if dict_in["output_step"] > 0:
                                 if dict_in["output_step"] * dict_in["tau"] > dict_in["t_final"]:
@@ -408,7 +444,8 @@ class MPOLindbladSolver:
         check_output = MPOLindbladSolver._check_argument_correctness(parameters)
         if check_output != "":
             print(check_output)
-            raise Exception(check_output)   #fixme: is there a problem with this exception ? if raised, it stops the run for me and not generate an input file as intended (you said it wont stop the input file generation)
+            raise Exception(
+                check_output)  # fixme: is there a problem with this exception ? if raised, it stops the run for me and not generate an input file as intended (you said it wont stop the input file generation)
         if "input_file" in parameters.keys():
             file_name = parameters["input_file"]
         else:
