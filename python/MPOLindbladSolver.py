@@ -78,7 +78,11 @@ class MPOLindbladSolver:
     @staticmethod
     # returns the number of qubits based on the given parameters, returns -1 if found an error
     def _get_number_of_qubits(dict_in):
-        if ("l_x" in dict_in) and ("l_y" in dict_in):
+        l_x_is_0 = False
+        if "l_x" in dict_in:
+            if dict_in["l_x"] == 0:
+                l_x_is_0 = True
+        if ("l_x" in dict_in) and ("l_y" in dict_in) and (not l_x_is_0):
             if MPOLindbladSolver._is_int(dict_in["l_x"]) and MPOLindbladSolver._is_int(dict_in["l_y"]):
                 return dict_in["l_x"] * dict_in["l_y"]
         elif "N" in dict_in:
