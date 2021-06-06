@@ -456,9 +456,28 @@ class MPOLindbladSolver:
             file_name = "input_file.txt"
         print("Preparing solver input file:")
         print(file_name)
+        AB_indices = False
+        A_bond_indices = []
+        B_bond_indices = []
         file = open(file_name, "w")
         for key in parameters.keys():
-            file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
+            if key == 'J' or key == 'J_z':
+                if type(parameters[key]) == np.ndarray:
+                    AB_indices = True
+                    file.write(key + " = ")
+                    for i in range(parameters[key].shape[0]):
+                        for j in range(parameters[key].shape[1]):
+                            A_bond_indices.append(i + 1)
+                            B_bond_indices.append(j + 1)
+                            file.write(str(parameters[key][i, j]))
+                            if (i + 1, j + 1) != parameters[key].shape:
+                                file.write(", ")
+                    file.write("\n")
+            else:
+                file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
+        if AB_indices:
+            file.write("A_bond_indices = " + str(A_bond_indices).strip("[]") + "\n")
+            file.write("B_bond_indices = " + str(B_bond_indices).strip("[]") + "\n")
         file.close()
 
     @staticmethod
