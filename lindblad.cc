@@ -200,6 +200,8 @@ int main(int argc, char *argv[])
       cerr << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
     //Check a few simple observables, using rho and psi
     vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
+	vector<double> psi_factor = {2., 1., 1., 2., 2.};
+
     double err = 0;
     for (int i = 1; i <= N; i++)
     {
@@ -207,7 +209,7 @@ int main(int argc, char *argv[])
       {
         const string &opname = ops[o];
         Cplx with_rho = C.Expect(opname, i);
-        Cplx with_psi = PureStateObs(opname, psi, i, C.sites);
+        Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites);
         err += fabs(with_rho - with_psi);
         if (fabs(with_rho - with_psi) > 1e-2)
           cerr << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
