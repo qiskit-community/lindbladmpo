@@ -51,6 +51,7 @@ public:
 //_____________________________________________________
 inline Cplx PureStateObs(const string &opname, MPS psi, int i, const SiteSet &sites) //<psi|O|psi> at some site i
 {
+// Note that these are iTensor spin operators (i.e., half Paulis for x,y,z)
   auto O = op(sites, opname, i);
   psi.position(i);
   ITensor A = psi.A(i);
