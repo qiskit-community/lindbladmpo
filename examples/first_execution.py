@@ -7,7 +7,7 @@ from python.temp_gate_map import *
 
 # Simulation parameters
 n_qubits = 8
-b_plaquette = False
+b_plaquette = True
 # s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
 # s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
 s_path = "C:/temp/"
@@ -15,15 +15,15 @@ s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simula
 b_save_figures = True
 fontsize = 22
 
-h_x = (0. * np.random.randn(n_qubits)).tolist()
-h_x[int(n_qubits / 2)] = 4.
-h_y = (0. * np.random.randn(n_qubits)).tolist()
+h_x = 0. * np.random.randn(n_qubits)
+h_x[int(n_qubits / 2)] = 10.
+h_y = 0. * np.random.randn(n_qubits)
 
-h_z = (5 * np.random.randn(n_qubits)).tolist()
+h_z = 1. * np.random.randn(n_qubits)
 g_1 = (0.01 * np.random.rand(n_qubits)).tolist()
-J = 3
-t_final = 1.2
-tau = .02
+J = 4
+t_final = 3.
+tau = .01
 
 mpl_data = {}
 c_map = {}
@@ -52,7 +52,7 @@ else:
 	l_y = 1
 
 # create the parameters dictionary
-solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 40, 'N': n_qubits,
+solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 60, 'N': n_qubits,
 				 'h_x': h_x, 'h_z': h_z, 'g_1': g_1, 'J': J_param, 'l_x': l_x, 'l_y': l_y,
 				 'input_file': s_path + "MPO.input",
 				 'output_file': s_path + "MPO"}
