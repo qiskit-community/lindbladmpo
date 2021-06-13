@@ -463,8 +463,12 @@ class MPOLindbladSolver:
                             B_bond_indices.append(j + 1)
                             file.write(str(parameters[key][i, j]))
                             if (i + 1, j + 1) != parameters[key].shape:
-                                file.write(", ")
+                                file.write(",")
                     file.write("\n")
+            elif type(parameters[key]) == np.ndarray:
+                file.write(key + " = " + str(parameters[key][i]))
+                if i + 1 != parameters[key].shape[0]:
+                    file.write(",")
             else:
                 file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
         if AB_indices:
