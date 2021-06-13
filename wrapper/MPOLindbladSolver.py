@@ -466,9 +466,12 @@ class MPOLindbladSolver:
                                 file.write(",")
                     file.write("\n")
             elif type(parameters[key]) == np.ndarray:
-                file.write(key + " = " + str(parameters[key][i]))
-                if i + 1 != parameters[key].shape[0]:
-                    file.write(",")
+                file.write(key + " = ")
+                for i in range(parameters[key].shape[0]):
+                    file.write(str(parameters[key][i])) 
+                    if i + 1 != parameters[key].shape[0]:
+                        file.write(",")
+                file.write("\n")
             else:
                 file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
         if AB_indices:
