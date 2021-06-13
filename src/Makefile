@@ -1,4 +1,4 @@
-LIBRARY_DIR=../itensor/
+LIBRARY_DIR=../../itensor
 
 APP=lindblad
 

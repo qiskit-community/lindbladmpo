@@ -1,9 +1,9 @@
-from python.MPOLindbladSolver import MPOLindbladSolver
+from wrapper.MPOLindbladSolver import MPOLindbladSolver
 from qiskit.visualization.gate_map import *
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from python.temp_gate_map import *
+from wrapper.temp_gate_map import *
 
 # Simulation parameters
 n_qubits = 8
@@ -11,18 +11,18 @@ b_plaquette = True
 # s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
 # s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
 s_path = "C:/temp/"
-s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simulator/lindblad.exe"
+s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simulator/src/lindblad.exe"
 b_save_figures = True
 fontsize = 22
 
 h_x = 0. * np.random.randn(n_qubits)
-h_x[int(n_qubits / 2)] = 10.
+h_x[int(n_qubits / 2)] = 5.
 h_y = 0. * np.random.randn(n_qubits)
 
-h_z = 1. * np.random.randn(n_qubits)
-g_1 = (0.01 * np.random.rand(n_qubits)).tolist()
-J = 4
-t_final = 3.
+h_z = 5. * np.random.randn(n_qubits)
+g_1 = (.1 * np.random.rand(n_qubits)).tolist()
+J = 1
+t_final = 1.
 tau = .01
 
 mpl_data = {}

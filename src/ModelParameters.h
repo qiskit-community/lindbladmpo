@@ -22,12 +22,12 @@ public:
 
         //Losses / dissipation
         operator[]("g_0") = "0"; // Strength of the excitation term
-        operator[]("g_1") = "1.0"; // Strength of the loss term
+        operator[]("g_1") = "0"; // Strength of the loss term
         operator[]("g_2") = "0"; // Strength of the dephasing term
 
         //Parameters of the interaction Hamiltonian
-        operator[]("J") = "1";       //Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single value, or a list of values
-        operator[]("J_z") = "1";       //Sz-Sz Interaction strength. This parameter can either be a single value, or a list of values
+        operator[]("J") = "0";       //Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single value, or a list of values
+        operator[]("J_z") = "0";       //Sz-Sz Interaction strength. This parameter can either be a single value, or a list of values
 
         //Lattice specification
         operator[]("b_periodic_x") = "false"; // if true -> periodic boundary conditions in the x direction (Warining: potential huge cost in terms of bond dimension)
