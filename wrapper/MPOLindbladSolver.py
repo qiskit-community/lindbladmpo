@@ -260,9 +260,11 @@ class MPOLindbladSolver:
                     continue
 
             elif key == "trotter_order":
-                if ((not MPOLindbladSolver._is_int(dict_in[key])) and dict_in[key] != 2 and dict_in[key] != 3 and
-                        dict_in[key] != 4):
-                    check_msg += "Error 400: " + key + " should be 2,3 or 4\n"
+                if not MPOLindbladSolver._is_int(dict_in[key]):
+                    check_msg += "Error 400: " + key + " should be 2, 3 or 4\n"
+                    continue
+                if (dict_in[key] != 2) and (dict_in[key] != 3) and (dict_in[key] != 4):
+                    check_msg += "Error 401: " + key + " should be 2, 3 or 4\n"
                     continue
 
             elif (key == "max_dim") or (key == "max_dim_rho"):  # int
@@ -292,6 +294,10 @@ class MPOLindbladSolver:
                     check_msg += "Error 440: " + key + " should get a list of sizes 1,2,3 with x,y,z)\n"
                     continue
                 for val in dict_in[key]:
+                    if not isinstance(val, str):
+                        check_msg += "Error 441: " + key + " only gets x,y,z (or a subset)\n"
+                        flag_continue = True
+                        break
                     val = str.lower(val)
                     if val == "x":
                         x_c += 1
@@ -468,7 +474,7 @@ class MPOLindbladSolver:
             elif type(parameters[key]) == np.ndarray:
                 file.write(key + " = ")
                 for i in range(parameters[key].shape[0]):
-                    file.write(str(parameters[key][i])) 
+                    file.write(str(parameters[key][i]))
                     if i + 1 != parameters[key].shape[0]:
                         file.write(",")
                 file.write("\n")
