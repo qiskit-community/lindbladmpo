@@ -1,4 +1,6 @@
 import subprocess
+from typing import Dict
+
 import numpy as np
 
 
@@ -18,13 +20,13 @@ class MPOLindbladSolver:
         self.result = {}
 
     @staticmethod
-    def _read_1q_output_into_dict(filename):
+    def _read_1q_output_into_dict(filename: str) -> Dict:
         """ Reads the 1 qubit output file and returns a dictionary with the values in the format:
         key (tuple) = (qubit (int), Axis (string), time (float)) : value = expectation value (float)
         Args:
-            filename (string): file location
+            filename : file location
         Returns:
-            result (dictionary): the arguments for the simulator
+            result : the arguments for the simulator
 		"""
         full_filename = filename + ".1q_obs.dat"
         print("Loading 1-qubit observables from file:")
@@ -42,7 +44,7 @@ class MPOLindbladSolver:
         return result
 
     @staticmethod
-    def _read_2q_output_into_dict(filename):
+    def _read_2q_output_into_dict(filename: str) -> Dict:
         """ Reads the 2 qubit output file and returns a dictionary with the values in the format:
         key = (qubit1 (int), qubit2 (int), Axis1 (string), Axis2 (string) ,time (float)), value = expectation value (float)
         Args:
@@ -77,7 +79,7 @@ class MPOLindbladSolver:
 
     @staticmethod
     # returns the number of qubits based on the given parameters, returns -1 if found an error
-    def _get_number_of_qubits(dict_in):
+    def _get_number_of_qubits(dict_in: Dict) -> int:
         l_x_is_0 = False
         if "l_x" in dict_in:
             if dict_in["l_x"] == 0:
@@ -91,7 +93,7 @@ class MPOLindbladSolver:
         return -1
 
     @staticmethod
-    def _check_argument_correctness(dict_in):
+    def _check_argument_correctness(dict_in: Dict) -> str:
         """Returns a detailed Error message if dict_in arguments are not in the correct format.
         Args:
             dict_in: a dictionary with the parameters for the simulation, keys as arguments and values as values.
@@ -438,7 +440,7 @@ class MPOLindbladSolver:
         return check_msg
 
     @staticmethod
-    def build_input_file(parameters):
+    def build_input_file(parameters: Dict):
         """ Writing the input parameters from the input dictionary to txt file
         Args:
             parameters (dictionary): the arguments for the simulator
