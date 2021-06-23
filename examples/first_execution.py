@@ -1,9 +1,9 @@
-from wrapper.MPOLindbladSolver import MPOLindbladSolver
+from MPO_Lindblad_solver.MPOLindbladSolver import MPOLindbladSolver
 from qiskit.visualization.gate_map import *
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from wrapper.temp_gate_map import *
+from MPO_Lindblad_solver.temp_gate_map import *
 
 # Simulation parameters
 n_qubits = 8
@@ -11,7 +11,7 @@ b_plaquette = True
 # s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
 # s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
 s_path = "C:/temp/"
-s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindblad-MPO-solver/src/lindblad.exe"
+s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/MPO-Lindblad-solver/src/lindblad.exe"
 b_save_figures = True
 fontsize = 22
 
