@@ -1,5 +1,8 @@
-# These are some examples of commonly ignored file patterns.
+# editor files
+.vscode/
+.idea/
 
+# standard ignores
 *~
 *.o
 *.dat

@@ -11,7 +11,7 @@ b_plaquette = True
 # s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
 # s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
 s_path = "C:/temp/"
-s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindbladian-MPO-simulator/src/lindblad.exe"
+s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/Lindblad-MPO-solver/src/lindblad.exe"
 b_save_figures = True
 fontsize = 22
 
@@ -19,11 +19,11 @@ h_x = 0. * np.random.randn(n_qubits)
 h_x[int(n_qubits / 2)] = 5.
 h_y = 0. * np.random.randn(n_qubits)
 
-h_z = 5. * np.random.randn(n_qubits)
+h_z = 0. * np.random.randn(n_qubits)
 g_1 = (.1 * np.random.rand(n_qubits)).tolist()
 J = 1
-t_final = 1.
-tau = .01
+t_final = 10
+tau = .05
 
 mpl_data = {}
 c_map = {}
@@ -75,7 +75,7 @@ t_ticks = np.round(t_steps * tau, 5)
 r_qubits = range(n_qubits)
 
 if b_plaquette:
-	plot_gate_map_raw(8, mpl_data, c_map[n_qubits])
+	plot_gate_map_raw(n_qubits, mpl_data, c_map[n_qubits], qubit_size = 28)
 
 fig, ax = plt.subplots(figsize = (14, 9))
 plt.rcParams.update({'font.size': fontsize})
