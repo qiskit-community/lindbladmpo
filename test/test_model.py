@@ -1,4 +1,4 @@
-from MPOLindbladSolver import MPOLindbladSolver
+from MPO_Lindblad_solver.MPOLindbladSolver import MPOLindbladSolver
 import unittest
 import numpy as np
 
