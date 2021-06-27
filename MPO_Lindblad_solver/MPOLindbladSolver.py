@@ -447,9 +447,11 @@ class MPOLindbladSolver:
         Returns:
 		"""
         check_output = MPOLindbladSolver._check_argument_correctness(parameters)
+        # check if there is a problem with the input, if "" returned there is no problem
         if check_output != "":
             print(check_output)
             raise Exception(check_output)
+        # check if the user defined an input file name
         if "input_file" in parameters.keys():
             file_name = parameters["input_file"]
         else:
@@ -462,13 +464,15 @@ class MPOLindbladSolver:
         file = open(file_name, "w")
         for key in parameters.keys():
             if key == 'J' or key == 'J_z':
+                # check if to create bond indices arrays
                 if type(parameters[key]) == np.ndarray:
                     AB_indices = True
                     file.write(key + " = ")
                     for i in range(parameters[key].shape[0]):
                         for j in range(parameters[key].shape[1]):
-                            A_bond_indices.append(i + 1)
-                            B_bond_indices.append(j + 1)
+                            if int(parameters[key][i, j]) != 0:
+                                A_bond_indices.append(i + 1)
+                                B_bond_indices.append(j + 1)
                             file.write(str(parameters[key][i, j]))
                             if (i + 1, j + 1) != parameters[key].shape:
                                 file.write(",")
@@ -488,7 +492,7 @@ class MPOLindbladSolver:
         file.close()
 
     @staticmethod
-    def execute(s_cygwin_path, s_simulator_path, s_input_file=""):
+    def execute(s_cygwin_path: str, s_simulator_path: str, s_input_file=""):
         """ Execute the C++ simulator
         Args:
             s_cygwin_path (string): the address of the cygwin bash terminal execution
@@ -513,7 +517,7 @@ class MPOLindbladSolver:
         print(f"Solver process terminated with exit code {exit_code}")
 
     @staticmethod
-    def load_output(s_output_file):
+    def load_output(s_output_file: str):
         result = {'1q': MPOLindbladSolver._read_1q_output_into_dict(s_output_file),
                   '2q': MPOLindbladSolver._read_2q_output_into_dict(s_output_file)}
         return result
