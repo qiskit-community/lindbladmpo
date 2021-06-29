@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
   double ttotal = param.val("t_final");
   const int nt = int(ttotal / tau + (1e-9 * (ttotal / tau)));
 
-  string name = param.stringval("output_file");
+  string name = param.stringval("output_file_prefix");
   //-----------------------------------------------------
   // Some preparation/checks for the 1-qbit observables
   ofstream file_1q(name + ".1q_obs.dat");
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  string fname = param.stringval("save_state_file");
+  string fname = param.stringval("save_state_file_prefix");
   if (fname != "")
   {
     fname += "_N=" + to_string(N);

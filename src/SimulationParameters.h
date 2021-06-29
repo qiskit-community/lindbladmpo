@@ -30,10 +30,10 @@ public:
         operator[]("load_state_file") = "";                                                                  
         //If not equal to "" the state (density matrix rho) will be saved to disk.
         //Note that initial state is in fact stored in three files, with names names *_N=*.obs, *_N=*.sites and*_N=*.rho
-        operator[]("save_state_file") = "";   
+        operator[]("save_state_file_prefix") = "";   
                                               
         operator[]("input_file") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones). If empty => 
-        operator[]("output_file") = "out"; //Prefix of the names of the files where observables are written
+        operator[]("output_file_prefix") = "out"; //Prefix of the names of the files where observables are written
 
     }
 };

@@ -1,3 +1,11 @@
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
 from MPO_Lindblad_solver.MPOLindbladSolver import MPOLindbladSolver
 from qiskit.visualization.gate_map import *
 import numpy as np
@@ -22,7 +30,7 @@ h_y = 0. * np.random.randn(n_qubits)
 h_z = 0. * np.random.randn(n_qubits)
 g_1 = (.1 * np.random.rand(n_qubits)).tolist()
 J = 1
-t_final = 10
+t_final = .5
 tau = .05
 
 mpl_data = {}
@@ -52,10 +60,9 @@ else:
 	l_y = 1
 
 # create the parameters dictionary
-solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 60, 'N': n_qubits,
+solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 60, 'N': n_qubits, 'b_unique_id': False,
 				 'h_x': h_x, 'h_z': h_z, 'g_1': g_1, 'J': J_param, 'l_x': l_x, 'l_y': l_y,
-				 'input_file': s_path + "MPO.input",
-				 'output_file': s_path + "MPO"}
+				 'input_file_prefix': s_path, 'output_file_prefix': s_path + "MPO"}
 # initialize class - parameters, cygwin_path, simulator_path
 solver = MPOLindbladSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
 

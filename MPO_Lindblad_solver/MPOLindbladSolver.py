@@ -1,23 +1,139 @@
-import subprocess
-from typing import Dict
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
 
+import subprocess
+import uuid
+from typing import Dict
 import numpy as np
 
 
 class MPOLindbladSolver:
     def __init__(self, parameters, s_cygwin_path, s_simulator_path):
         self.parameters = parameters
-        if "output_file" in self.parameters:
-            self.s_output_file = parameters["output_file"]
-        else:
-            self.s_output_file = "out"
-        if "input_file" in self.parameters:
-            self.s_input_file = parameters["input_file"]
-        else:
-            self.s_input_file = "input_file.txt"
+        self.s_input_file = ''
+        self.s_output_file = ''
         self.s_cygwin_path = s_cygwin_path
         self.s_simulator_path = s_simulator_path
         self.result = {}
+
+    @staticmethod
+    def build_input_file(parameters: Dict) -> (str, str):
+        """ Writing the input parameters from the input dictionary to txt file
+        Args:
+            parameters (dictionary): the arguments for the simulator
+        Returns:
+            (s_input_file, s_output_file): File name of solver input file, and file prefix for solver output, based
+            on the user settings in the parameters dictionary (or default values if not assigned), and possibly
+            appended with a unique id (if requested).
+		"""
+        check_output = MPOLindbladSolver._check_argument_correctness(parameters)
+        # check if there is a problem with the input, if "" returned there is no problem
+        if check_output != "":
+            print(check_output)
+            raise Exception(check_output)
+        # check if the user defined an input file name
+        s_input_file = parameters.get("input_file_prefix", "")
+        if s_input_file == "" or s_input_file[-1] in ('/', '.', '\\'):
+            s_input_file += "input"
+        s_output_file = parameters.get("output_file_prefix", "")
+        if s_output_file == "" or s_output_file[-1] in ('/', '.', '\\'):
+            s_output_file += "out"
+        s_save_file = parameters.get("save_state_file_prefix", "")
+        if s_save_file != "" and s_save_file[-1] in ('/', '.', '\\'):
+            s_save_file += "save"
+        b_uuid = parameters.get("b_unique_id", False)
+        if b_uuid:
+            s_uuid = uuid.uuid4().hex
+            print("Generating a unique id for this simulation: " + s_uuid)
+            s_uuid = '.' + s_uuid
+            s_input_file += s_uuid
+            s_output_file += s_uuid
+            if s_save_file != "":
+                s_save_file += s_uuid
+        s_input_file += ".txt"
+
+        print("Creating solver input file:")
+        print(s_input_file)
+        AB_indices = False
+        A_bond_indices = []
+        B_bond_indices = []
+        file = open(s_input_file, "w")
+        for key in parameters.keys():
+            if key == "input_file_prefix" or key == "b_unique_id":
+                pass
+            elif key == "output_file_prefix":
+                file.write(key + " = " + s_output_file + "\n")
+            elif key == "save_state_file_prefix":
+                file.write(key + " = " + s_save_file + "\n")
+            elif key == 'J' or key == 'J_z':
+                # check if to create bond indices arrays
+                if type(parameters[key]) == np.ndarray:
+                    AB_indices = True
+                    file.write(key + " = ")
+                    for i in range(parameters[key].shape[0]):
+                        for j in range(parameters[key].shape[1]):
+                            if parameters[key][i, j] != 0:
+                                A_bond_indices.append(i + 1)
+                                B_bond_indices.append(j + 1)
+                                file.write(str(parameters[key][i, j]))
+                                if (i + 1, j + 1) != parameters[key].shape:
+                                    file.write(",")
+                    file.write("\n")
+            elif type(parameters[key]) == np.ndarray:
+                file.write(key + " = ")
+                for i in range(parameters[key].shape[0]):
+                    file.write(str(parameters[key][i]))
+                    if i + 1 != parameters[key].shape[0]:
+                        file.write(",")
+                file.write("\n")
+            else:
+                file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
+        if AB_indices:
+            file.write("A_bond_indices = " + str(A_bond_indices).strip("[]") + "\n")
+            file.write("B_bond_indices = " + str(B_bond_indices).strip("[]") + "\n")
+        file.close()
+        return s_input_file, s_output_file
+
+    @staticmethod
+    def execute(s_cygwin_path: str, s_simulator_path: str, s_input_file=""):
+        """ Execute the C++ simulator
+        Args:
+            s_cygwin_path (string): the address of the cygwin bash terminal execution
+            s_simulator_path (string): the address of the simulator .exe
+            s_input_file (string): input file location and name, if empty then the simulator is running on default values
+
+        Returns:
+		"""
+        if s_cygwin_path:
+            # call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
+            call_string = s_cygwin_path + " --login -c \""
+        else:
+            call_string = ''
+        call_string += s_simulator_path
+        if s_input_file:
+            call_string += " input_file " + str(s_input_file)
+        print("Executing solver with command:")
+        print("\t" + call_string + "\n")
+
+        process = subprocess.Popen(call_string)
+        exit_code = process.wait()
+        print(f"Solver process terminated with exit code {exit_code}")
+
+    @staticmethod
+    def load_output(s_output_file: str):
+        result = {'1q': MPOLindbladSolver._read_1q_output_into_dict(s_output_file),
+                  '2q': MPOLindbladSolver._read_2q_output_into_dict(s_output_file)}
+        return result
+
+    def solve(self):
+        self.s_input_file, self.s_output_file = self.build_input_file(self.parameters)
+        self.execute(self.s_cygwin_path, self.s_simulator_path, self.s_input_file)
+        self.result = self.load_output(self.s_output_file)
 
     @staticmethod
     def _read_1q_output_into_dict(filename: str) -> Dict:
@@ -256,7 +372,7 @@ class MPOLindbladSolver:
                     continue
 
             elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
-                    key == "b_force_rho_hermitian")):
+                    key == "b_force_rho_hermitian") or (key == "b_unique_id")):
                 if not isinstance(dict_in[key], bool):
                     check_msg += "Error 390: " + key + " should be a boolean True or False as its a switch\n"
                     continue
@@ -279,11 +395,11 @@ class MPOLindbladSolver:
                     check_msg += "Error 420: " + key + " is not a small float format (ae-b where a and b are numbers)\n"
                     continue
 
-            elif key == "save_state_file":
+            elif key == "save_state_file_prefix":
                 pass
-            elif key == "output_file":
+            elif key == "output_file_prefix":
                 pass
-            elif key == "input_file":
+            elif key == "input_file_prefix":
                 pass
             elif key == "1q_components":
                 x_c = 0
@@ -438,91 +554,3 @@ class MPOLindbladSolver:
                                                  "output_step in units of tau, times tau is bigger then the " \
                                                  "simulation time)\n "
         return check_msg
-
-    @staticmethod
-    def build_input_file(parameters: Dict):
-        """ Writing the input parameters from the input dictionary to txt file
-        Args:
-            parameters (dictionary): the arguments for the simulator
-        Returns:
-		"""
-        check_output = MPOLindbladSolver._check_argument_correctness(parameters)
-        # check if there is a problem with the input, if "" returned there is no problem
-        if check_output != "":
-            print(check_output)
-            raise Exception(check_output)
-        # check if the user defined an input file name
-        if "input_file" in parameters.keys():
-            file_name = parameters["input_file"]
-        else:
-            file_name = "input_file.txt"
-        print("Preparing solver input file:")
-        print(file_name)
-        AB_indices = False
-        A_bond_indices = []
-        B_bond_indices = []
-        file = open(file_name, "w")
-        for key in parameters.keys():
-            if key == 'J' or key == 'J_z':
-                # check if to create bond indices arrays
-                if type(parameters[key]) == np.ndarray:
-                    AB_indices = True
-                    file.write(key + " = ")
-                    for i in range(parameters[key].shape[0]):
-                        for j in range(parameters[key].shape[1]):
-                            if int(parameters[key][i, j]) != 0:
-                                A_bond_indices.append(i + 1)
-                                B_bond_indices.append(j + 1)
-                            file.write(str(parameters[key][i, j]))
-                            if (i + 1, j + 1) != parameters[key].shape:
-                                file.write(",")
-                    file.write("\n")
-            elif type(parameters[key]) == np.ndarray:
-                file.write(key + " = ")
-                for i in range(parameters[key].shape[0]):
-                    file.write(str(parameters[key][i]))
-                    if i + 1 != parameters[key].shape[0]:
-                        file.write(",")
-                file.write("\n")
-            else:
-                file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
-        if AB_indices:
-            file.write("A_bond_indices = " + str(A_bond_indices).strip("[]") + "\n")
-            file.write("B_bond_indices = " + str(B_bond_indices).strip("[]") + "\n")
-        file.close()
-
-    @staticmethod
-    def execute(s_cygwin_path: str, s_simulator_path: str, s_input_file=""):
-        """ Execute the C++ simulator
-        Args:
-            s_cygwin_path (string): the address of the cygwin bash terminal execution
-            s_simulator_path (string): the address of the simulator .exe
-            s_input_file (string): input file location and name, if empty then the simulator is running on default values
-
-        Returns:
-		"""
-        if s_cygwin_path:
-            # call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
-            call_string = s_cygwin_path + " --login -c \""
-        else:
-            call_string = ''
-        call_string += s_simulator_path
-        if s_input_file:
-            call_string += " input_file " + str(s_input_file)
-        print("Executing solver with command:")
-        print("\t" + call_string + "\n")
-
-        process = subprocess.Popen(call_string)
-        exit_code = process.wait()
-        print(f"Solver process terminated with exit code {exit_code}")
-
-    @staticmethod
-    def load_output(s_output_file: str):
-        result = {'1q': MPOLindbladSolver._read_1q_output_into_dict(s_output_file),
-                  '2q': MPOLindbladSolver._read_2q_output_into_dict(s_output_file)}
-        return result
-
-    def solve(self):
-        self.build_input_file(self.parameters)
-        self.execute(self.s_cygwin_path, self.s_simulator_path, self.s_input_file)
-        self.result = self.load_output(self.s_output_file)
