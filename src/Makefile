@@ -35,7 +35,6 @@ build: $(APP)
 debug: $(APP)-g
 
 $(APP): $(OBJECTS) $(ITENSOR_LIBS)
-	echo Hi
 	$(CCCOM) $(CCFLAGS) $(OBJECTS) -o $(APP) $(LIBFLAGS)
 
 $(APP)-g: mkdebugdir $(GOBJECTS) $(ITENSOR_GLIBS)

@@ -1,3 +1,11 @@
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
 from MPO_Lindblad_solver.MPOLindbladSolver import MPOLindbladSolver
 
 import numpy as np
@@ -449,7 +457,7 @@ class MPOLindbladSolverTestArgs(unittest.TestCase):
         input_dict['cut_off_rho'] = 1e-11
         input_dict['b_force_rho_trace'] = False
         input_dict['b_force_rho_hermitian'] = True
-        input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+        input_dict['save_state_file_prefix'] = "C:\\output_of_my_simulation"
         input_dict['1q_components'] = ["x", "y", "z"]
         input_dict['1q_indices'] = [1, 3, 4]
         input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
@@ -499,7 +507,7 @@ class MPOLindbladSolverTestArgs(unittest.TestCase):
         input_dict['b_force_rho_trace'] = "False"  # this should fail
         input_dict['b_force_rho_hermitian'] = True
         input_dict['output_step'] = 0.6  # this should fail
-        input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+        input_dict['save_state_file_prefix'] = "C:\\output_of_my_simulation"
         input_dict['1q_components'] = ["x", "y", "j"]  # this should fail
         input_dict['1q_indices'] = [1, 3, 5]
         input_dict['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]  # this should fail
@@ -548,7 +556,7 @@ class MPOLindbladSolverTestArgs(unittest.TestCase):
         input_dict['b_force_rho_trace'] = "False"
         input_dict['b_force_rho_hermitian'] = 222
         input_dict['output_step'] = 0.6
-        input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+        input_dict['save_state_file_prefix'] = "C:\\output_of_my_simulation"
         input_dict['1q_components'] = ["x", "y", "j"]
         input_dict['1q_indices'] = [1, 3, 1, 5, 1]
         input_dict['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]
@@ -599,7 +607,7 @@ class MPOLindbladSolverTestArgs(unittest.TestCase):
         input_dict['b_force_rho_trace'] = False
         input_dict['b_force_rho_hermitian'] = True
         input_dict['output_step'] = 1
-        input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+        input_dict['save_state_file_prefix'] = "C:\\output_of_my_simulation"
         input_dict['1q_components'] = ["x", "y", "z"]
         input_dict['1q_indices'] = [1, 3, 2]
         input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
@@ -649,7 +657,7 @@ class MPOLindbladSolverTestArgs(unittest.TestCase):
         input_dict['b_force_rho_trace'] = False
         input_dict['b_force_rho_hermitian'] = True
         input_dict['output_step'] = 1
-        input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+        input_dict['save_state_file_prefix'] = "C:\\output_of_my_simulation"
         input_dict['1q_components'] = ["x", "y", "z"]
         input_dict['1q_indices'] = [1, 3, 99]
         input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
@@ -698,7 +706,7 @@ class MPOLindbladSolverTestArgs(unittest.TestCase):
         input_dict['b_force_rho_trace'] = False
         input_dict['b_force_rho_hermitian'] = True
         input_dict['output_step'] = 1
-        input_dict['save_state_file'] = "C:\\output_of_my_simulation"
+        input_dict['save_state_file_prefix'] = "C:\\output_of_my_simulation"
         input_dict['1q_components'] = ["x", "y", "z"]
         input_dict['1q_indices'] = [1, 2, 4]
         input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
