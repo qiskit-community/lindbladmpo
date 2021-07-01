@@ -19,10 +19,6 @@ HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h T
 #    add their full filenames here.
 CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc
 
-
-#################################################################
-#################################################################
-#################################################################
 #################################################################
 
 include $(LIBRARY_DIR)/this_dir.mk
@@ -30,30 +26,41 @@ include $(LIBRARY_DIR)/options.mk
 
 TENSOR_HEADERS=$(LIBRARY_DIR)/itensor/core.h
 
+#Directory for the executable
+EXEDIR=../bin
+
+#Directory for the .o files
+ODIR=../obj
+
+#Directory for the debug .o files
+GODIR=../debug_obj
+
 #Mappings --------------
-OBJECTS=$(patsubst %.cc,%.o, $(CCFILES))
-GOBJECTS=$(patsubst %,.debug_objs/%, $(OBJECTS))
+OBJECTS=$(patsubst %.cc,$(ODIR)/%.o, $(CCFILES))
+GOBJECTS=$(patsubst %.cc,$(GODIR)/%.o, $(CCFILES))
 
 #Rules ------------------
-%.o: %.cc $(HEADERS) $(TENSOR_HEADERS)
+$(ODIR)/%.o: %.cc $(HEADERS) $(TENSOR_HEADERS)
+	mkdir -p $(ODIR)
 	$(CCCOM) -c $(CCFLAGS) -o $@ $<
 
-.debug_objs/%.o: %.cc $(HEADERS) $(TENSOR_HEADERS)
+$(GODIR)/%.o: %.cc $(HEADERS) $(TENSOR_HEADERS)
+	mkdir -p $(GODIR)
 	$(CCCOM) -c $(CCGFLAGS) -o $@ $<
 
 #Targets -----------------
 
-build: $(APP)
-debug: $(APP)-g
+build: $(EXEDIR)/$(APP)
+debug: $(EXEDIR)/$(APP)-g
 
-$(APP): $(OBJECTS) $(ITENSOR_LIBS)
-	$(CCCOM) $(CCFLAGS) $(OBJECTS) -o $(APP) $(LIBFLAGS)
+$(EXEDIR)/$(APP): $(OBJECTS) $(ITENSOR_LIBS)
+	mkdir -p $(EXEDIR)
+	$(CCCOM) $(CCFLAGS) $(OBJECTS) -o $(EXEDIR)/$(APP) $(LIBFLAGS)
 
-$(APP)-g: mkdebugdir $(GOBJECTS) $(ITENSOR_GLIBS)
-	$(CCCOM) $(CCGFLAGS) $(GOBJECTS) -o $(APP)-g $(LIBGFLAGS)
+$(EXEDIR)/$(APP)-g: $(GOBJECTS) $(ITENSOR_GLIBS)
+	mkdir -p $(EXEDIR)
+	$(CCCOM) $(CCGFLAGS) $(GOBJECTS) -o $(EXEDIR)/$(APP)-g $(LIBGFLAGS)
 
 clean:
-	rm -fr .debug_objs *.o $(APP) $(APP)-g
+	rm -fr  $(GODIR)/*.o $(ODIR)/*.o $(EXEDIR)/$(APP)-g $(EXEDIR)/$(APP)
 
-mkdebugdir:
-	mkdir -p .debug_objs
