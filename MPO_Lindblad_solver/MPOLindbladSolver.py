@@ -10,6 +10,7 @@ import subprocess
 import uuid
 from typing import Dict
 import numpy as np
+import os
 
 
 class MPOLindbladSolver:
@@ -62,7 +63,32 @@ class MPOLindbladSolver:
         AB_indices = False
         A_bond_indices = []
         B_bond_indices = []
+        interactions = []
+        if 'J' in parameters.keys():
+            if type(parameters['J']) == np.ndarray:
+                interactions.append('J')
+        if 'J_z' in parameters.keys():
+            if type(parameters['J_z']) == np.ndarray:
+                interactions.append('J_z')
         file = open(s_input_file, "w")
+        if len(interactions) == 2:
+            if parameters['J'].shape == parameters['J_z'].shape:
+                AB_indices = True
+                for i in range(parameters['J'].shape[0]):
+                    for j in range(parameters['J'].shape[1]):
+                        if parameters['J'][i, j] != 0 or parameters['J_z'][i, j] != 0:
+                            A_bond_indices.append(i + 1)
+                            B_bond_indices.append(j + 1)
+            else:
+                print("J and J_z are not of the same size, aborting program")
+                raise
+        elif len(interactions) == 1:
+            AB_indices = True
+            for i in range(parameters[interactions[0]].shape[0]):
+                for j in range(parameters[interactions[0]].shape[1]):
+                    if parameters[interactions[0]][i, j] != 0:
+                        A_bond_indices.append(i + 1)
+                        B_bond_indices.append(j + 1)
         for key in parameters.keys():
             if key == "input_file_prefix" or key == "b_unique_id":
                 pass
@@ -73,16 +99,13 @@ class MPOLindbladSolver:
             elif key == 'J' or key == 'J_z':
                 # check if to create bond indices arrays
                 if type(parameters[key]) == np.ndarray:
-                    AB_indices = True
+                    not_first_value = False
                     file.write(key + " = ")
-                    for i in range(parameters[key].shape[0]):
-                        for j in range(parameters[key].shape[1]):
-                            if parameters[key][i, j] != 0:
-                                A_bond_indices.append(i + 1)
-                                B_bond_indices.append(j + 1)
-                                file.write(str(parameters[key][i, j]))
-                                if (i + 1, j + 1) != parameters[key].shape:
-                                    file.write(",")
+                    for i in range(len(A_bond_indices)):
+                        if not_first_value:
+                            file.write(",")
+                        file.write(str(parameters[key][A_bond_indices[i] - 1, B_bond_indices[i] - 1]))
+                        not_first_value = True
                     file.write("\n")
             elif type(parameters[key]) == np.ndarray:
                 file.write(key + " = ")
@@ -96,18 +119,20 @@ class MPOLindbladSolver:
         if AB_indices:
             file.write("A_bond_indices = " + str(A_bond_indices).strip("[]") + "\n")
             file.write("B_bond_indices = " + str(B_bond_indices).strip("[]") + "\n")
+        s_input_file = os.path.abspath(file.name).replace("\\","/")
         file.close()
         return s_input_file, s_output_file
 
     @staticmethod
-    def execute(s_cygwin_path: str, s_simulator_path: str, s_input_file=""):
+    def execute(s_cygwin_path: str, s_simulator_path: str, s_input_file="") -> int:
         """ Execute the C++ simulator
         Args:
-            s_cygwin_path (string): the address of the cygwin bash terminal execution
-            s_simulator_path (string): the address of the simulator .exe
-            s_input_file (string): input file location and name, if empty then the simulator is running on default values
+            s_cygwin_path : the address of the cygwin bash terminal execution
+            s_simulator_path : the address of the simulator .exe
+            s_input_file : input file location and name, if empty then the simulator is running on default values
 
         Returns:
+            exit code : the exit code of the solver
 		"""
         if s_cygwin_path:
             # call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
@@ -123,6 +148,7 @@ class MPOLindbladSolver:
         process = subprocess.Popen(call_string)
         exit_code = process.wait()
         print(f"Solver process terminated with exit code {exit_code}")
+        return exit_code
 
     @staticmethod
     def load_output(s_output_file: str):
@@ -131,9 +157,17 @@ class MPOLindbladSolver:
         return result
 
     def solve(self):
-        self.s_input_file, self.s_output_file = self.build_input_file(self.parameters)
-        self.execute(self.s_cygwin_path, self.s_simulator_path, self.s_input_file)
+        try:
+            self.s_input_file, self.s_output_file = self.build_input_file(self.parameters)
+        except:
+            print("there was an error with creating the file, aborting program")
+            raise
+        exit_code = self.execute(self.s_cygwin_path, self.s_simulator_path, self.s_input_file)
+        if exit_code != 0:
+            print("there was an error with the execution, aborting program")
+            raise
         self.result = self.load_output(self.s_output_file)
+
 
     @staticmethod
     def _read_1q_output_into_dict(filename: str) -> Dict:
