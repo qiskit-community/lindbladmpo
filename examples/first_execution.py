@@ -20,6 +20,7 @@ b_plaquette = True
 # s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/lindbladmpo/bin/lindblad.exe"
 s_path = "./output/"
 s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/lindbladmpo/bin/lindblad.exe"
+s_cygwin_path = "C:/cygwin64/bin/bash.exe"
 b_save_figures = True
 fontsize = 22
 
@@ -65,7 +66,7 @@ solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 100, 'N': n_qubi
 				 'init_Pauli_state': '+x',
 				 'input_file_prefix': s_path, 'output_file_prefix': s_path + "MPO"}
 # initialize class - parameters, cygwin_path, simulator_path
-solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
+solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_executable)
 
 # execute simulator
 solver.solve()
