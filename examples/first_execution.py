@@ -17,9 +17,9 @@ from lindbladmpo.temp_gate_map import *
 n_qubits = 8
 b_plaquette = True
 # s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
-# s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
+# s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/lindbladmpo/bin/lindblad.exe"
 s_path = "C:/temp/"
-s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/MPO-Lindblad-solver/src/lindblad.exe"
+s_executable = "/cygdrive/c/Users/HaggaiLanda/gitprojects/lindbladmpo/bin/lindblad.exe"
 b_save_figures = True
 fontsize = 22
 
@@ -30,7 +30,7 @@ h_y = 0. * np.random.randn(n_qubits)
 h_z = 0. * np.random.randn(n_qubits)
 g_1 = (.1 * np.random.rand(n_qubits)).tolist()
 J = 1
-t_final = .5
+t_final = 5
 tau = .05
 
 mpl_data = {}
@@ -60,8 +60,9 @@ else:
 	l_y = 1
 
 # create the parameters dictionary
-solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 60, 'N': n_qubits, 'b_unique_id': False,
+solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 100, 'N': n_qubits, 'b_unique_id': False,
 				 'h_x': h_x, 'h_z': h_z, 'g_1': g_1, 'J': J_param, 'l_x': l_x, 'l_y': l_y,
+				 'init_Pauli_state': '+x',
 				 'input_file_prefix': s_path, 'output_file_prefix': s_path + "MPO"}
 # initialize class - parameters, cygwin_path, simulator_path
 solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
