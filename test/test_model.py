@@ -6,7 +6,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-from MPO_Lindblad_solver.MPOLindbladSolver import MPOLindbladSolver
+from lindbladmpo.MPOLindbladSolver import MPOLindbladSolver
 import unittest
 import numpy as np
 

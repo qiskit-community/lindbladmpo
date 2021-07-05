@@ -9,11 +9,11 @@ LIBRARY_DIR=$(HOME)/itensor3
 #    set APP to 'myappname'. Running 'make' will compile the app.
 #    Running 'make debug' will make a program called 'myappname-g'
 #    which includes debugging symbols and can be used in gdb (Gnu debugger);
-APP=lindblad
+APP=lindbladmpo
 
 # 4. Add any headers your program depends on here. The make program
 #    will auto-detect if these headers have changed and recompile your app.
-HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h MyLindbladian.h mps_mpo_utils.h io_utils.h
+HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h lindbladian.h mps_mpo_utils.h io_utils.h
 
 # 5. For any additional .cc (source) files making up your project,
 #    add their full filenames here.

@@ -6,12 +6,12 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-from MPO_Lindblad_solver.MPOLindbladSolver import MPOLindbladSolver
+from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 from qiskit.visualization.gate_map import *
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from MPO_Lindblad_solver.temp_gate_map import *
+from lindbladmpo.temp_gate_map import *
 
 # Simulation parameters
 n_qubits = 8
@@ -64,7 +64,7 @@ solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 60, 'N': n_qubit
 				 'h_x': h_x, 'h_z': h_z, 'g_1': g_1, 'J': J_param, 'l_x': l_x, 'l_y': l_y,
 				 'input_file_prefix': s_path, 'output_file_prefix': s_path + "MPO"}
 # initialize class - parameters, cygwin_path, simulator_path
-solver = MPOLindbladSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
+solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
 
 # execute simulator
 solver.solve()

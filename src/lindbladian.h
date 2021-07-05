@@ -10,8 +10,8 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-#ifndef _MYLINDBLADIAN_
-#define _MYLINDBLADIAN_
+#ifndef _LINDBLADIAN_
+#define _LINDBLADIAN_
 
 using namespace itensor;
 using namespace std;

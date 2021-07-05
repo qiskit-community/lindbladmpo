@@ -6,7 +6,7 @@
 #include "SimpleSquareLattice.h"
 #include "TimeEvolution.h"
 #include "ModelParameters.h"
-#include "MyLindbladian.h"
+#include "lindbladian.h"
 using namespace itensor;
 using namespace std;
 
