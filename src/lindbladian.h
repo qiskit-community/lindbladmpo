@@ -108,7 +108,7 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         }
 
         //Magnetic field terms:
-        for (int j = 1; j <= N; ++j)
+        for (int j = 1; j <= int(N); ++j)
         {
             if (h_x[j - 1] != 0.)
             {
@@ -144,8 +144,8 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         g_2 = vector<double>(N, g_2[0]);
     // OLD: const double gamma = param.val("gamma");
     // cout << "Strength of the Lindblad terms, gamma=" << gamma << endl;
- 
-    for (int i = 1; i <= N; i++)
+
+    for (int i = 1; i <= int(N); i++)
         // AddSingleSpinBath:
         // The first argument is the rate of dissipative processes where a spin goes from down to up
         // The second argument is the rate of dissipative processes where a spin goes from up to down
