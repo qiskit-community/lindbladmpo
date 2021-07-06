@@ -5,9 +5,7 @@
 
 This code simulates the time-evolution of a quantum system made of interacting/coupled two-level systems (qubits)
 
-The dynamics is determined by:
-    - Some Hamiltonian, which corresponds to the unitary part of the time-evolution.
-    - Some dissipative terms, which take into account the fact that the system is coupled to an environment.
+The dynamics is determined by: (1) A Hamiltonian, which corresponds to the unitary part of the time-evolution, and (2) Dissipative terms, which take into account the fact that the system is coupled to an environment.
 The two types of terms above enter in a so-called *Lindblad equation* that determines the evolution of the density matrix of the system.
 At any given time the state of the system is defined by a (many-body) *density matrix*. Since we have N qubits the Hilbert space has dimension 2^N and the density matrix is 2^N by 2^N in size. In practice this is a huge dimension unless N is not very small, and it therefore prevents a direct brute-force numerical solution of the Lindblad equation.
 
