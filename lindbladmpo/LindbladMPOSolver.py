@@ -145,7 +145,7 @@ class LindbladMPOSolver:
         print("Executing solver with command:")
         print("\t" + call_string + "\n")
 
-        process = subprocess.Popen(call_string)
+        process = subprocess.Popen(call_string, shell = True)
         exit_code = process.wait()
         print(f"Solver process terminated with exit code {exit_code}")
         return exit_code

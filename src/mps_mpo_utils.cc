@@ -28,15 +28,14 @@ double Entropy(MPS psi, int i) //returns the von Neumann entropy on some bond (i
   auto spectrum = svd(wf,U,S,V,{"MaxDim",bond_dim});
   Real SvN = 0.;
   Real sum=0;
-  cout<<"\tSingular value decomp.:"<<endl;
-  cout<<"\t\tdim="<<spectrum.numEigsKept()<<endl;
+  cout<<"\tSingular value decomposition: dim="<<spectrum.numEigsKept()<<endl;
   cout<<"\t\tLargest sing. val:"<<spectrum.eig(1);
-  cout<<"\tSmallest sing. val:"<<spectrum.eig(spectrum.numEigsKept())<<endl;
+  cout<<",\tsmallest sing. val:"<<spectrum.eig(spectrum.numEigsKept());
   for(auto p : spectrum.eigs()) {
     sum+=p;
     SvN += -p*log(p);
   }
-  cout<<"\t\tsum ="<<sum<<endl;
+  cout<<",\tsum ="<<sum<<endl;
   return SvN;
 }
 //____________________________________________________________________

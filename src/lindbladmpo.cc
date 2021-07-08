@@ -292,10 +292,10 @@ int main(int argc, char *argv[])
   for (auto &s : components)
   {
     if (s.length() != 1)
-      cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+      cerr << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
     char c = toupper(s[0]);
     if (c != 'X' && c != 'Y' && c != 'Z')
-      cerr << "Error: " << s << " is an unknown 1-qbit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+      cerr << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
   }
   vector<long> sit = param.longvec("1q_sites");
   if (sit.size() == 0)
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
   for (auto &s : components2)
   {
     if (s.length() != 2)
-      cerr << "Error: " << s << " is an unknown 2-qbit component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
+      cerr << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
     for (int n = 0; n <= 1; n++)
     {
       char c = toupper(s[n]);
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
         file_ent << t << " \t" << S_2 << " \t" << osee << " \t" << bd << " \t" << bd_max << endl;
         //-----------------------------------------------------------------------------------------
         { //compute the 1-q  observables and write them to file_1q
-          cout << "\n\tObservables:";
+          cout << "\tObservables:";
           int count = 0;
 
           for (long &i : sit)
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
             }
             file_1q << endl;
           }
-          cout << "\n\t" << count << " 1-qubit expectation values have been computed and written in to a file.";
+          cout << "\n\t\t" << count << " 1-qubit expectation values have been computed and written to a file.";
           file_1q << endl; //Skip a line between each time step
           file_1q.flush();
         }
@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
               count++;
             }
           }
-          cout << "\n\t" << count << " 2-qubit expectation values (correlations) have been computed and written to a file.\n";
+          cout << "\n\t\t" << count << " 2-qubit expectation values (correlations) have been computed and written to a file.\n";
           file_2q << endl; //Skip a line between each time step
           file_2q.flush();
         }
