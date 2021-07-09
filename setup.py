@@ -21,7 +21,7 @@ if s_system == 'windows':
 	s_executable = 'lindbladmpo.exe'
 	print('Note: Automatic building of the solver executable is not currently supported on Windows.\n'
 		  '\tPlease follow the installation guide in the pacakge directory for instructions regarding\n'
-		  '\tlocall installation of cygwin, and building the solver from source.')
+		  '\tlocal installation of cygwin, and building the solver from source.')
 else:
 	s_executable = 'lindbladmpo'
 	process = subprocess.Popen('make -C ./src/', shell=True)
