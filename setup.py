@@ -18,12 +18,15 @@ with open('requirements') as f:
 
 s_system = platform.system().lower()
 if s_system == 'windows':
-	raise Exception('Automatic building of the package is not currently supported on Windows OS.'
-					'Please follow the installation guide in the root directory for building instructions.')
-
-process = subprocess.Popen('make -C ./src/', shell=True)
-exit_code = process.wait()
-process = subprocess.Popen('cp ./bin/lindbladmpo ./lindbladmpo/lindbladmpo', shell=True)
+	s_executable = 'lindbladmpo.exe'
+	print('Note: Automatic building of the solver executable is not currently supported on Windows.\n'
+		  '\tPlease follow the installation guide in the pacakge directory for instructions regarding\n'
+		  '\tlocall installation of cygwin, and building the solver from source.')
+else:
+	s_executable = 'lindbladmpo.exe'
+	process = subprocess.Popen('make -C ./src/', shell=True)
+	exit_code = process.wait()
+	process = subprocess.Popen(f'cp ./bin/{s_executable} ./lindbladmpo/{s_executable}', shell=True)
 
 # Read long description from README.
 README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
