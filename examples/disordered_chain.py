@@ -22,9 +22,10 @@ if s_system == 'windows':
 	s_solver_path = s_solver_path.replace(':', '')
 	s_solver_path = s_solver_path.replace('\\', '/')
 	s_solver_path = "/cygdrive/" + s_solver_path
+	s_solver_path += '/../bin/lindbladmpo.exe'
 else:
 	s_cygwin_path = ''
-s_solver_path += '/../bin/lindbladmpo.exe'
+	s_solver_path += '/../bin/lindbladmpo'
 
 s_path = os.path.abspath('./output') + '/'
 if not os.path.exists(s_path):
