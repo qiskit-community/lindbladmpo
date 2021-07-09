@@ -43,8 +43,8 @@ setup(
 	long_description=README,
 	long_description_content_type='text/markdown',
 	url="https://github.com/haggaila/lindbladmpo",
-	author="Gregoire Misguich",
-	author_email="gregoire.misguich@ipht.fr",
+	author="Gregoire Misguich, Haggai Landa, Gal Shmulovitz, Eldor Fadida",
+	# author_email="",
 	license="Apache 2.0",
 	classifiers=[
 		"Environment :: Console",
