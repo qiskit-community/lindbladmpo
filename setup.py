@@ -23,7 +23,7 @@ if s_system == 'windows':
 		  '\tPlease follow the installation guide in the pacakge directory for instructions regarding\n'
 		  '\tlocall installation of cygwin, and building the solver from source.')
 else:
-	s_executable = 'lindbladmpo.exe'
+	s_executable = 'lindbladmpo'
 	process = subprocess.Popen('make -C ./src/', shell=True)
 	exit_code = process.wait()
 	process = subprocess.Popen(f'cp ./bin/{s_executable} ./lindbladmpo/{s_executable}', shell=True)
