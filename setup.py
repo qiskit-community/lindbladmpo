@@ -13,19 +13,17 @@ import subprocess
 
 from setuptools import setup, find_packages, Extension
 
-# with open('requirements.txt') as f:
-# 	REQUIREMENTS = f.read().splitlines()
-REQUIREMENTS = 'itensor=3'
+with open('requirements') as f:
+	REQUIREMENTS = f.read().splitlines()
 
 s_system = platform.system().lower()
 if s_system == 'windows':
 	raise Exception('Automatic building of the package is not currently supported on Windows OS.'
 					'Please follow the installation guide in the root directory for building instructions.')
 
-call_string = './src/make'
-process = subprocess.Popen(call_string, shell = True)
+process = subprocess.Popen('make -C ./src/', shell=True)
 exit_code = process.wait()
-print(f"Make process terminated with exit code {exit_code}")
+process = subprocess.Popen('cp ./bin/lindbladmpo ./lindbladmpo/lindbladmpo', shell=True)
 
 # Read long description from README.
 README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
