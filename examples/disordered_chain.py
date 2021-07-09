@@ -9,7 +9,7 @@
 import platform
 
 from lindbladmpo.LindbladMPOSolver import *
-from lindbladmpo.solver_routines import *
+from lindbladmpo.plot_routines import *
 
 s_solver_path = os.path.dirname(os.path.abspath(__file__))
 s_system = platform.system().lower()
@@ -23,35 +23,33 @@ if s_system == 'windows':
 	s_solver_path = s_solver_path.replace('\\', '/')
 	s_solver_path = "/cygdrive/" + s_solver_path
 else:
-	s_cygwin_path = ""
-s_solver_path += "/../bin/lindbladmpo.exe"
+	s_cygwin_path = ''
+s_solver_path += '/../bin/lindbladmpo.exe'
 
-s_path = "./output/"
+s_path = os.path.abspath('./output') + '/'
 if not os.path.exists(s_path):
 	os.mkdir(s_path)
 
 # Simulation parameters
 n_qubits = 8
-b_plaquette = True
 b_save_figures = True
 fontsize = 22
 
 h_x = 0. * np.random.randn(n_qubits)
-h_x[int(n_qubits / 2)] = 5.
+h_x[int(n_qubits / 2)] = .5
 h_y = 0. * np.random.randn(n_qubits)
 
 h_z = 0. * np.random.randn(n_qubits)
 g_1 = (.1 * np.random.rand(n_qubits)).tolist()
 J = 1
-t_final = 1
+t_final = 5
 tau = .05
 
 # Create the parameters dictionary
-s_file_prefix = f"Disordered chain, N = {n_qubits}"
+s_file_prefix = f"Disordered_chain,N={n_qubits}"
 
-solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 100, 'N': n_qubits, 'b_unique_id': False,
+solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 80, 'N': n_qubits, 'b_unique_id': False,
 				 'h_x': h_x, 'h_z': h_z, 'g_1': g_1, 'J': J, 'l_x': n_qubits, 'l_y': 1,
-				 'init_Pauli_state': '+x',
 				 'input_file_prefix': s_path, 'output_file_prefix': s_path + s_file_prefix}
 # Initialize class arguments - the parameters, cygwin path, and MPO executable path
 solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
@@ -60,5 +58,5 @@ solver.solve()
 # Prepare plot data
 data, t_steps, t_ticks, qubits = prepare_plot_data(solver)
 # And plot one figure. By default it will be saved to a file.
-plot_space_time(data, t_steps, t_ticks, qubits, s_path + s_file_prefix)
+plot_space_time(data, t_steps, t_ticks, qubits, fontsize = fontsize, s_file_prefix = s_path + s_file_prefix)
 plt.show()

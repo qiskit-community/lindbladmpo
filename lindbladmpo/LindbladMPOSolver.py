@@ -93,20 +93,19 @@ class LindbladMPOSolver:
             if key == "input_file_prefix" or key == "b_unique_id":
                 pass
             elif key == "output_file_prefix":
-                file.write(key + " = " + s_output_file + "\n")
+                file.write(key + ' = ' + s_output_file + "\n")
             elif key == "save_state_file_prefix":
                 file.write(key + " = " + s_save_file + "\n")
-            elif key == 'J' or key == 'J_z':
+            elif (key == 'J' or key == 'J_z') and type(parameters[key]) == np.ndarray and len(parameters[key]) > 1:
                 # check if to create bond indices arrays
-                if type(parameters[key]) == np.ndarray:
-                    not_first_value = False
-                    file.write(key + " = ")
-                    for i in range(len(A_bond_indices)):
-                        if not_first_value:
-                            file.write(",")
-                        file.write(str(parameters[key][A_bond_indices[i] - 1, B_bond_indices[i] - 1]))
-                        not_first_value = True
-                    file.write("\n")
+                not_first_value = False
+                file.write(key + " = ")
+                for i in range(len(A_bond_indices)):
+                    if not_first_value:
+                        file.write(",")
+                    file.write(str(parameters[key][A_bond_indices[i] - 1, B_bond_indices[i] - 1]))
+                    not_first_value = True
+                file.write("\n")
             elif type(parameters[key]) == np.ndarray:
                 file.write(key + " = ")
                 for i in range(parameters[key].shape[0]):

@@ -1,6 +1,6 @@
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 
