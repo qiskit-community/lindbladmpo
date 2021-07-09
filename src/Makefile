@@ -1,22 +1,23 @@
-# 1. Put this file in the same folder as your 'driver' code 
-#    (the code containing the 'main' function).
+#	Edit LIBRARY_DIR to point at the location of your ITensor library
+#   source folder (this is the folder that has options.mk in it, and where
+#	this_dir.mk is created after itensor is built using make).
+#	The value below is used unless make is invoked with a command line
+#	argument of the form: make LIBRARY_DIR=" ... ".
+ifeq ($(LIBRARY_DIR),)
+LIBRARY_DIR=../../itensor3
+endif
 
-# 2. Edit LIBRARY_DIR to point at the location of your ITensor Library
-#    source folder (this is the folder that has options.mk in it)
-LIBRARY_DIR=$(HOME)/itensor3
-
-# 3. If your 'main' function is in a file called 'myappname.cc', then
-#    set APP to 'myappname'. Running 'make' will compile the app.
-#    Running 'make debug' will make a program called 'myappname-g'
-#    which includes debugging symbols and can be used in gdb (Gnu debugger);
+#	Running 'make' will compile the solver executable and name it to the
+#   value of the variable APP (here, it's lindbladmpo).
+#	Running 'make debug' will make a program called 'lindbladmpo-g',
+#   which includes debugging symbols and can be used in gdb (Gnu debugger);
 APP=lindbladmpo
 
-# 4. Add any headers your program depends on here. The make program
-#    will auto-detect if these headers have changed and recompile your app.
+#	Header files that solver depends on here. The make program
+#	will auto-detect if these headers have changed and recompile if necessary.
 HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h lindbladian.h mps_mpo_utils.h io_utils.h
 
-# 5. For any additional .cc (source) files making up your project,
-#    add their full filenames here.
+#	Additional .cc (source) files.
 CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc
 
 #################################################################
