@@ -25,7 +25,7 @@ SH_N = 10
 # Fail tests (trying to fail on purpose) should use assertNotEqual to ""
 # Pass tests (trying to pass on purpose) should use assertEqual    to ""
 
-class LindbladMPOSolverTestArgs(unittest.TestCase):
+class LindbladMPOSolverTestArguments(unittest.TestCase):
 	def test_arg_N_F1(self):
 		input_dict = {'N': "5", 't_final': SH_T_FINAL, 'tau': SH_TAU}
 		expected = ""
@@ -468,7 +468,6 @@ class LindbladMPOSolverTestArgs(unittest.TestCase):
 			self.assertTrue(True)       # print("Check 1 Passed")
 		else:
 			self.assertTrue(False)       # print("Check 1 Failed")
-
 
 	def test_arg_2(self):
 		input_dict = {}

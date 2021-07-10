@@ -6,30 +6,12 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import platform
-
 from lindbladmpo.LindbladMPOSolver import *
 from lindbladmpo.plot_routines import *
 
-s_solver_path = os.path.dirname(os.path.abspath(__file__))
-s_system = platform.system().lower()
-if s_system == 'windows':
-	# On Windows we execute the solver using the cygwin bash. Change the following variable if necessary.
-	s_cygwin_path = "C:/cygwin64/bin/bash.exe"
-
-	# s_solver_path should be of the form "/cygdrive/c/ ... ", and we use below a path relative
-	# to the current file's path in the package
-	s_solver_path = s_solver_path.replace(':', '')
-	s_solver_path = s_solver_path.replace('\\', '/')
-	s_solver_path = "/cygdrive/" + s_solver_path
-	s_solver_path += '/../bin/lindbladmpo.exe'
-else:
-	s_cygwin_path = ''
-	s_solver_path += '/../bin/lindbladmpo'
-
-s_path = os.path.abspath('./output') + '/'
-if not os.path.exists(s_path):
-	os.mkdir(s_path)
+s_output_path = os.path.abspath('./output') + '/'
+if not os.path.exists(s_output_path):
+	os.mkdir(s_output_path)
 
 # Simulation parameters
 n_qubits = 8
@@ -51,13 +33,15 @@ s_file_prefix = f"Disordered_chain,N={n_qubits}"
 
 solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 80, 'N': n_qubits, 'b_unique_id': False,
 				 'h_x': h_x, 'h_z': h_z, 'g_1': g_1, 'J': J, 'l_x': n_qubits, 'l_y': 1,
-				 'input_file_prefix': s_path, 'output_file_prefix': s_path + s_file_prefix}
+				 'input_file_prefix': s_output_path, 'output_file_prefix': s_output_path + s_file_prefix}
 # Initialize class arguments - the parameters, cygwin path, and MPO executable path
+s_cygwin_path = None
+s_solver_path = None
 solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 # Execute simulator
 solver.solve()
 # Prepare plot data
 data, t_steps, t_ticks, qubits = prepare_plot_data(solver)
 # And plot one figure. By default it will be saved to a file.
-plot_space_time(data, t_steps, t_ticks, qubits, fontsize = fontsize, s_file_prefix = s_path + s_file_prefix)
+plot_space_time(data, t_steps, t_ticks, qubits, fontsize = fontsize, s_file_prefix = s_output_path + s_file_prefix)
 plt.show()

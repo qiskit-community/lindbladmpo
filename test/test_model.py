@@ -10,16 +10,17 @@ from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 import unittest
 import numpy as np
 
-s_path = "C:/Users/galvz/PycharmProjects/sim_func/"
-s_executable = "/cygdrive/c/Users/galvz/AppData/Roaming/SPB_Data/Lindbladian-MPO-simulator/lindblad.exe"
+s_output_path = "./"
+s_cygwin_path = None
+s_solver_path = None
 
 
-class TestModel(unittest.TestCase):
+class LindbladMPOSolverModel(unittest.TestCase):
 	def test_All_zero(self):
 		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 0,
-						 'input_file_prefix': s_path + "MPO.input",
-						 'output_file_prefix': s_path + "MPO"}
-		solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
+						 'input_file_prefix': s_output_path + "input.txt",
+						 'output_file_prefix': s_output_path + "MPO"}
+		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
 		expected_Z = 1
@@ -27,12 +28,11 @@ class TestModel(unittest.TestCase):
 		self.assertEqual(solver.result['1q'][(1, 'Y', 1)], expected_XY)
 		self.assertEqual(solver.result['1q'][(1, 'Z', 1)], expected_Z)
 
-
 	def test_hz_not_zero(self):
 		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 0, 'l_x': 0, 'h_z': 5,
-						 'input_file_prefix': s_path + "MPO.input",
-						 'output_file_prefix': s_path + "MPO"}
-		solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
+						 'input_file_prefix': s_output_path + "MPO.input",
+						 'output_file_prefix': s_output_path + "MPO"}
+		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
 		expected_Z = 1
@@ -42,9 +42,9 @@ class TestModel(unittest.TestCase):
 
 	def test_steady_state(self):
 		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 5, 'l_x': 0, 'h_z': 5,
-						 'input_file_prefix': s_path + "MPO.input",
-						 'output_file_prefix': s_path + "MPO"}
-		solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
+						 'input_file_prefix': s_output_path + "MPO.input",
+						 'output_file_prefix': s_output_path + "MPO"}
+		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
 		expected_Z = 1
@@ -54,9 +54,9 @@ class TestModel(unittest.TestCase):
 
 	def test_steady_state_2(self):
 		solver_params = {'tau': 1, 't_final': 10, 'N': 1, 'g_1': 5, 'g_0': 1, 'l_x': 0, 'h_z': 5,
-						 'input_file_prefix': s_path + "MPO.input",
-						 'output_file_prefix': s_path + "MPO"}
-		solver = LindbladMPOSolver(solver_params, "C:/cygwin64/bin/bash.exe", s_executable)
+						 'input_file_prefix': s_output_path + "MPO.input",
+						 'output_file_prefix': s_output_path + "MPO"}
+		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
 		expected_Z = 4/6

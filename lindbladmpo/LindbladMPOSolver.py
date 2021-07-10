@@ -10,17 +10,62 @@ import subprocess
 import uuid
 from typing import Dict
 import numpy as np
+import platform
 import os
 
 
 class LindbladMPOSolver:
-	def __init__(self, parameters, s_cygwin_path, s_simulator_path):
+	def __init__(self, parameters, s_cygwin_path = None, s_solver_path = None):
 		self.parameters = parameters
 		self.s_input_file = ''
 		self.s_output_file = ''
+		s_cygwin_path, s_solver_path = self.process_default_paths(s_cygwin_path, s_solver_path)
 		self.s_cygwin_path = s_cygwin_path
-		self.s_simulator_path = s_simulator_path
+		self.s_solver_path = s_solver_path
 		self.result = {}
+
+	def solve(self):
+		try:
+			self.s_input_file, self.s_output_file = self.build_input_file(self.parameters)
+		except:
+			raise Exception("There was an error creating the input file, aborting program")
+		exit_code = self.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
+		if exit_code != 0:
+			raise Exception("There was an error executing the solver, aborting program.")
+		self.result = self.load_output(self.s_output_file)
+
+	@staticmethod
+	def process_default_paths(s_cygwin_path = None, s_solver_path = None) -> (str, str):
+		""" Returns the proper default values for the cygwin path and solver path according to the system
+			platform, for each of those parameter that is None, otherwise the parameter is returned unchanged.
+		Args:
+			s_cygwin_path: the path for the cygwin executable (on Windows).
+			s_solver_path: the path for the solver executable.
+		Returns:
+			(s_cygwin_path, s_solver_path): Default values for the cygwin path and solver path according to
+			the system platform.
+		"""
+		if s_cygwin_path is None or s_solver_path is None:
+			s_solver_path1 = os.path.dirname(os.path.abspath(__file__))
+			s_system = platform.system().lower()
+			if s_system == 'windows':
+				# On Windows we execute the solver using the cygwin bash. The default path is the following.
+				s_cygwin_path1 = "C:/cygwin64/bin/bash.exe"
+
+				# s_solver_path should be of the form "/cygdrive/c/ ... ", and we use below a path relative
+				# to the current file's path in the package
+				s_solver_path1 = s_solver_path1.replace(':', '')
+				s_solver_path1 = s_solver_path1.replace('\\', '/')
+				s_solver_path1 = "/cygdrive/" + s_solver_path1
+				s_solver_path1 += '/../bin/lindbladmpo.exe'
+			else:
+				s_cygwin_path1 = ''
+				s_solver_path1 += '/../bin/lindbladmpo'
+			if s_cygwin_path is None:
+				s_cygwin_path = s_cygwin_path1
+			if s_solver_path is None:
+				s_solver_path = s_solver_path1
+		return s_cygwin_path, s_solver_path
 
 	@staticmethod
 	def build_input_file(parameters: Dict) -> (str, str):
@@ -35,7 +80,6 @@ class LindbladMPOSolver:
 		check_output = LindbladMPOSolver._check_argument_correctness(parameters)
 		# check if there is a problem with the input, if "" returned there is no problem
 		if check_output != "":
-			print(check_output)
 			raise Exception(check_output)
 		# check if the user defined an input file name
 		s_input_file = parameters.get("input_file_prefix", "")
@@ -80,8 +124,7 @@ class LindbladMPOSolver:
 							A_bond_indices.append(i + 1)
 							B_bond_indices.append(j + 1)
 			else:
-				print("J and J_z are not of the same size, aborting program")
-				raise
+				raise Exception("J and J_z are not of the same size, aborting program.")
 		elif len(interactions) == 1:
 			AB_indices = True
 			for i in range(parameters[interactions[0]].shape[0]):
@@ -123,22 +166,22 @@ class LindbladMPOSolver:
 		return s_input_file, s_output_file
 
 	@staticmethod
-	def execute(s_cygwin_path: str, s_simulator_path: str, s_input_file="") -> int:
-		""" Execute the C++ simulator
+	def execute(s_cygwin_path = None, s_solver_path = None, s_input_file = "") -> int:
+		""" Execute the C++ solver
 		Args:
-			s_cygwin_path : the address of the cygwin bash terminal execution
-			s_simulator_path : the address of the simulator .exe
-			s_input_file : input file location and name, if empty then the simulator is running on default values
+			s_cygwin_path : the path of the cygwin bash terminal execution
+			s_solver_path : the path of the simulator executable
+			s_input_file : input file path, if empty then the simulator is run using default values.
 
 		Returns:
-			exit code : the exit code of the solver
+			exit code : the exit code of the solver.
 		"""
+		s_cygwin_path, s_solver_path = LindbladMPOSolver.process_default_paths(s_cygwin_path, s_solver_path)
 		if s_cygwin_path:
-			# call_string = 'cmd /k ' + s_cygwin_path + " --login -i -c \""
 			call_string = s_cygwin_path + " --login -c \""
 		else:
 			call_string = ''
-		call_string += s_simulator_path
+		call_string += s_solver_path
 		if s_input_file:
 			call_string += " input_file " + str(s_input_file)
 		print("Executing solver with command:")
@@ -154,19 +197,6 @@ class LindbladMPOSolver:
 		result = {'1q': LindbladMPOSolver._read_1q_output_into_dict(s_output_file),
 				  '2q': LindbladMPOSolver._read_2q_output_into_dict(s_output_file)}
 		return result
-
-	def solve(self):
-		try:
-			self.s_input_file, self.s_output_file = self.build_input_file(self.parameters)
-		except:
-			print("there was an error with creating the file, aborting program")
-			raise
-		exit_code = self.execute(self.s_cygwin_path, self.s_simulator_path, self.s_input_file)
-		if exit_code != 0:
-			print("there was an error with the execution, aborting program")
-			raise
-		self.result = self.load_output(self.s_output_file)
-
 
 	@staticmethod
 	def _read_1q_output_into_dict(filename: str) -> Dict:
