@@ -19,16 +19,20 @@
 #include "TimeEvolution.h"
 #include "ModelParameters.h"
 #include "lindbladian.h"
+#include<chrono>
 using namespace itensor;
 using namespace std;
+using namespace std::chrono;
 
 #define UNDEFINED_VAL 9999
 
 //_____________________________________________________
 int main(int argc, char *argv[])
 {
-
   ModelParameters param;
+
+  //Start tracking simulation time
+  auto start_sim = high_resolution_clock::now();
 
   //Read some input parameters from the command line (can be empty -> default values for all parameters):
   param.ReadArguments(argc, argv);
@@ -136,7 +140,7 @@ int main(int argc, char *argv[])
 		auto initState = InitState(C.sites);
 		for (int i = 1; i <= N; ++i) // Start with all spins up
 		initState.set(i, "Up");
-    psi = MPS(initState);
+		psi = MPS(initState);
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
@@ -188,7 +192,7 @@ int main(int argc, char *argv[])
             cout << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << endl;
           }
         }
-    psi.orthogonalize(Args("Cutoff", 1e-6, "MaxDim", 1));
+		psi.orthogonalize(Args("Cutoff", 1e-6, "MaxDim", 1));
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
@@ -366,15 +370,29 @@ int main(int argc, char *argv[])
   file_ent.precision(15);
   //-----------------------------------------------------
   const int obs = param.longval("output_step");
+  auto start_evolve = high_resolution_clock::now();
+  auto duration = duration_cast<milliseconds>(start_evolve - start_sim);
+  cout << "\nSimulation duration so far: " << duration.count() / 1000. << "s" << endl;
+  auto prev_step = high_resolution_clock::now();
+  
+  char buf[100];
   for (int n = 0; n <= nt; n++)
   {
     if (obs > 0)
     {
       if ((n % obs) == 0 || n == nt)
       {
+		auto time_step = high_resolution_clock::now();
+		duration = duration_cast<milliseconds>(time_step - prev_step);
+		cout << "\nTime since previous printout: " << duration.count() / 1000. << "s";
+		auto tot_duration = duration_cast<seconds>(time_step - start_sim);
+		sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
+		cout << ".\tTotal simulation duration: " << buf << endl;
+		prev_step = time_step;
+		
         const double t = n * tau;
         //Some data about this time step
-        cout << "\ntime t=" << n * tau << "\t----------------------------\n";
+        cout << "Solution time t=" << n * tau << "\t----------------------------\n";
 
         if (param.longval("b_force_rho_Hermitian") != 0)
           C.MakeRhoHermitian(argsRho);
@@ -474,6 +492,9 @@ int main(int argc, char *argv[])
     cout << "the state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
   }
   cout << endl;
+  auto end_sim = high_resolution_clock::now();
+	auto tot_duration = duration_cast<seconds>(end_sim - start_sim);
+	cout << "Total simulation duration: " << tot_duration.count() / 3600. << "hr" << endl;
   return 0;
 }
 
