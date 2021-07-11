@@ -494,7 +494,8 @@ int main(int argc, char *argv[])
   cout << endl;
   auto end_sim = high_resolution_clock::now();
 	auto tot_duration = duration_cast<seconds>(end_sim - start_sim);
-	cout << "Total simulation duration: " << tot_duration.count() / 3600. << "hr" << endl;
+	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
+	cout << "tTotal simulation duration: " << buf << endl;
   return 0;
 }
 
