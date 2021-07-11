@@ -70,18 +70,18 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 
     if ((J_z.size() != 1 || J.size() != 1) && L.predefined)
     {
-        cerr << "Error: J_z.size()=" << J_z.size() << " and " << J.size() << " but L.predefined=" << L.predefined << ". Couplings J and Jz must be uniform in such a predefined lattice.\n", exit(1);
+        cerr << "Error: J_z.size()=" << J_z.size() << " and " << J.size() << " but L.predefined=" << L.predefined << ". Couplings J and J_z must be uniform in such a predefined lattice.\n", exit(1);
     }
 
     if (J.size() != 1 && J.size() != num_bonds)
-        cerr << "Error: the paramter J has " << J.size() << " values  but  1 or " << num_bonds << " value(s) were expected.\n", exit(1);
+        cerr << "Error: the paramter J has " << J.size() << " values but 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
     if (J.size() == 1)
     {
         J = vector<double>(num_bonds, J[0]);
     }
 
     if (J_z.size() != 1 && J_z.size() != num_bonds)
-        cerr << "Error: the paramter J has " << J_z.size() << " values  but  1 or " << num_bonds << " value(s) were expected.\n", exit(1);
+        cerr << "Error: the paramter J_z has " << J_z.size() << " values but 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
     if (J_z.size() == 1)
     {
         J_z = vector<double>(num_bonds, J_z[0]);
