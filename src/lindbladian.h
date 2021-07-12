@@ -100,11 +100,11 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
             int i = L.I[n], j = L.J[n];
             auto_L += -J[n], "S+", i, "S-", j;
             auto_L += -J[n], "S-", i, "S+", j;
-            auto_L += J_z[n], "Sz", i, "Sz", j;
+            auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
 
             auto_L += J[n], "_S+", i, "_S-", j;
             auto_L += J[n], "_S-", i, "_S+", j;
-            auto_L += -J_z[n], "_Sz", i, "_Sz", j;
+            auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
         }
 
         //Magnetic field terms:
@@ -112,18 +112,18 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         {
             if (h_x[j - 1] != 0.)
             {
-                auto_L += h_x[j - 1], "Sx", j;
-                auto_L += -h_x[j - 1], "_Sx", j;
+                auto_L += .5 * h_x[j - 1], "Sx", j;
+                auto_L += -.5 * h_x[j - 1], "_Sx", j;
             }
             if (h_y[j - 1] != 0.)
             {
-                auto_L += h_y[j - 1], "Sy", j;
-                auto_L += -h_y[j - 1], "_Sy", j;
+                auto_L += .5 * h_y[j - 1], "Sy", j;
+                auto_L += -.5 * h_y[j - 1], "_Sy", j;
             }
             if (h_z[j - 1] != 0.)
             {
-                auto_L += h_z[j - 1], "Sz", j;
-                auto_L += -h_z[j - 1], "_Sz", j;
+                auto_L += .5 * h_z[j - 1], "Sz", j;
+                auto_L += -.5 * h_z[j - 1], "_Sz", j;
             }
         }
     }

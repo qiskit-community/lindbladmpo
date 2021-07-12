@@ -18,8 +18,7 @@ s_solver_path = None
 class LindbladMPOSolverModel(unittest.TestCase):
 	def test_All_zero(self):
 		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 0,
-						 'input_file_prefix': s_output_path + "input.txt",
-						 'output_file_prefix': s_output_path + "MPO"}
+						 'output_files_prefix': s_output_path}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
@@ -30,8 +29,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
 
 	def test_hz_not_zero(self):
 		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 0, 'l_x': 0, 'h_z': 5,
-						 'input_file_prefix': s_output_path + "MPO.input",
-						 'output_file_prefix': s_output_path + "MPO"}
+						 'output_files_prefix': s_output_path}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
@@ -42,8 +40,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
 
 	def test_steady_state(self):
 		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 5, 'l_x': 0, 'h_z': 5,
-						 'input_file_prefix': s_output_path + "MPO.input",
-						 'output_file_prefix': s_output_path + "MPO"}
+						 'output_files_prefix': s_output_path}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
@@ -54,8 +51,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
 
 	def test_steady_state_2(self):
 		solver_params = {'tau': 1, 't_final': 10, 'N': 1, 'g_1': 5, 'g_0': 1, 'l_x': 0, 'h_z': 5,
-						 'input_file_prefix': s_output_path + "MPO.input",
-						 'output_file_prefix': s_output_path + "MPO"}
+						 'output_files_prefix': s_output_path}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0

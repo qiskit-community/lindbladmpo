@@ -72,16 +72,16 @@ int main(int argc, char *argv[])
   SpinHalfSystem C(N);
 
 //  if (param.stringval("load_purestate_file") != "" || param.stringval("load_state_file") != "")
-  if (param.stringval("load_state_file") != "")
+  if (param.stringval("load_files_prefix") != "")
   {
     string fname;
 //    if (param.stringval("load_purestate_file") != "")
 //      fname = param.stringval("load_purestate_file");
 //    if (param.stringval("load_state_file") != "")
-    fname = param.stringval("load_state_file");
-    fname += "_N=" + to_string(N);
-    string f1 = fname + ".ops";
-    string f3 = fname + ".sites";
+    fname = param.stringval("load_files_prefix");
+    fname += ".N=" + to_string(N);
+    string f1 = fname + ".state.ops";
+    string f3 = fname + ".state.sites";
     cout << "Opening '" << f1 << "' and '" << f3 << "'...";
     cout.flush();
     readFromFile(f3, C.sites);
@@ -116,11 +116,11 @@ int main(int argc, char *argv[])
 
   MPS psi;
   bool psi_defined = false;
-  if (param.stringval("load_state_file") != "")
+  if (param.stringval("load_files_prefix") != "")
 	{ //Read the density matrix from disk
 
-	  string fname = param.stringval("load_state_file");
-	  fname += "_N=" + to_string(N) + ".rho";
+	  string fname = param.stringval("load_files_prefix");
+	  fname += ".N=" + to_string(N) + ".state.rho";
 	  cout << "Read the initial rho from the file '" << fname << "'...";
 	  cout.flush();
 	  readFromFile(fname, C.rho);
@@ -299,10 +299,12 @@ int main(int argc, char *argv[])
   double ttotal = param.val("t_final");
   const int nt = int(ttotal / tau + (1e-9 * (ttotal / tau)));
 
-  string name = param.stringval("output_file_prefix");
-  //-----------------------------------------------------
+  string name = param.stringval("output_files_prefix");
+  name += ".N=" + to_string(N);
+ 
+ //-----------------------------------------------------
   // Some preparation/checks for the 1-qbit observables
-  ofstream file_1q(name + ".1q_obs.dat");
+  ofstream file_1q(name + ".obs.1q.dat");
   file_1q << "#Component\ttime_t\tsite_i\tExpectationValue" << endl;
   auto components = param.stringvec("1q_components");
   for (auto &s : components)
@@ -327,7 +329,7 @@ int main(int argc, char *argv[])
   file_1q.precision(15);
   //-----------------------------------------------------
   // Some preparation/checks for the 2-qbit observables
-  ofstream file_2q(name + ".2q_obs.dat");
+  ofstream file_2q(name + ".obs.2q.dat");
   file_2q << "#Component\ttime_t\tsite_i\tsite_j\tExpectationValue" << endl;
   file_2q.precision(15);
   vector<long> sit2 = param.longvec("2q_sites");
@@ -479,23 +481,23 @@ int main(int argc, char *argv[])
     }
   }
 
-  string fname = param.stringval("save_state_file_prefix");
-  if (fname != "")
+  bool b_save_state = param.boolval("b_save_final_state");
+  if (b_save_state)
   {
-    fname += "_N=" + to_string(N);
-    string f1 = fname + ".ops";
+    string fname = name;
+    string f1 = fname + ".state.ops";
     writeToFile(f1, C.siteops);
-    string f2 = fname + ".rho";
+    string f2 = fname + ".state.rho";
     writeToFile(f2, C.rho);
-    string f3 = fname + ".sites";
+    string f3 = fname + ".state.sites";
     writeToFile(f3, C.sites);
-    cout << "the state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
+    cout << "The final state was saved to disk, using 3 files:" << f1 << endl << f2 << endl << f3 << endl;
   }
   cout << endl;
   auto end_sim = high_resolution_clock::now();
 	auto tot_duration = duration_cast<seconds>(end_sim - start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
-	cout << "tTotal simulation duration: " << buf << endl;
+	cout << "\nTotal simulation duration: " << buf << endl;
   return 0;
 }
 

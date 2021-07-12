@@ -18,21 +18,23 @@ class LindbladMPOSolver:
 	def __init__(self, parameters, s_cygwin_path = None, s_solver_path = None):
 		self.parameters = parameters
 		self.s_input_file = ''
-		self.s_output_file = ''
+		self.s_output_path = ''
 		s_cygwin_path, s_solver_path = self.process_default_paths(s_cygwin_path, s_solver_path)
 		self.s_cygwin_path = s_cygwin_path
 		self.s_solver_path = s_solver_path
+		self.s_id_suffix = ''
+		self.s_N_suffix = ''
 		self.result = {}
 
 	def solve(self):
 		try:
-			self.s_input_file, self.s_output_file = self.build_input_file(self.parameters)
+			self.s_input_file, self.s_output_path, self.s_id_suffix, self.s_N_suffix = self.build_input_file(self.parameters)
 		except:
 			raise Exception("There was an error creating the input file, aborting program")
 		exit_code = self.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
 		if exit_code != 0:
 			raise Exception("There was an error executing the solver, aborting program.")
-		self.result = self.load_output(self.s_output_file)
+		self.result = self.load_output(self.s_output_path)
 
 	@staticmethod
 	def process_default_paths(s_cygwin_path = None, s_solver_path = None) -> (str, str):
@@ -68,39 +70,34 @@ class LindbladMPOSolver:
 		return s_cygwin_path, s_solver_path
 
 	@staticmethod
-	def build_input_file(parameters: Dict) -> (str, str):
+	def build_input_file(parameters: Dict) -> (str, str, str, str):
 		""" Writing the input parameters from the input dictionary to txt file
 		Args:
 			parameters (dictionary): the arguments for the simulator
 		Returns:
-			(s_input_file, s_output_file): File name of solver input file, and file prefix for solver output, based
-			on the user settings in the parameters dictionary (or default values if not assigned), and possibly
-			appended with a unique id (if requested).
+			(s_input_file, s_output_path, s_id_suffix): File name of solver input file, file prefix for solver output,
+			 based on the user settings in the parameters dictionary (or default values if not assigned), and possibly
+			appended with a unique id (if requested), the unique id string (possibly empty), and the file
+			names suffix denoting the number of qubit, e.g. ".N=8".
 		"""
 		check_output = LindbladMPOSolver._check_argument_correctness(parameters)
 		# check if there is a problem with the input, if "" returned there is no problem
 		if check_output != "":
 			raise Exception(check_output)
 		# check if the user defined an input file name
-		s_input_file = parameters.get("input_file_prefix", "")
-		if s_input_file == "" or s_input_file[-1] in ('/', '.', '\\'):
-			s_input_file += "input"
-		s_output_file = parameters.get("output_file_prefix", "")
-		if s_output_file == "" or s_output_file[-1] in ('/', '.', '\\'):
-			s_output_file += "out"
-		s_save_file = parameters.get("save_state_file_prefix", "")
-		if s_save_file != "" and s_save_file[-1] in ('/', '.', '\\'):
-			s_save_file += "save"
+		s_output_path = parameters.get("output_files_prefix", "")
+		if s_output_path == "" or s_output_path[-1] in ('/', '.', '\\'):
+			s_output_path += "lindblad"
 		b_uuid = parameters.get("b_unique_id", False)
+		s_id_suffix = ''
 		if b_uuid:
-			s_uuid = uuid.uuid4().hex
-			print("Generating a unique id for this simulation: " + s_uuid)
-			s_uuid = '.' + s_uuid
-			s_input_file += s_uuid
-			s_output_file += s_uuid
-			if s_save_file != "":
-				s_save_file += s_uuid
-		s_input_file += ".txt"
+			s_id_suffix = uuid.uuid4().hex
+			print("Generating a unique id for this simulation: " + s_id_suffix)
+			s_id_suffix = '.' + s_id_suffix
+			s_output_path += s_id_suffix
+		n_qubits = parameters.get("N")
+		s_N_suffix = f".N={n_qubits}"
+		s_input_file = s_output_path + s_N_suffix + ".input.txt"
 
 		print("Creating solver input file:")
 		print(s_input_file)
@@ -133,12 +130,10 @@ class LindbladMPOSolver:
 						A_bond_indices.append(i + 1)
 						B_bond_indices.append(j + 1)
 		for key in parameters.keys():
-			if key == "input_file_prefix" or key == "b_unique_id":
+			if key == "b_unique_id":
 				pass
-			elif key == "output_file_prefix":
-				file.write(key + ' = ' + s_output_file + "\n")
-			elif key == "save_state_file_prefix":
-				file.write(key + " = " + s_save_file + "\n")
+			elif key == "output_files_prefix":
+				file.write(key + ' = ' + s_output_path + "\n")
 			elif (key == 'J' or key == 'J_z') and type(parameters[key]) == np.ndarray and len(parameters[key]) > 1:
 				# check if to create bond indices arrays
 				not_first_value = False
@@ -163,7 +158,7 @@ class LindbladMPOSolver:
 			file.write("B_bond_indices = " + str(B_bond_indices).strip("[]") + "\n")
 		s_input_file = os.path.abspath(file.name).replace("\\","/")
 		file.close()
-		return s_input_file, s_output_file
+		return s_input_file, s_output_path + s_N_suffix, s_id_suffix, s_N_suffix
 
 	@staticmethod
 	def execute(s_cygwin_path = None, s_solver_path = None, s_input_file = "") -> int:
@@ -193,21 +188,21 @@ class LindbladMPOSolver:
 		return exit_code
 
 	@staticmethod
-	def load_output(s_output_file: str):
-		result = {'1q': LindbladMPOSolver._read_1q_output_into_dict(s_output_file),
-				  '2q': LindbladMPOSolver._read_2q_output_into_dict(s_output_file)}
+	def load_output(s_output_path: str):
+		result = {'1q': LindbladMPOSolver._read_1q_output_into_dict(s_output_path),
+				  '2q': LindbladMPOSolver._read_2q_output_into_dict(s_output_path)}
 		return result
 
 	@staticmethod
-	def _read_1q_output_into_dict(filename: str) -> Dict:
+	def _read_1q_output_into_dict(s_output_path: str) -> Dict:
 		""" Reads the 1 qubit output file and returns a dictionary with the values in the format:
 		key (tuple) = (qubit (int), Axis (string), time (float)) : value = expectation value (float)
 		Args:
-			filename : file location
+			s_output_path : file location
 		Returns:
 			result : the arguments for the simulator
 		"""
-		full_filename = filename + ".1q_obs.dat"
+		full_filename = s_output_path + ".obs.1q.dat"
 		print("Loading 1-qubit observables from file:")
 		print(full_filename)
 		file = open(full_filename, "r")
@@ -223,15 +218,15 @@ class LindbladMPOSolver:
 		return result
 
 	@staticmethod
-	def _read_2q_output_into_dict(filename: str) -> Dict:
+	def _read_2q_output_into_dict(s_output_path: str) -> Dict:
 		""" Reads the 2 qubit output file and returns a dictionary with the values in the format:
 		key = (qubit1 (int), qubit2 (int), Axis1 (string), Axis2 (string) ,time (float)), value = expectation value (float)
 		Args:
-			filename (string): file location
+			s_output_path (string): file location
 		Returns:
 			result (dictionary): the arguments for the simulator
 		"""
-		full_filename = filename + ".2q_obs.dat"
+		full_filename = s_output_path + ".obs.2q.dat"
 		print("Loading 2-qubit observables from file:")
 		print(full_filename)
 		file = open(full_filename, "r")
@@ -435,7 +430,7 @@ class LindbladMPOSolver:
 					continue
 
 			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
-					key == "b_force_rho_hermitian") or (key == "b_unique_id")):
+					key == "b_force_rho_hermitian") or (key == "b_unique_id") or (key == "b_save_final_state")):
 				if not isinstance(dict_in[key], bool):
 					check_msg += "Error 390: " + key + " should be a boolean True or False as its a switch\n"
 					continue
@@ -458,11 +453,7 @@ class LindbladMPOSolver:
 					check_msg += "Error 420: " + key + " is not a small float format (ae-b where a and b are numbers)\n"
 					continue
 
-			elif key == "save_state_file_prefix":
-				pass
-			elif key == "output_file_prefix":
-				pass
-			elif key == "input_file_prefix":
+			elif key == "output_files_prefix":
 				pass
 			elif key == "1q_components":
 				x_c = 0
