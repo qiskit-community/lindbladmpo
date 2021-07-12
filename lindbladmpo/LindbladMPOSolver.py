@@ -173,12 +173,14 @@ class LindbladMPOSolver:
 		"""
 		s_cygwin_path, s_solver_path = LindbladMPOSolver.process_default_paths(s_cygwin_path, s_solver_path)
 		if s_cygwin_path:
-			call_string = s_cygwin_path + " --login -c \""
+			call_string = s_cygwin_path + ' --login -c "'
 		else:
 			call_string = ''
 		call_string += s_solver_path
 		if s_input_file:
-			call_string += " input_file " + str(s_input_file)
+			call_string += " input_file '" + str(s_input_file) + "'"
+			if s_cygwin_path:
+				call_string += '"'
 		print("Executing solver with command:")
 		print("\t" + call_string + "\n")
 
