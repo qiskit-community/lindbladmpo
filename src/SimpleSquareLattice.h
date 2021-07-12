@@ -45,10 +45,17 @@ public:
       I.push_back(A[i]);
       J.push_back(B[i]);
     }
-    cout << "User-defined lattice with " << N << " qbits and " << n << " bonds.\n";
+    cout << "User-defined lattice with " << N << " qbit(s) and " << n << " bonds.\n";
     cout << "List of bonds:\n";
-    cout << "\t" << I << endl;
-    cout << "\t" << J << endl;
+    if (I.size() == 0)
+    {
+      cout << " [empty]" << endl;
+    }
+    else
+    {
+      cout << I << endl;
+      cout << J << endl;
+    }
   }
   // Creation of a Lx*Ly square lattice with or without periodic boundary conditions in the x and y direction
   Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly), predefined(true)
@@ -111,8 +118,15 @@ public:
       }
     cout << "Square lattice of size l_x=" << Lx << "*l_y=" << Ly << "=" << N << " qubits.\n";
     cout << "List of bonds:\n";
-    cout << I << endl;
-    cout << J << endl;
+    if (I.size() == 0)
+    {
+      cout << " [empty]" << endl;
+    }
+    else
+    {
+      cout << I << endl;
+      cout << J << endl;
+    }
   }
 };
 //____________________________________________________________
