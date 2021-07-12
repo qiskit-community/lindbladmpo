@@ -55,20 +55,24 @@ inline double char2double(char *a)
   return x;
 }
 //____________________________________________________________
-vector<string> &split(const string &s, char delimiter,vector<std::string> &elems) {
-    stringstream ss(s);
-    string item;
-    while (getline(ss, item, delimiter)) {
-        if (item.length() > 0) {
-            elems.push_back(item);
-            }
+vector<string> &split(const string &s, char delimiter, vector<std::string> &elems)
+{
+  stringstream ss(s);
+  string item;
+  while (getline(ss, item, delimiter))
+  {
+    if (item.length() > 0)
+    {
+      elems.push_back(item);
     }
-    return elems;
+  }
+  return elems;
 }
-vector<string> split(const string &s, char delimiter) {
-    vector<string> elems;
-    split(s, delimiter, elems);
-    return elems;
+vector<string> split(const string &s, char delimiter)
+{
+  vector<string> elems;
+  split(s, delimiter, elems);
+  return elems;
 }
 //____________________________________________________________
 class Parameters_old : public map<string, double>
@@ -129,6 +133,26 @@ public:
     }
   }
 };
+// trim from start (in place)
+static inline void ltrim(std::string &s)
+{
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s)
+{
+}
+
+// trim a string 
+void trim(string &s)
+{
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
+                                  { return !std::isspace(ch); }));
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
+                       { return !std::isspace(ch); })
+              .base(),
+          s.end());
+}
 //____________________________________________________________
 class Parameters : public map<string, string>
 {
@@ -141,7 +165,7 @@ public:
   //
   // * All spaces are ignored by the parser
   // * Any line without any '=' sign is ignored
-  // * All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h). 
+  // * All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h).
   // At this stage all values are strings, and they are added to the Parameters object.
   // The methods Parameters::val, Parameters::longval, Parameters::boolval, and Parameters::stringval can later be used to retrieve these values as
   // double, long, bool and string.
@@ -149,12 +173,13 @@ public:
   void ReadFromFile(string filename)
   {
     ifstream file(filename);
-    if (!file) cerr<<"Error: unable to open the file "<<filename<<endl,exit(1);
-    else cout<<"Reading parameters from the file "<<filename<<endl;
+    if (!file)
+      cerr << "Error: unable to open the file " << filename << endl, exit(1);
+    else
+      cout << "Reading parameters from the file " << filename << endl;
     string line;
     while (getline(file, line))
     {
-      line = regex_replace(line, regex("\\s+"), "");// remove white spaces using a regular expression
       if (line != "")
       {
         string delimiter = "=";
@@ -164,8 +189,10 @@ public:
         if (position != string::npos)
         {
           var_name = line.substr(0, position);
+          var_name = regex_replace(var_name, regex("\\s+"), ""); // remove white spaces using a regular expression
           string var_value = line.erase(0, position + delimiter.length());
-
+          //remove white spaces at the begining and at the end (but not in the middle)
+          trim(var_value);
           map<string, string>::const_iterator it = find(var_name);
           if (it != end())
             operator[](var_name) = var_value;
@@ -204,12 +231,14 @@ public:
     else
     {
       long i;
-      try {
-          i=stoi(it->second);
-        }
-        catch(...) {
-          cerr<<"Error: was expecting a long int and instead got '"<<it->second<<"'\n",exit(1);
-        }
+      try
+      {
+        i = stoi(it->second);
+      }
+      catch (...)
+      {
+        cerr << "Error: was expecting a long int and instead got '" << it->second << "'\n", exit(1);
+      }
       return i;
     }
   }
@@ -286,7 +315,7 @@ public:
   //------------------------------------------------------
   // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
   vector<double> doublevec(string var_name) const
-  { 
+  {
     vector<double> vec;
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
@@ -296,14 +325,17 @@ public:
     else
     {
       vector<string> str_vec;
-      str_vec=split(it->second, ',');
-      for(auto& s: str_vec) {
+      str_vec = split(it->second, ',');
+      for (auto &s : str_vec)
+      {
         double x;
-         try {
-          x=stod(s);
+        try
+        {
+          x = stod(s);
         }
-        catch(...) {
-          cerr<<"Error: was expecting a double and instead got "<<s<<endl,exit(1);
+        catch (...)
+        {
+          cerr << "Error: was expecting a double and instead got " << s << endl, exit(1);
         }
         vec.push_back(x);
       }
@@ -313,7 +345,7 @@ public:
   //------------------------------------------------------
   // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<long>
   vector<long> longvec(string var_name) const
-  { 
+  {
     vector<long> vec;
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
@@ -323,14 +355,17 @@ public:
     else
     {
       vector<string> str_vec;
-      str_vec=split(it->second, ',');
-      for(auto& s: str_vec) {
+      str_vec = split(it->second, ',');
+      for (auto &s : str_vec)
+      {
         long i;
-        try {
-          i=stoi(s);
+        try
+        {
+          i = stoi(s);
         }
-        catch(...) {
-          cerr<<"Error: was expecting a long int and instead got '"<<s<<"'\n",exit(1);
+        catch (...)
+        {
+          cerr << "Error: was expecting a long int and instead got '" << s << "'\n", exit(1);
         }
         vec.push_back(i);
       }
@@ -340,7 +375,7 @@ public:
   //------------------------------------------------------
   // The method below converts a string of the type hello,thanks,home,car into a vector<string>
   vector<string> stringvec(string var_name) const
-  { 
+  {
     vector<string> vec;
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
@@ -349,9 +384,9 @@ public:
     }
     else
     {
-      vector<string> str_vec=split(it->second, ',');
-      for(auto& s: str_vec)
-               vec.push_back(s);
+      vector<string> str_vec = split(it->second, ',');
+      for (auto &s : str_vec)
+        vec.push_back(s);
     }
     return vec;
   }
