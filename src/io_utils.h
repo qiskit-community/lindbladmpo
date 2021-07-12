@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include <regex>
+#include <algorithm>
 using namespace itensor;
 using namespace std;
 //____________________________________________________________
@@ -225,19 +226,12 @@ public:
     else
     {
       string s = it->second;
-      if (s == "true")
+	  std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
+      if (s == "1" || s == "true")
         return true;
-      if (s == "TRUE")
-        return true;
-      if (s == "1")
-        return true;
-      if (s == "false")
+      if (s == "0" || s == "false")
         return false;
-      if (s == "FALSE")
-        return false;
-      if (s == "0")
-        return false;
-      cerr << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false, TRUE/FALSE or or 1/0\n", exit(1);
+      cerr << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false (case-insensitive), or 1/0\n", exit(1);
     }
   } //------------------------------------------------------
   string stringval(string var_name) const

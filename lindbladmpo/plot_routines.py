@@ -41,7 +41,5 @@ def plot_space_time(data: np.ndarray, t_steps: np.ndarray, t_ticks: np.ndarray, 
 	ax.set_ylabel('qubits', fontsize = fontsize)
 	ax.set_title('$\\langle\sigma_z(t)\\rangle$')
 	if b_save_figures:
-		if s_file_prefix != '':
-			s_file_prefix += ', '
-		plt.savefig(s_file_prefix + 'sigma_z(t)')
+		plt.savefig(s_file_prefix + '.sigma_z.png')
 
