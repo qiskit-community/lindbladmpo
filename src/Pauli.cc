@@ -101,7 +101,7 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Sx")
   {
-	//Op = ITensor(s,sP); //itensor v3
+    //Op = ITensor(s,sP); //itensor v3
     Op.set(ud_, uu, 1.0);
     Op.set(dd_, du, 1.0);
     Op.set(du_, dd, 1.0);
@@ -141,8 +141,8 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(ud, dd_, 1.0);
   }
   else if (opname == "_Sy")
-  { 
-    Op = ITensor(s, sP); 
+  {
+    Op = ITensor(s, sP);
     Op.set(dd, ud_, -Cplx_i);
     Op.set(du, uu_, -Cplx_i);
     Op.set(uu, du_, Cplx_i);
@@ -158,12 +158,12 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   else if (opname == "_S-S+")
   {
     //Op.set(uu, dd_, 1.0);
-    Op.set(dd_,uu,  1.0);
+    Op.set(dd_, uu, 1.0);
   }
   else if (opname == "_S+S-")
   {
     //Op.set(dd, uu_, 1.0);
-    Op.set(uu_,dd, 1.0);
+    Op.set(uu_, dd, 1.0);
   }
   else if (opname == "projUp")
   {
@@ -223,28 +223,37 @@ void SpinHalfSystem::ConstructIdentity()
   //In case we read data from disk, this must be called
   //after the 'sites' are defined (read from disk)
   Identity = MPS(InitState(siteops, "dd"));
-
   ITensor &U1 = Identity.ref(1);
-  Index a = commonIndex(U1, Identity.A(2));
-  Index p = siteops(1);
-  U1.set(IndexVal(p, 1), IndexVal(a, 1), 1.0);
-  U1.set(IndexVal(p, 4), IndexVal(a, 1), 1.0);
-
-  ITensor &UN = Identity.ref(N);
-  p = siteops(N);
-  a = commonIndex(UN, Identity.A(N - 1));
-  UN.set(IndexVal(p, 1), IndexVal(a, 1), 1.0);
-  UN.set(IndexVal(p, 4), IndexVal(a, 1), 1.0);
-
-  for (int j = 2; j <= N - 1; ++j)
+  if (N > 1)
   {
-    ITensor &U = Identity.ref(j);
-    Index a = commonIndex(U, Identity.A(j + 1));
-    Index b = commonIndex(U, Identity.A(j - 1));
-    Index p = siteops(j);
-    U.set(IndexVal(p, 1), IndexVal(a, 1), IndexVal(b, 1), 1.0);
-    U.set(IndexVal(p, 4), IndexVal(a, 1), IndexVal(b, 1), 1.0);
+    Index a = commonIndex(U1, Identity.A(2));
+    Index p = siteops(1);
+    U1.set(IndexVal(p, 1), IndexVal(a, 1), 1.0);
+    U1.set(IndexVal(p, 4), IndexVal(a, 1), 1.0);
+
+    ITensor &UN = Identity.ref(N);
+    p = siteops(N);
+    a = commonIndex(UN, Identity.A(N - 1));
+    UN.set(IndexVal(p, 1), IndexVal(a, 1), 1.0);
+    UN.set(IndexVal(p, 4), IndexVal(a, 1), 1.0);
+
+    for (int j = 2; j <= N - 1; ++j)
+    {
+      ITensor &U = Identity.ref(j);
+      Index a = commonIndex(U, Identity.A(j + 1));
+      Index b = commonIndex(U, Identity.A(j - 1));
+      Index p = siteops(j);
+      U.set(IndexVal(p, 1), IndexVal(a, 1), IndexVal(b, 1), 1.0);
+      U.set(IndexVal(p, 4), IndexVal(a, 1), IndexVal(b, 1), 1.0);
+    }
   }
+  else
+  {
+    //N=1, single site system (but not supported by iTensor)
+    Index p = siteops(1);
+    U1.set(IndexVal(p, 1), 1.0);
+    U1.set(IndexVal(p, 4), 1.0);
+  } 
 }
 
 //Convert a pure state (psi) of the chain into a density matrix rho (projector onto psi)
@@ -412,7 +421,7 @@ Cplx SpinHalfSystem::Expect(const string &opname1, int i1, const string &opname2
 void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site)
 {
   // TODO possibly worth if'ing over 0 rates
-  
+
   Cplx z = GammaMinus * Cplx_i;
   Lindbladian += z, "_S-S+", site;
   Lindbladian += -z * 0.5, "_projUp", site;
@@ -443,7 +452,6 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
   Lindbladian += z, "Sz_Sz", site;
   Lindbladian += -z * 0.5, "_Id", site;
   Lindbladian += -z * 0.5, "Id", site;
-
 }
 //_____________________________________________________
 
@@ -465,16 +473,16 @@ void SpinHalfSystem::MakeRhoHermitian(Args args)
       const IndexVal l(a, aa);
       const Cplx z1 = eltC(U, p1, l);
       U.set(p1, l, conj(z1));
-      const Cplx z4 = eltC(U,p4, l);
+      const Cplx z4 = eltC(U, p4, l);
       U.set(p4, l, conj(z4));
-      const Cplx z2 = eltC(U,p2, l);
-      const Cplx z3 = eltC(U,p3, l);
+      const Cplx z2 = eltC(U, p2, l);
+      const Cplx z3 = eltC(U, p3, l);
       U.set(p2, l, conj(z3));
       U.set(p3, l, conj(z2));
     }
     U.scaleTo(rho.A(i).scale());
   }
-//#pragma omp parallel for
+  //#pragma omp parallel for
   for (int j = 2; j <= N - 1; ++j)
   {
     ITensor &U = rd.ref(j);
@@ -488,12 +496,12 @@ void SpinHalfSystem::MakeRhoHermitian(Args args)
       for (int bb = 1; bb <= b.dim(); bb++)
       {
         const IndexVal m(b, bb);
-        const Cplx z1 = eltC(U,p1, l, m);
+        const Cplx z1 = eltC(U, p1, l, m);
         U.set(p1, l, m, conj(z1));
-        const Cplx z4 = eltC(U,p4, l, m);
+        const Cplx z4 = eltC(U, p4, l, m);
         U.set(p4, l, m, conj(z4));
-        const Cplx z2 = eltC(U,p2, l, m);
-        const Cplx z3 = eltC(U,p3, l, m);
+        const Cplx z2 = eltC(U, p2, l, m);
+        const Cplx z3 = eltC(U, p3, l, m);
         U.set(p2, l, m, conj(z3));
         U.set(p3, l, m, conj(z2));
       }
