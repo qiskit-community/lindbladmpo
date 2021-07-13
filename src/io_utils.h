@@ -134,15 +134,6 @@ public:
     }
   }
 };
-// trim from start (in place)
-static inline void ltrim(std::string &s)
-{
-}
-
-// trim from end (in place)
-static inline void rtrim(std::string &s)
-{
-}
 
 // trim a string 
 void trim(string &s)
