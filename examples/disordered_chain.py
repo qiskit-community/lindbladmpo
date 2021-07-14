@@ -15,6 +15,7 @@ if not os.path.exists(s_output_path):
 
 # Simulation parameters
 n_qubits = 8
+b_unique_id = False
 b_save_figures = True
 fontsize = 22
 
@@ -30,7 +31,7 @@ tau = .05
 
 # Create the parameters dictionary
 s_file_prefix = f"disordered chain"
-solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 80, 'N': n_qubits, 'b_unique_id': False,
+solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 80, 'N': n_qubits, 'b_unique_id': b_unique_id,
 				 'h_x': h_x, 'h_z': h_z, 'g_0': g_0, 'J': J, 'l_x': n_qubits, 'l_y': 1,
 				 'output_files_prefix': s_output_path + s_file_prefix}
 # Initialize class arguments - the parameters, cygwin path, and MPO executable path

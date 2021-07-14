@@ -67,8 +67,8 @@ public:
 
         if (Lx < 1 || Ly < 1)
             cerr << "Error in the lattice parameters l_x=" << Lx << " l_y=" << Ly << endl, exit(1);
-        if (N < 1)
-            cerr << "Error, this code assumes that the system has at least 1 site.\n", exit(1);
+        if (N <= 1)
+            cerr << "Error, this code assumes that the system has at least 2 sites.\n", exit(1);
     }
 };
 
