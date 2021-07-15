@@ -8,11 +8,11 @@ Go to Cygwin's official site:
 
 https://www.cygwin.com
 
-Download the executable and Run the Installation. process.
+Download the executable and Run the Installation process.
 
 During the Installation, install the following Cygwin packages:
 
-gcc ,BLAS, LAPACK.
+    gcc ,BLAS, LAPACK.
 
 After finishing the Installation, open Cygwin terminal.
 
