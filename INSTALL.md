@@ -18,38 +18,36 @@ After finishing the Installation, open Cygwin terminal.
 
 Note that in Cygwin the root directory of a particular drive (say "C"): 
 
-    "C:/" 
+    "C:\" 
 is
 
     "/cygdrive/c/"
 
 ## [Optional] Open a projects directory
 
-Run the following commands in your terminal, to create a directory under which the git repos will be downloaded:
+Run the following commands in the terminal, to create a directory under which the git repos will be downloaded:
 
     mkdir projects
     cd projects
 
 ## ITensor installation
 
-Run the following commands in your terminal:
+Run the following commands in the terminal (on Windows, replace the "cp" command with "copy"). This assumes that you have a git locally configured:
 
     mkdir itensor3
     cd itensor3
     git clone https://github.com/ITensor/ITensor.git .
     cp options.mk.sample options.mk
 
-If you run Linux or Windows, you must un/comment as follows:
+Linux/Windows only: Open options.mk in editor and comment out two MACOS lines, uncomment Linux BLAS, and save.
 
-Linux/Windows only: Open options.mk in editor and comment out two MACOS lines, uncomment Linux BLAS, save.
-
-Run the following command in your Linux terminal, or on Windows, navigate inside the Cygwin64 Terminal to the same directory and type:
+Run the following command in the Linux terminal, or on Windows, navigate inside the Cygwin64 Terminal to the same directory and type:
 
     make
 
 ## Building the lindbladmpo solver
 
-In order to leave the ITensor library and download the lindbladmpo library and build the solver, run the following commands in your terminal:
+In order to leave the ITensor library and download the lindbladmpo repo and build the solver, run the following commands in the terminal:
 
     cd ..
     mkdir lindbladmpo
@@ -67,6 +65,6 @@ In order to run a first test of the solver, type in the Linux terminal:
     cd ../bin/
     ./lindbladmpo
 
-On Windows, navigate inside the Cygwin64 Terminal on Windows to /bin directory as above, and type:
+Or, on Windows, navigate inside the Cygwin64 Terminal on Windows to /bin directory as above, and type:
 
     ./lindbladmpo
