@@ -1,4 +1,3 @@
-
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,8 +8,9 @@ def prepare_plot_data(solver: LindbladMPOSolver) -> (np.ndarray, np.ndarray, np.
 	tau = solver.parameters['tau']
 	n_qubits = solver.parameters['N']
 	t_final = solver.parameters['t_final']
-	n_t_steps = int(t_final / tau) + 1
-	data = np.zeros(shape = (n_qubits, n_t_steps), dtype = float)
+	# output_step = solver.parameters.get('output_step', 1)
+	n_t_steps = int(t_final / (tau * 1)) + 1
+	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	i = 0
 	for key in solver.result['1q']:
 		if key[1] == 'Z':

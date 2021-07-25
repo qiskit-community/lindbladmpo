@@ -154,8 +154,8 @@ class LindbladMPOSolver:
 			else:
 				file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
 		if AB_indices:
-			file.write("A_bond_indices = " + str(A_bond_indices).strip("[]") + "\n")
-			file.write("B_bond_indices = " + str(B_bond_indices).strip("[]") + "\n")
+			file.write("A_bond_indices = " + str(A_bond_indices).strip("[]").replace(' ', '') + "\n")
+			file.write("B_bond_indices = " + str(B_bond_indices).strip("[]").replace(' ', '') + "\n")
 		s_input_file = os.path.abspath(file.name).replace("\\","/")
 		file.close()
 		return s_input_file, s_output_path + s_N_suffix, s_id_suffix, s_N_suffix

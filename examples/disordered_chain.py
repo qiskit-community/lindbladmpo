@@ -23,14 +23,14 @@ h_x = 0. * np.random.randn(n_qubits)
 h_x[int(n_qubits / 2)] = .5
 h_y = 0. * np.random.randn(n_qubits)
 
-h_z = 0. * np.random.randn(n_qubits)
+h_z = 2. * np.ones(n_qubits)
 g_0 = .1 * np.random.rand(n_qubits)
 J = 1
-t_final = 5
-tau = .05
+t_final = 4
+tau = .01
 
 # Create the parameters dictionary
-s_file_prefix = f"disordered chain"
+s_file_prefix = "chain"
 solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 80, 'N': n_qubits, 'b_unique_id': b_unique_id,
 				 'h_x': h_x, 'h_z': h_z, 'g_0': g_0, 'J': J, 'l_x': n_qubits, 'l_y': 1,
 				 'output_files_prefix': s_output_path + s_file_prefix}
