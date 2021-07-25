@@ -56,7 +56,7 @@ public:
 
         //2-qubit observables
         // Vector of components. Each element should have two letters. For instance XY means that <sigma^x(i)sigma^y(j)> will be computed for the pairs i,j specified in the argument "2q_sites".
-        operator[]("2q_components") = "";
+        operator[]("2q_components") = "zz";
         operator[]("2q_sites") = ""; // Vector of long integers i1,j1,i2,j2,.... If left empty => equivalent to all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
     }
     void check()

@@ -358,12 +358,12 @@ int main(int argc, char *argv[])
   for (auto &s : components2)
   {
     if (s.length() != 2)
-      cerr << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
+      cerr << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
     for (int n = 0; n <= 1; n++)
     {
       char c = toupper(s[n]);
       if (c != 'X' && c != 'Y' && c != 'Z')
-        cerr << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z).\n", exit(1);
+        cerr << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
     }
   }
   //-----------------------------------------------------
@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
     writeToFile(f2, C.rho);
     string f3 = fname + ".state.sites";
     writeToFile(f3, C.sites);
-    cout << "The final state was saved to disk, using 3 files:" << f1 << endl << f2 << endl << f3 << endl;
+    cout << "The final state was saved to disk, using 3 files:\n" << f1 << endl << f2 << endl << f3 << endl;
   }
   cout << endl;
   auto end_sim = high_resolution_clock::now();
