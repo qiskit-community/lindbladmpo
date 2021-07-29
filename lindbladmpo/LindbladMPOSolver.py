@@ -151,6 +151,13 @@ class LindbladMPOSolver:
 					if i + 1 != parameters[key].shape[0]:
 						file.write(",")
 				file.write("\n")
+			elif key == '1q_components' or key == '2q_components':
+				file.write(key + " = ")
+				for pauli in parameters[key]:
+					file.write(str(pauli).strip("'"))
+					if parameters[key][len(parameters[key]) - 1] != pauli:
+						file.write(",")
+				file.write("\n")
 			else:
 				file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
 		if AB_indices:
