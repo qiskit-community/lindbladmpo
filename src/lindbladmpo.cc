@@ -233,8 +233,8 @@ int main(int argc, char *argv[])
               exit(1);
       }
     }
-    err /= N * ops.size();
-    cout << "Compare observables " << ops << " in |psi> and rho: average precision=" << err << endl;
+    //err /= N * ops.size();
+    //cout << "Compare observables " << ops << " in |psi> and rho: average precision=" << err << endl;
   }
   //-----------------------------------------------------
   //Construct the Lindbladian from the parameters (unitary and dissipative terms)
