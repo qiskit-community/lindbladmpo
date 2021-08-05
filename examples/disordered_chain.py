@@ -12,26 +12,29 @@ from lindbladmpo.plot_routines import *
 s_output_path = os.path.abspath('./output') + '/'
 if not os.path.exists(s_output_path):
 	os.mkdir(s_output_path)
+s_file_prefix = "chain"
 
 # Simulation parameters
-n_qubits = 8
-b_unique_id = False
-b_save_figures = True
+rand_seed = 1
+n_qubits = 9
+b_unique_id = True
+b_save_figures = False
 fontsize = 22
+h_z_half_width = 0.
 
-h_x = 0. * np.random.randn(n_qubits)
-h_x[int(n_qubits / 2)] = .5
-h_y = 0. * np.random.randn(n_qubits)
+np.random.seed(rand_seed)
+h_x = np.zeros(n_qubits, float)
+h_x[int(n_qubits / 2)] = 5.
 
-h_z = 2. * np.ones(n_qubits)
-g_0 = .1 * np.random.rand(n_qubits)
+h_z = -h_z_half_width + 2 * h_z_half_width * np.random.rand(n_qubits)  # np.ones(n_qubits)  # np.random.rand(n_qubits)  #
+g_0 = .1 * np.ones(n_qubits)
 J = 1
-t_final = 4
+t_final = 10
 tau = .01
 
 # Create the parameters dictionary
-s_file_prefix = "chain"
-solver_params = {'tau': tau, 't_final': t_final, 'max_dim_rho': 80, 'N': n_qubits, 'b_unique_id': b_unique_id,
+solver_params = {'tau': tau, 't_final': t_final, 'cut_off_rho': 1e-16,
+				 'max_dim_rho': 100, 'N': n_qubits, 'b_unique_id': b_unique_id,
 				 'h_x': h_x, 'h_z': h_z, 'g_0': g_0, 'J': J, 'l_x': n_qubits, 'l_y': 1,
 				 'output_files_prefix': s_output_path + s_file_prefix}
 # Initialize class arguments - the parameters, cygwin path, and MPO executable path
@@ -43,5 +46,6 @@ solver.solve()
 # Prepare plot data
 data, t_steps, t_ticks, qubits = prepare_plot_data(solver)
 # And plot one figure. By default it will be saved to a file.
-plot_space_time(data, t_steps, t_ticks, qubits, fontsize = fontsize, s_file_prefix = s_output_path + s_file_prefix)
+plot_space_time(data, t_steps, t_ticks, qubits, fontsize = fontsize, s_file_prefix = s_output_path + s_file_prefix,
+				b_save_figures = b_save_figures)
 plt.show()

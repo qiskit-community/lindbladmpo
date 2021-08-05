@@ -28,7 +28,8 @@ class LindbladMPOSolver:
 
 	def solve(self):
 		try:
-			self.s_input_file, self.s_output_path, self.s_id_suffix, self.s_N_suffix = self.build_input_file(self.parameters)
+			self.s_input_file, self.s_output_path, self.s_id_suffix, self.s_N_suffix =\
+				self.build_input_file(self.parameters)
 		except:
 			raise Exception("There was an error creating the input file, aborting program")
 		exit_code = self.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
@@ -439,7 +440,7 @@ class LindbladMPOSolver:
 					continue
 
 			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
-					key == "b_force_rho_hermitian") or (key == "b_unique_id") or (key == "b_save_final_state")):
+					key == "b_force_rho_Hermitian") or (key == "b_unique_id") or (key == "b_save_final_state")):
 				if not isinstance(dict_in[key], bool):
 					check_msg += "Error 390: " + key + " should be a boolean True or False as its a switch\n"
 					continue

@@ -456,7 +456,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
 		input_dict['b_force_rho_trace'] = False
-		input_dict['b_force_rho_hermitian'] = True
+		input_dict['b_force_rho_Hermitian'] = True
 		input_dict['output_files_prefix'] = "./"
 		input_dict['1q_components'] = ["x", "y", "z"]
 		input_dict['1q_indices'] = [1, 3, 4]
@@ -504,7 +504,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
 		input_dict['b_force_rho_trace'] = "False"  # this should fail
-		input_dict['b_force_rho_hermitian'] = True
+		input_dict['b_force_rho_Hermitian'] = True
 		input_dict['output_step'] = 0.6  # this should fail
 		input_dict['output_files_prefix'] = "./"
 		input_dict['1q_components'] = ["x", "y", "j"]  # this should fail
@@ -553,7 +553,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['cut_off'] = "1e-10"
 		input_dict['cut_off_rho'] = "1e-11"
 		input_dict['b_force_rho_trace'] = "False"
-		input_dict['b_force_rho_hermitian'] = 222
+		input_dict['b_force_rho_Hermitian'] = 222
 		input_dict['output_step'] = 0.6
 		input_dict['output_files_prefix'] = "./"
 		input_dict['1q_components'] = ["x", "y", "j"]
@@ -604,7 +604,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
 		input_dict['b_force_rho_trace'] = False
-		input_dict['b_force_rho_hermitian'] = True
+		input_dict['b_force_rho_Hermitian'] = True
 		input_dict['output_step'] = 1
 		input_dict['output_files_prefix'] = "./"
 		input_dict['1q_components'] = ["x", "y", "z"]
@@ -654,7 +654,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
 		input_dict['b_force_rho_trace'] = False
-		input_dict['b_force_rho_hermitian'] = True
+		input_dict['b_force_rho_Hermitian'] = True
 		input_dict['output_step'] = 1
 		input_dict['output_files_prefix'] = "./"
 		input_dict['1q_components'] = ["x", "y", "z"]
@@ -703,7 +703,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
 		input_dict['b_force_rho_trace'] = False
-		input_dict['b_force_rho_hermitian'] = True
+		input_dict['b_force_rho_Hermitian'] = True
 		input_dict['output_step'] = 1
 		input_dict['output_files_prefix'] = "./"
 		input_dict['1q_components'] = ["x", "y", "z"]
