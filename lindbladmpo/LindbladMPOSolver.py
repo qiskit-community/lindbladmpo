@@ -453,7 +453,7 @@ class LindbladMPOSolver:
 					check_msg += "Error 401: " + key + " should be 2, 3 or 4\n"
 					continue
 
-			elif (key == "max_dim") or (key == "max_dim_rho"):  # int
+			elif (key == "min_dim_rho") or (key == "max_dim_rho"):  # int
 				if not LindbladMPOSolver._is_int(dict_in[key]):
 					check_msg += "Error 410: " + key + " should be an integer\n"
 					continue

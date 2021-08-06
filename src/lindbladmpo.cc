@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
 
   auto argsRho = Args();
   argsRho.add("Normalize", false);
+  argsRho.add("MinDim", param.longval("min_dim_rho"));
   argsRho.add("MaxDim", param.longval("max_dim_rho"));
   argsRho.add("Cutoff", param.val("cut_off_rho"));
 
@@ -129,7 +130,8 @@ int main(int argc, char *argv[])
 	  {
 		cout << "C.rho.orthogonalize...";
 		cout.flush();
-		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
+		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
+		  "MaxDim", param.longval("max_dim_rho")));
 		cout << "done.\n";
 		cout.flush();
 	  }
@@ -396,7 +398,7 @@ int main(int argc, char *argv[])
         //Some data about this time step
         cout << "Solution time t=" << n * tau << "\t----------------------------\n";
 
-        if (param.longval("b_force_rho_Hermitian") != 0)
+        if (param.boolval("b_force_rho_Hermitian") != 0)
           C.MakeRhoHermitian(argsRho);
 
         const Cplx tr2 = C.trace_rho2();

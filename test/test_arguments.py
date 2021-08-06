@@ -314,14 +314,14 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		out = LindbladMPOSolver._check_argument_correctness(input_dict)
 		self.assertEqual(expected, out)
 
-	def test_arg_max_dim_F1(self):
-		input_dict = {'max_dim': 5.1, 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
+	def test_arg_min_dim_rho_F1(self):
+		input_dict = {'min_dim_rho': 5.1, 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
 		expected = ""
 		out = LindbladMPOSolver._check_argument_correctness(input_dict)
 		self.assertNotEqual(expected, out)
 
-	def test_arg_max_dim_P(self):
-		input_dict = {'max_dim': 1, 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
+	def test_arg_min_dim_rho_P(self):
+		input_dict = {'min_dim_rho': 1, 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
 		expected = ""
 		out = LindbladMPOSolver._check_argument_correctness(input_dict)
 		self.assertEqual(expected, out)
@@ -451,7 +451,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_periodic_x'] = True
 		input_dict['b_periodic_y'] = False
 		input_dict['trotter_order'] = 3
-		input_dict['max_dim'] = 100
+		input_dict['min_dim_rho'] = 100
 		input_dict['max_dim_rho'] = 200
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
@@ -499,7 +499,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_periodic_x'] = 0  # this should fail
 		input_dict['b_periodic_y'] = 1  # this should fail
 		input_dict['trotter_order'] = 3
-		input_dict['max_dim'] = 100
+		input_dict['min_dim_rho'] = 100
 		input_dict['max_dim_rho'] = 200
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
@@ -548,7 +548,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_periodic_x'] = 0
 		input_dict['b_periodic_y'] = 1
 		input_dict['trotter_order'] = (3.99, 99)
-		input_dict['max_dim'] = 100.99
+		input_dict['min_dim_rho'] = 100.99
 		input_dict['max_dim_rho'] = 200.99
 		input_dict['cut_off'] = "1e-10"
 		input_dict['cut_off_rho'] = "1e-11"
@@ -599,7 +599,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_periodic_x'] = True
 		input_dict['b_periodic_y'] = False
 		input_dict['trotter_order'] = 3
-		input_dict['max_dim'] = 100
+		input_dict['min_dim_rho'] = 100
 		input_dict['max_dim_rho'] = 200
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
@@ -649,7 +649,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_periodic_x'] = True
 		input_dict['b_periodic_y'] = False
 		input_dict['trotter_order'] = 3
-		input_dict['max_dim'] = 100
+		input_dict['min_dim_rho'] = 100
 		input_dict['max_dim_rho'] = 200
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
@@ -698,7 +698,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_periodic_x'] = True
 		input_dict['b_periodic_y'] = False
 		input_dict['trotter_order'] = 3
-		input_dict['max_dim'] = 100
+		input_dict['min_dim_rho'] = 100
 		input_dict['max_dim_rho'] = 200
 		input_dict['cut_off'] = 1e-10
 		input_dict['cut_off_rho'] = 1e-11
