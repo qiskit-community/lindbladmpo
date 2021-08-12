@@ -465,6 +465,11 @@ class LindbladMPOSolver:
 
 			elif key == "output_files_prefix":
 				pass
+			elif key == "load_files_prefix":
+				if not isinstance(dict_in[key], str):
+					check_msg += "Error 425: " + key + " is not a string\n"
+					continue
+
 			elif key == "1q_components":
 				x_c = 0
 				y_c = 0

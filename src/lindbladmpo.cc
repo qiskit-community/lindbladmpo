@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
   vector<string> a_init = param.stringvec("init_Pauli_state");
   unsigned int a_init_len = a_init.size();
   if (a_init_len != 1 && int(a_init_len) != N)
-	cerr << "Error: the paramter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+	cerr << "Error: the parameter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
   if (a_init_len == 1)
 	a_init = vector<string>(N, a_init[0]);
 
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
   cout << tr2 << endl;
   if (psi_defined)
   {
-    if (fabs(tr - 1) > 1e-1 || fabs(tr2 - 1) > 1e-1)
+    if (std::abs(tr - 1) > 1e-1 || std::abs(tr2 - 1) > 1e-1)
       cerr << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
     //Check a few simple observables, using rho and psi
     vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
@@ -228,8 +228,8 @@ int main(int argc, char *argv[])
         const string &opname = ops[o];
         Cplx with_rho = C.Expect(opname, i);
         Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites);
-        err += fabs(with_rho - with_psi);
-        if (fabs(with_rho - with_psi) > 1e-2)
+        err += std::abs(with_rho - with_psi);
+        if (std::abs(with_rho - with_psi) > 1e-2)
           cerr << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
                << "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << endl,
               exit(1);
@@ -476,7 +476,7 @@ int main(int argc, char *argv[])
     {
       TE.evolve(C.rho);
       Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
-      if (fabs(z - 1) > 1e-2)
+      if (std::abs(z - 1) > 1e-2)
         cout << "Warning: Tr[rho]<>1 :" << z << endl;
       if (param.val("b_force_rho_trace") != 0)
         C.rho /= z;
