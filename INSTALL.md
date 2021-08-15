@@ -39,9 +39,9 @@ Run the following commands in the terminal (on Windows, replace the "cp" command
     git clone https://github.com/ITensor/ITensor.git .
     cp options.mk.sample options.mk
 
-Linux/Windows only: Open options.mk in editor and comment out two MACOS lines, uncomment Linux BLAS, and save.
+Open options.mk in editor and comment/uncomment the lines configuring the compilation and BLAS/LAPACK platform according to the operating system (Linux, Mac OS or Cygwin on Windows), and save.
 
-Run the following command in the Linux terminal, or on Windows, navigate inside the Cygwin64 Terminal to the same directory and type:
+Run the following command in the Linux/Mac OS terminal, or on Windows, navigate inside the Cygwin64 Terminal to the same directory and type:
 
     make
 
