@@ -13,7 +13,7 @@ import subprocess
 
 from setuptools import setup, find_packages, Extension
 
-with open('requirements') as f:
+with open('requirements.txt') as f:
 	REQUIREMENTS = f.read().splitlines()
 
 s_system = platform.system().lower()
@@ -28,10 +28,9 @@ else:
 	exit_code = process.wait()
 	process = subprocess.Popen(f'cp ./bin/{s_executable} ./lindbladmpo/{s_executable}', shell=True)
 
+
 # Read long description from README.
-README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-						   'README.md')
-with open(README_PATH) as readme_file:
+with open('README.md') as readme_file:
 	README = re.sub(
 		'<!--- long-description-skip-begin -->.*<!--- long-description-skip-end -->', '',
 		readme_file.read(), flags=re.S | re.M)
