@@ -360,9 +360,9 @@ int main(int argc, char *argv[])
 		}
 	}
 	//-----------------------------------------------------
-	ofstream file_ent(output_prefix + ".entropy.dat");
-	file_ent << "#time\tS_2\tOSEE(center)\tdBondDim(center)\tdBondDim(max)" << endl;
-	file_ent.precision(15);
+	ofstream entropy_file(output_prefix + ".entropy.dat");
+	entropy_file << "#time\tS_2\tOSEE(center)\tdBondDim(max)" << endl;
+	entropy_file.precision(15);
 	//-----------------------------------------------------
 	const int obs = param.longval("output_step");
 	auto start_evolve = steady_clock::now();
@@ -386,25 +386,27 @@ int main(int argc, char *argv[])
 				prev_step = time_step;
 
 				const double t = n * tau;
-				//Some data about this time step
+				// Some data about this time step
 				cout << "Solution time t=" << n * tau << "\t----------------------------\n";
 
 				if (param.boolval("b_force_rho_Hermitian") != 0)
 					C.MakeRhoHermitian(argsRho);
 
 				const Cplx tr2 = C.trace_rho2();
-				const Real osee = OSEE(C.rho, N / 2); //This is not the entanglement entropy, but the operator-space entanglement entropy (OSEE) of rho, associated to a cut in the middle of te system (N/2)
+				const Real osee = OSEE(C.rho, N / 2);
+				// This is the operator-space entanglement entropy (OSEE) of rho, associated
+				// to a cut in the middle of the system (at the center bond)
 
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
-//				cout << "\tTr{rho}=" << C.trace_rho() << "\tTr{rho^2} =" << tr2 << "\tRényi Entropy S_2 =" << S_2
-				cout << "\tTr{rho}=" << C.trace_rho() << "\tRényi Entropy S_2 =" << S_2
+				cout << "\tTr{rho}=" << C.trace_rho() << "\tRényi Entropy S_2 =" << S_2 << "\tTr{rho^2} =" << tr2
 				     << "\n\tCenter bond dimension: " << bd << "\tMax bond dimension of rho: " << bd_max
 				     << "\n\tOperator Space Entropy at center bond :" << osee << endl;
-				file_ent << t << " \t" << S_2 << " \t" << osee << " \t" << bd << " \t" << bd_max << endl;
-				//-----------------------------------------------------------------------------------------
-				//compute the 1-q  observables and write them to file_1q
-				cout << "\tObservables:";
+				entropy_file << t << " \t" << S_2 << " \t" << osee << " \t" << bd_max << endl;
+
+				// --------------------------------------------------
+				// Compute 1-qubit observables and write them to file
+				// cout << "\tObservables:";
 				int count = 0;
 
 				for (long &i : sit)
@@ -413,7 +415,7 @@ int main(int argc, char *argv[])
 					{
 					  Cplx expectation_value;
 					  if (tolower(s[0]) == 'x')
-					    expectation_value = C.Expect("Sx", i);
+						expectation_value = C.Expect("Sx", i);
 					  if (tolower(s[0]) == 'y')
 					    expectation_value = C.Expect("Sy", i);
 					  if (tolower(s[0]) == 'z')
@@ -426,11 +428,12 @@ int main(int argc, char *argv[])
 					}
 //					file_1q << endl;
 				}
-				cout << "\n\t\t" << count << " 1-qubit expectation values have been computed and written to a file.";
-				file_1q << endl; //Skip a line between each time step
+				file_1q << endl; // Skip a line between each time step
 				file_1q.flush();
-		        //-----------------------------------------------------------------------------------------
-				//compute the 2-q  observables and write them to file_2q
+				cout << "\n\t" << count << " 1-qubit expectation values saved to file.";
+
+		        // --------------------------------------------------
+				// Compute 2-qubit observables and write them to file
 				count = 0;
 				for (unsigned int n = 0; n < sit2.size(); n += 2)
 				{
@@ -448,9 +451,10 @@ int main(int argc, char *argv[])
 						count++;
 					}
 				}
-				cout << "\n\t\t" << count << " 2-qubit expectation values (correlations) have been computed and written to a file.\n";
 				file_2q << endl; //Skip a line between each time step
 				file_2q.flush();
+				cout << "\n\t" << count << " 2-qubit expectation values (correlations) saved to file.\n";
+
 	        //-----------------------------------------------------------------------------------------
 			}
 			else
