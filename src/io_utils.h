@@ -75,65 +75,6 @@ vector<string> split(const string &s, char delimiter)
   split(s, delimiter, elems);
   return elems;
 }
-//____________________________________________________________
-class Parameters_old : public map<string, double>
-{
-public:
-  double val(string var_name) const
-  {
-    map<string, double>::const_iterator it = find(var_name);
-    if (it == end())
-    {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-      return 0;
-    }
-    else
-      return it->second;
-  }
-  long longval(string var_name) const
-  {
-    double v = val(var_name);
-    if (abs(double(round(v)) - v) < 1e-6)
-    {
-      return long(round(v));
-    }
-    else
-    {
-      cerr << "Error, parameter " << var_name << "=" << v << " is not a long" << endl, exit(1);
-      return 0;
-    }
-  }
-  void PRint(ostream &o) const
-  {
-    for (map<string, double>::const_iterator it = begin(); it != end(); it++)
-    {
-      o << it->first << "=" << it->second << endl;
-    }
-  }
-  void ReadArguments(int argc, char *argv[])
-  {
-    for (int n = 1; n < argc; n++)
-    {
-      string var_name(argv[n]);
-      map<string, double>::const_iterator it = find(var_name);
-
-      if (it != end())
-      {
-        n++;
-        if (n == argc)
-          cerr << "Error: missing value after " << var_name << endl, exit(1);
-        operator[](var_name) = char2double(argv[n]);
-      }
-      else
-      {
-        cerr << "Error :" << var_name << endl;
-        cout << "List of command-line parameters :\n";
-        PRint(cout);
-        exit(1);
-      }
-    }
-  }
-};
 
 // trim a string 
 void trim(string &s)
@@ -266,11 +207,11 @@ public:
       return (it->second);
   }
   //------------------------------------------------------
-  void PRint(ostream &o) const
+  void Print(ostream &o) const
   {
     for (map<string, string>::const_iterator it = begin(); it != end(); it++)
     {
-      o << it->first << "=" << it->second << endl;
+      o << it->first << " = " << it->second << endl;
     }
   }
   //------------------------------------------------------
@@ -292,7 +233,7 @@ public:
       {
         cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n";
         cout << "List of command-line parameters :\n";
-        PRint(cout);
+        Print(cout);
         exit(1);
       }
     }
@@ -377,3 +318,65 @@ public:
   }
 };
 #endif
+
+/*
+//____________________________________________________________
+class Parameters_old : public map<string, double>
+{
+public:
+  double val(string var_name) const
+  {
+    map<string, double>::const_iterator it = find(var_name);
+    if (it == end())
+    {
+      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      return 0;
+    }
+    else
+      return it->second;
+  }
+  long longval(string var_name) const
+  {
+    double v = val(var_name);
+    if (abs(double(round(v)) - v) < 1e-6)
+    {
+      return long(round(v));
+    }
+    else
+    {
+      cerr << "Error, parameter " << var_name << "=" << v << " is not a long" << endl, exit(1);
+      return 0;
+    }
+  }
+  void Print(ostream &o) const
+  {
+    for (map<string, double>::const_iterator it = begin(); it != end(); it++)
+    {
+      o << it->first << "=" << it->second << endl;
+    }
+  }
+  void ReadArguments(int argc, char *argv[])
+  {
+    for (int n = 1; n < argc; n++)
+    {
+      string var_name(argv[n]);
+      map<string, double>::const_iterator it = find(var_name);
+
+      if (it != end())
+      {
+        n++;
+        if (n == argc)
+          cerr << "Error: missing value after " << var_name << endl, exit(1);
+        operator[](var_name) = char2double(argv[n]);
+      }
+      else
+      {
+        cerr << "Error :" << var_name << endl;
+        cout << "List of command-line parameters :\n";
+        Print(cout);
+        exit(1);
+      }
+    }
+  }
+};
+*/

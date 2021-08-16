@@ -222,7 +222,6 @@ class LindbladMPOSolver:
 			words = line.strip().split()
 			if not words:
 				continue
-			words[0] = words[0].lstrip('#')
 			result[(int(words[2]), words[0], float(words[1]))] = float(str(words[3]))
 		file.close()
 		return result
