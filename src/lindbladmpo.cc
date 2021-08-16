@@ -393,13 +393,14 @@ int main(int argc, char *argv[])
 					C.MakeRhoHermitian(argsRho);
 
 				const Cplx tr2 = C.trace_rho2();
-				const Real osee = OSEE(C.rho, N / 2); //This is not the enanglement entropy, but the operator-space entanglement entropy (OSEE) of rho, associated to a cut in the middle of te system (N/2)
+				const Real osee = OSEE(C.rho, N / 2); //This is not the entanglement entropy, but the operator-space entanglement entropy (OSEE) of rho, associated to a cut in the middle of te system (N/2)
 
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
-				cout << "\tTrace[rho]=" << C.trace_rho() << "\tTr{rho^2} =" << tr2 << "\tRényi Entropy S_2 =" << S_2
-				     << "\n\tCenter-bond dimension for rho:" << bd << "\tMax bond dimension of rho:" << bd_max
-				     << "\n\tOperator Space Entropy @center bond :" << osee << endl;
+//				cout << "\tTr{rho}=" << C.trace_rho() << "\tTr{rho^2} =" << tr2 << "\tRényi Entropy S_2 =" << S_2
+				cout << "\tTr{rho}=" << C.trace_rho() << "\tRényi Entropy S_2 =" << S_2
+				     << "\n\tCenter bond dimension: " << bd << "\tMax bond dimension of rho: " << bd_max
+				     << "\n\tOperator Space Entropy at center bond :" << osee << endl;
 				file_ent << t << " \t" << S_2 << " \t" << osee << " \t" << bd << " \t" << bd_max << endl;
 				//-----------------------------------------------------------------------------------------
 				//compute the 1-q  observables and write them to file_1q
