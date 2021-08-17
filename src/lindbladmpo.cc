@@ -279,18 +279,20 @@ int main(int argc, char *argv[])
 	}
 	*/
 	//-----------------------------------------------------
-	cout << "Compute exp(i*tau*Linblad) as an MPO... ";
+	cout << "Compute exp(i*tau*L) as an MPO... ";
 	cout.flush();
 
+	const double t_0 = param.val("t_0");
 	const double tau = param.val("tau");
+	const double t_f = param.val("t_final");
+	const double t_total = t_f - t_0;
 	const int o = param.val("Trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
 	TE.init(tau, C.Lindbladian, argsRho, o);
 	cout << "done.\n";
 	cout.flush();
 	cout << "Largest bond dimension of exp(tau*L)  (MPO):" << maxLinkDim(TE.expL1) << endl;
-	double ttotal = param.val("t_final");
-	const int nt = int(ttotal / tau + (1e-9 * (ttotal / tau)));
+	const int n_steps = int(t_total / tau + (1e-9 * (t_total / tau)));
 
 	string output_prefix = param.stringval("output_files_prefix");
 	output_prefix += ".N=" + to_string(N);
@@ -364,7 +366,7 @@ int main(int argc, char *argv[])
 	entropy_file << "#time\tRe{Tr{rho}}\tS_2\tOSEE(center)\tBondDimension(max)\ttot_duration(ms)" << endl;
 	entropy_file.precision(15);
 	//-----------------------------------------------------
-	const int obs = param.longval("output_step");
+	const int output_step = param.longval("output_step");
 
 	auto t_init_end = steady_clock::now();
 	auto duration_ms = duration_cast<milliseconds>(t_init_end - t_start_sim);
@@ -372,20 +374,20 @@ int main(int argc, char *argv[])
 
 	char buf[100];
 	const bool b_force_rho_Hermitian = param.boolval("b_force_rho_Hermitian");
-	for (int n = 0; n <= nt; n++)
+	for (int n = 0; n <= n_steps; n++)
 	{
-		const double t = n * tau;
+		const double t = t_0 + n * tau;
 		// Print data about this time step
-		auto t_step = steady_clock::now();
-		auto tot_duration = duration_cast<milliseconds>(t_step - t_start_sim);
+		auto t_now = steady_clock::now();
+		auto tot_duration = duration_cast<milliseconds>(t_now - t_start_sim);
 		sprintf(buf, "%.2fhr", tot_duration.count() / 3600000.);
-		cout << "\nSolution time t = " << n * tau << "\t----------------------";
+		cout << "\nSolution time t = " << t << "\t----------------------";
 		cout << "\tTotal simulation duration: " << buf << endl;
-		if (obs > 0)
+		if (output_step > 0)
 		{
-			if ((n % obs) == 0 || n == nt)
+			if ((n % output_step) == 0 || n == n_steps)
 			{
-			// Print and save output data at initial time, final time, and every obs timesteps
+			// Print and save output data at initial time, final time, and every output_step timesteps
 
 				if (b_force_rho_Hermitian)
 					C.MakeRhoHermitian(argsRho);
@@ -469,7 +471,7 @@ int main(int argc, char *argv[])
 	        //-----------------------------------------------------------------------------------------
 			}
 		}
-		if (n < nt)
+		if (n < n_steps)
 		{
 			cout << "\t" << "Time evolving the state -> ";
 			auto t_evolve_start = steady_clock::now();

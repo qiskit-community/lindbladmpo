@@ -13,7 +13,8 @@ public:
         //The parameters below concern the simulation algorithm and approximations, these parameters are not model-specific
         //THe model-specific parametrs should be defined in ModelParameters.h
 
-        operator[]("t_final") = "1";            //Total (final) time
+        operator[]("t_0") = "0";            //Total (final) time
+        operator[]("t_final") = "1";            //Final time
         operator[]("tau") = "0.1";        //time step for the time evolution (should be small for better accuracy)
         operator[]("output_step") = "1";          //How often (in units of tau) shall we compute (and write to disk) the observables (just <Sz_i> etc. ). Set to zero if you do not want any observable to be computed
 
