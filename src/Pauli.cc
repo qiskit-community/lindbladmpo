@@ -512,9 +512,9 @@ void SpinHalfSystem::MakeRhoHermitian(Args args)
   }
 	rho.plusEq(rd, args);
 	rho *= 0.5;
-	cout << maxLinkDim(rho) << endl;
+	cout << maxLinkDim(rho);
 	auto time_end = steady_clock::now();
 	auto duration = duration_cast<milliseconds>(time_end - time_step);
-	cout << ", duration: " << duration.count() / 1000. << "s";
+	cout << ", duration: " << duration.count() / 1000. << "s" << endl;
 	cout.flush();
 }

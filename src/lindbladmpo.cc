@@ -381,7 +381,7 @@ int main(int argc, char *argv[])
 			{
 				auto time_step = steady_clock::now();
 				duration = duration_cast<milliseconds>(time_step - prev_step);
-				cout << "\nTime since previous printout: " << duration.count() / 1000. << "s";
+//				cout << "\nTime since previous printout: " << duration.count() / 1000. << "s";
 
 				auto tot_duration = duration_cast<seconds>(time_step - start_sim);
 				sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
 
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
-				cout << "\tTr{rho}=" << C.trace_rho() << "\tRényi Entropy S_2 =" << S_2 << "\tTr{rho^2} =" << tr2
+				cout << "\tTr{rho}=" << C.trace_rho() << "\tRényi Entropy S_2 =" << S_2 // << "\tTr{rho^2} =" << tr2
 				     << "\n\tCenter bond dimension: " << bd << "\tMax bond dimension of rho: " << bd_max
 				     << "\n\tOperator Space Entropy at center bond :" << osee << endl;
 				entropy_file << t << " \t" << S_2 << " \t" << osee << " \t" << bd_max << endl;
