@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 {
 	ModelParameters param;
 
-	auto start_sim = steady_clock::now();
+	auto t_start_sim = steady_clock::now();
 	// Start tracking simulation time
 
 	// Read the input parameters given in the command line. Default values are substituted for all
@@ -366,51 +366,44 @@ int main(int argc, char *argv[])
 	//-----------------------------------------------------
 	const int obs = param.longval("output_step");
 
-	auto start_evolve = steady_clock::now();
-	auto duration = duration_cast<milliseconds>(start_evolve - start_sim);
-	cout << "\nSimulation initialization duration: " << duration.count() / 1000. << "s" << endl;
-	auto prev_step = steady_clock::now();
+	auto t_init_end = steady_clock::now();
+	auto duration_ms = duration_cast<milliseconds>(t_init_end - t_start_sim);
+	cout << "\nSimulation initialization duration: " << duration_ms.count() / 1000. << "s" << endl;
 
 	char buf[100];
 	const bool b_force_rho_Hermitian = param.boolval("b_force_rho_Hermitian");
 	for (int n = 0; n <= nt; n++)
 	{
+		const double t = n * tau;
+		// Print data about this time step
+		cout << "Solution time t = " << n * tau << "\t----------------------------\n";
 		if (obs > 0)
 		{
 			if ((n % obs) == 0 || n == nt)
 			{
-				auto time_step = steady_clock::now();
-				duration = duration_cast<milliseconds>(time_step - prev_step);
-//				cout << "\nTime since previous printout: " << duration.count() / 1000. << "s";
-
-				auto tot_duration = duration_cast<seconds>(time_step - start_sim);
-				sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
-				cout << ".\tTotal simulation duration: " << buf << endl;
-				prev_step = time_step;
-
-				const double t = n * tau;
-				// Some data about this time step
-				cout << "Solution time t = " << n * tau << "\t----------------------------\n";
+			// Print and save output data at initial time, final time, and every obs timesteps
 
 				if (b_force_rho_Hermitian)
 					C.MakeRhoHermitian(argsRho);
 
+				tr = C.trace_rho();
 				const Cplx tr2 = C.trace_rho2();
 				const Real osee = OSEE(C.rho, N / 2);
 				// This is the operator-space entanglement entropy (OSEE) of rho, associated
 				// to a cut in the middle of the system (at the center bond)
-
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
-				cout << "\tTr{rho}=" << C.trace_rho() << "\tRényi Entropy S_2 =" << S_2 // << "\tTr{rho^2} =" << tr2
-				     << "\n\tCenter bond dimension: " << bd << "\tMax bond dimension of rho: " << bd_max
-				     << "\n\tOperator Space Entropy at center bond :" << osee << endl;
+
+				cout << "\tTr{rho}=" << tr << ",\tRényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
+				     << "\n\tCenter bond dimension: " << bd << ",\tMax bond dimension: " << bd_max
+				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
+
 				entropy_file << t << " \t" << S_2 << " \t" << osee << " \t" << bd_max << endl;
 
 				// --------------------------------------------------
 				// Compute 1-qubit observables and write them to file
-				// cout << "\tObservables:";
 				int count = 0;
+				auto t_1q_start = steady_clock::now();
 
 				for (long &i : sit)
 				{
@@ -433,8 +426,12 @@ int main(int argc, char *argv[])
 				}
 				file_1q << endl; // Skip a line between each time step
 				file_1q.flush();
-				cout << "\n\t" << count << " 1-qubit expectation values saved to file.";
-
+				auto t_1q_end = steady_clock::now();
+				if (count)
+				{
+					duration_ms = duration_cast<milliseconds>(t_1q_end - t_1q_start);
+					cout << "\n\t" << count << " 1-qubit expectation values saved to file, duration: " << duration_ms.count() / 1000. << "s";
+				}
 		        // --------------------------------------------------
 				// Compute 2-qubit observables and write them to file
 				count = 0;
@@ -456,19 +453,28 @@ int main(int argc, char *argv[])
 				}
 				file_2q << endl; //Skip a line between each time step
 				file_2q.flush();
-				cout << "\n\t" << count << " 2-qubit expectation values (correlations) saved to file.\n";
+				auto t_2q_end = steady_clock::now();
+				if (count)
+				{
+					duration_ms = duration_cast<milliseconds>(t_2q_end - t_1q_end);
+					cout << "\n\t" << count << " 2-qubit expectation values saved to file, duration: " << duration_ms.count() / 1000. << "s";
+				}
+				cout << endl;
 
 	        //-----------------------------------------------------------------------------------------
-			}
-			else
-			{
-				cout << ".";
-				cout.flush();
 			}
 		}
 		if (n < nt)
 		{
+			cout << "\t" << "Time evolving the state -> ";
+			auto t_evolve_start = steady_clock::now();
 			TE.evolve(C.rho);
+			auto t_evolve_end = steady_clock::now();
+			duration_ms = duration_cast<milliseconds>(t_evolve_end - t_evolve_start);
+			auto tot_duration = duration_cast<seconds>(t_evolve_end - t_start_sim);
+			cout << "done. Duration: " << duration_ms.count() / 1000. << "s";
+			sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
+			cout << ",\tTotal duration so far: " << buf << endl;
 			Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
 			if (std::abs(z - 1) > 1e-2)
 				cout << "Warning: Tr[rho]<>1 :" << z << endl;
@@ -489,8 +495,8 @@ int main(int argc, char *argv[])
 		cout << "The final state was saved to disk, using 3 files:\n" << f1 << endl << f2 << endl << f3 << endl;
 	}
 	cout << endl;
-	auto end_sim = steady_clock::now();
-	auto tot_duration = duration_cast<seconds>(end_sim - start_sim);
+	auto t_end_sim = steady_clock::now();
+	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
 	cout << "\nTotal simulation duration: " << buf << endl;
 	return 0;
