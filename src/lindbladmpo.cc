@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		param.ReadFromFile(inputfilename);
 	// Now `param` contains all parameters.
 
-	cout.precision(10);
+	cout.precision(8);
 	cout << endl;
 	//param.check();
 	param.Print(cout);
@@ -394,8 +394,8 @@ int main(int argc, char *argv[])
 		auto t_now = steady_clock::now();
 		auto tot_duration = duration_cast<milliseconds>(t_now - t_start_sim);
 		sprintf(buf, "%.2fhr", tot_duration.count() / 3600000.);
-		cout << "\nSolution time t = " << t << "\t----------------------";
-		cout << "\tTotal simulation duration: " << buf << endl;
+		cout << "\nSolution time t = " << t << " ----------------------";
+		cout << " Total run duration: " << buf << endl;
 		if (output_step > 0)
 		{
 			if ((n % output_step) == 0 || n == n_steps)
@@ -413,8 +413,8 @@ int main(int argc, char *argv[])
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
 
-				cout << "\tTr{rho}=" << tr << ",\tRényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
-				     << "\n\tCenter bond dimension: " << bd << ",\tMax bond dimension: " << bd_max
+				cout << "\tTr{rho}=" << tr << ", Rényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
+				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
 				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
 				entropy_file << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max

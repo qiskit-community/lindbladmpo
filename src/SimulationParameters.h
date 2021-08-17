@@ -19,9 +19,9 @@ public:
         operator[]("output_step") = "1";          //How often (in units of tau) shall we compute (and write to disk) the observables (just <Sz_i> etc. ). Set to zero if you do not want any observable to be computed
 
         operator[]("Trotter_order") = "4"; //Possible choices are 2,3,4. 3 or 4 are recommended.
-        operator[]("max_dim_rho") = "500";  //maximum bond dimension for density matrices
+        operator[]("max_dim_rho") = "1024";  //maximum bond dimension for density matrices
         operator[]("min_dim_rho") = "1";  //minimum bond dimension for density matrices
-        operator[]("cut_off_rho") = "1e-9"; //maximum truncation error  for density matrices
+        operator[]("cut_off_rho") = "0"; //maximum truncation error for density matrices
         operator[]("b_force_rho_trace") = "1";  // We do rho/=trace{rho} at every time step, to keep trace[rho]=1, irrespectively of finite-step errors
         operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors
         operator[]("b_initial_rho_orthogonalization") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation

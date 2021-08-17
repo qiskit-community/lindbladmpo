@@ -103,8 +103,8 @@ class LindbladMPOSolver:
 		print("Creating solver input file:")
 		print(s_input_file)
 		AB_indices = False
-		A_bond_indices = []
-		B_bond_indices = []
+		first_bond_indices = []
+		second_bond_indices = []
 		interactions = []
 		if 'J' in parameters.keys():
 			if type(parameters['J']) == np.ndarray:
@@ -119,8 +119,8 @@ class LindbladMPOSolver:
 				for i in range(parameters['J'].shape[0]):
 					for j in range(parameters['J'].shape[1]):
 						if parameters['J'][i, j] != 0 or parameters['J_z'][i, j] != 0:
-							A_bond_indices.append(i + 1)
-							B_bond_indices.append(j + 1)
+							first_bond_indices.append(i + 1)
+							second_bond_indices.append(j + 1)
 			else:
 				raise Exception("J and J_z are not of the same size, aborting program.")
 		elif len(interactions) == 1:
@@ -128,8 +128,8 @@ class LindbladMPOSolver:
 			for i in range(parameters[interactions[0]].shape[0]):
 				for j in range(parameters[interactions[0]].shape[1]):
 					if parameters[interactions[0]][i, j] != 0:
-						A_bond_indices.append(i + 1)
-						B_bond_indices.append(j + 1)
+						first_bond_indices.append(i + 1)
+						second_bond_indices.append(j + 1)
 		for key in parameters.keys():
 			if key == "b_unique_id":
 				pass
@@ -139,10 +139,10 @@ class LindbladMPOSolver:
 				# check if to create bond indices arrays
 				not_first_value = False
 				file.write(key + " = ")
-				for i in range(len(A_bond_indices)):
+				for i in range(len(first_bond_indices)):
 					if not_first_value:
 						file.write(",")
-					file.write(str(parameters[key][A_bond_indices[i] - 1, B_bond_indices[i] - 1]))
+					file.write(str(parameters[key][first_bond_indices[i] - 1, second_bond_indices[i] - 1]))
 					not_first_value = True
 				file.write("\n")
 			elif type(parameters[key]) == np.ndarray:
@@ -162,9 +162,9 @@ class LindbladMPOSolver:
 			else:
 				file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
 		if AB_indices:
-			file.write("A_bond_indices = " + str(A_bond_indices).strip("[]").replace(' ', '') + "\n")
-			file.write("B_bond_indices = " + str(B_bond_indices).strip("[]").replace(' ', '') + "\n")
-		s_input_file = os.path.abspath(file.name).replace("\\","/")
+			file.write("first_bond_indices = " + str(first_bond_indices).strip("[]").replace(' ', '') + "\n")
+			file.write("second_bond_indices = " + str(second_bond_indices).strip("[]").replace(' ', '') + "\n")
+		s_input_file = os.path.abspath(file.name).replace("\\", "/")
 		file.close()
 		return s_input_file, s_output_path + s_N_suffix, s_id_suffix, s_N_suffix
 
