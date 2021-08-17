@@ -361,16 +361,18 @@ int main(int argc, char *argv[])
 	}
 	//-----------------------------------------------------
 	ofstream entropy_file(output_prefix + ".entropy.dat");
-	entropy_file << "#time\tS_2\tOSEE(center)\tdBondDim(max)" << endl;
+	entropy_file << "#time\tS_2\tOSEE(center)\tBondDimension(max)" << endl;
 	entropy_file.precision(15);
 	//-----------------------------------------------------
 	const int obs = param.longval("output_step");
+
 	auto start_evolve = steady_clock::now();
 	auto duration = duration_cast<milliseconds>(start_evolve - start_sim);
-	cout << "\nSimulation duration so far: " << duration.count() / 1000. << "s" << endl;
+	cout << "\nSimulation initialization duration: " << duration.count() / 1000. << "s" << endl;
 	auto prev_step = steady_clock::now();
 
 	char buf[100];
+	const bool b_force_rho_Hermitian = param.boolval("b_force_rho_Hermitian");
 	for (int n = 0; n <= nt; n++)
 	{
 		if (obs > 0)
@@ -380,6 +382,7 @@ int main(int argc, char *argv[])
 				auto time_step = steady_clock::now();
 				duration = duration_cast<milliseconds>(time_step - prev_step);
 				cout << "\nTime since previous printout: " << duration.count() / 1000. << "s";
+
 				auto tot_duration = duration_cast<seconds>(time_step - start_sim);
 				sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
 				cout << ".\tTotal simulation duration: " << buf << endl;
@@ -387,9 +390,9 @@ int main(int argc, char *argv[])
 
 				const double t = n * tau;
 				// Some data about this time step
-				cout << "Solution time t=" << n * tau << "\t----------------------------\n";
+				cout << "Solution time t = " << n * tau << "\t----------------------------\n";
 
-				if (param.boolval("b_force_rho_Hermitian") != 0)
+				if (b_force_rho_Hermitian)
 					C.MakeRhoHermitian(argsRho);
 
 				const Cplx tr2 = C.trace_rho2();

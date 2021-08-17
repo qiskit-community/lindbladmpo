@@ -14,6 +14,9 @@
 #include "mps_mpo_utils.h"
 #include "itensor/all.h"
 #include <string>
+#include <chrono>
+
+using namespace std::chrono;
 
 PauliSite::PauliSite() {}
 PauliSite::PauliSite(Index I) : s(I) {}
@@ -457,11 +460,11 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
 
 void SpinHalfSystem::MakeRhoHermitian(Args args)
 {
-
-  cout << "\tMakeRhoHermitian(): max bond-dim:" << maxLinkDim(rho) << " -> ";
-  cout.flush();
-  MPS rd(rho); //Copy
-  //Now we take the Hermitian conjugate of rd
+	auto time_step = steady_clock::now();
+	cout << "\tMaking rho Hermitian, max bond-dim: " << maxLinkDim(rho) << " -> ";
+	cout.flush();
+	MPS rd(rho); // Copy
+	// Next, take the Hermitian conjugate of rd
   for (int i = 1; i <= N; i += N - 1)
   {
     ITensor &U = rd.ref(i);
@@ -507,8 +510,11 @@ void SpinHalfSystem::MakeRhoHermitian(Args args)
       }
     }
   }
-  rho.plusEq(rd, args);
-  rho *= 0.5;
-  cout << maxLinkDim(rho) << endl;
-  cout.flush();
+	rho.plusEq(rd, args);
+	rho *= 0.5;
+	cout << maxLinkDim(rho) << endl;
+	auto time_end = steady_clock::now();
+	auto duration = duration_cast<milliseconds>(time_end - time_step);
+	cout << ", duration: " << duration.count() / 1000. << "s";
+	cout.flush();
 }
