@@ -25,12 +25,15 @@ public:
     {
         //Specify below all the allowed parameter names,
         //and their default values
-        operator[]("N") = "0"; //Number of qubits in the case of a used-defined lattice. If 0 => square lattice defined by the parameters above
+        operator[]("N") = "4"; // Number of qubits in the case of a used-defined lattice.
+        // If N = 0, the total number of qubits is taken to be l_x * l_y (which must be both nonzero).
+        // The Python interface does not provide a default value (requires a user assignment), but here
+        // we assign a default value of 4 to allow running the solver from the command line for testing.
 
         //Parameters of the single-qubit Hamiltonian part of the model
-        operator[]("h_x") = "0";     // magnetic field in the x direction. Note: h_x(sigma^+ + sigma^-)/2 = h_x*sigma^x/2 = h_x*S^x
-        operator[]("h_y") = "0";     // magnetic field in the y direction. Note:                            h_y*sigma^y/2 = h_y*S^y
-        operator[]("h_z") = "0";     // magnetic field in the z direction. Note:                            h_z*sigma^z/2 = h_z*S^z
+        operator[]("h_x") = "0"; // magnetic field in the x direction. Note: h_x(sigma^+ + sigma^-)/2 = h_x*sigma^x/2 = h_x*S^x
+        operator[]("h_y") = "0"; // magnetic field in the y direction. Note:                            h_y*sigma^y/2 = h_y*S^y
+        operator[]("h_z") = "0"; // magnetic field in the z direction. Note:                            h_z*sigma^z/2 = h_z*S^z
 
         //Losses / dissipation
         operator[]("g_0") = "0"; // Strength of the excitation term
@@ -38,17 +41,17 @@ public:
         operator[]("g_2") = "0"; // Strength of the dephasing term
 
         //Parameters of the interaction Hamiltonian
-        operator[]("J") = "0";       //Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single value, or a list of values
-        operator[]("J_z") = "0";       //Sz-Sz Interaction strength. This parameter can either be a single value, or a list of values
+        operator[]("J") = "0";   // Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single value, or a list of values
+        operator[]("J_z") = "0"; // Sz-Sz Interaction strength. This parameter can either be a single value, or a list of values
 
         //Lattice specification
         operator[]("b_periodic_x") = "false"; // if true -> periodic boundary conditions in the x direction (Warining: potential huge cost in terms of bond dimension)
         operator[]("b_periodic_y") = "false"; // if true -> periodic boundary conditions in the y direction
-        operator[]("l_x") = "4";               //Small system by default
+        operator[]("l_x") = "0"; // The default setting of l_x = 0, l_y = 1 will construct a 1D chain of length N.
         operator[]("l_y") = "1";
-        //Instead of the lattice defined by tha above options, one can provide an explicit list of the couplings between qubits
-        operator[]("A_bond_indices") = ""; //List of site indices
-        operator[]("B_bond_indices") = ""; //List of site indices
+        // Instead of the lattice defined by tha above options, the user can provide an explicit list of the couplings between qubits
+        operator[]("first_bond_indices") = ""; // List of indices, first site of each bond
+        operator[]("second_bond_indices") = ""; // List of indices, second site of each bond
 
         //1-qubit observables
         operator[]("1q_components") = "z"; // Vector of components
@@ -58,17 +61,6 @@ public:
         // Vector of components. Each element should have two letters. For instance XY means that <sigma^x(i)sigma^y(j)> will be computed for the pairs i,j specified in the argument "2q_sites".
         operator[]("2q_components") = "zz";
         operator[]("2q_sites") = ""; // Vector of long integers i1,j1,i2,j2,.... If left empty => equivalent to all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
-    }
-    void check()
-    {
-        int Lx = longval("l_x");
-        int Ly = longval("l_y");
-        const int N = Lx * Ly;
-
-        if (Lx < 1 || Ly < 1)
-            cerr << "Error in the lattice parameters l_x=" << Lx << " l_y=" << Ly << endl, exit(1);
-        if (N <= 1)
-            cerr << "Error, this code assumes that the system has at least 2 sites.\n", exit(1);
     }
 };
 

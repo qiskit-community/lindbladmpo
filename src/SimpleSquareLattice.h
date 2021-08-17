@@ -30,8 +30,8 @@ public:
   Lattice2d(int N_, vector<long> A, vector<long> B) : N(N_), predefined(false), predefined_chain(false)
   {
     cout << "A=" << A << "\nB=" << B << endl;
-    if (N < 1)
-      cerr << "Error: the number of sites N=" << N_ << " should be >= 1.\n", exit(1);
+    if (N < 2)
+      cerr << "Error: the number of sites N = " << N_ << ", must be >= 2.\n", exit(1);
     const unsigned int n = A.size();
     if (n != B.size())
       cerr << "Error: the two lists of sites have size " << A.size() << " and " << B.size() << " but they should be identical.\n", exit(1);
@@ -57,9 +57,11 @@ public:
       cout << J << endl;
     }
   }
-  // Creation of a Lx*Ly square lattice with or without periodic boundary conditions in the x and y direction
+  // Creation of a Lx * Ly square lattice with or without periodic boundary conditions in the x and y direction
   Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly), predefined(true)
   {
+    if (N < 2)
+      cerr << "Error: the number of sites N = " << N << ", must be >= 2.\n", exit(1);
     predefined_chain = (Ly == 1) ? (true) : (false);
     bool up;
     int n = 0;

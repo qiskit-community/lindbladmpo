@@ -46,25 +46,38 @@ int main(int argc, char *argv[])
 	//param.check();
 	param.Print(cout);
 
+	Lattice2d lattice;
+	int N = param.longval("N");
 	int Lx = param.longval("l_x");
 	int Ly = param.longval("l_y");
-	int N;
-	Lattice2d lattice;
-	if (Lx < 0 || Ly < 0)
-		cerr << "Error, invalid (l_x, l_y)=" << Lx << "," << Ly << ".\n", exit(1);
-	if (Lx > 0 && Ly > 0)
+	vector<long> A = param.longvec("first_bond_indices");
+	vector<long> B = param.longvec("second_bond_indices");
+    const unsigned int n_bonds = A.size();
+
+	if (n_bonds)
 	{
-		//Square lattice
-		N = Lx * Ly;
-		lattice = Lattice2d(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
+		// A user-defined lattice given explicitly using the bond couplings. In this case,
+		// the number of qubits is taken to be N (validated in ``Lattice2d``, and l_x, l_y
+		// parameters must take their default values, otherwise it's inconsistent
+		if (!(Lx == 0 && Ly == 1))
+			cerr << "Error, when bond couplings are specified explicitly, the parameters "
+				"(l_x, l_y) must be left at their default values (0, 1).\n", exit(1);
+		lattice = Lattice2d(N, A, B);
 	}
 	else
 	{
-		//User-defined lattice
-		N = param.longval("N");
-		if (N < 1)
-			cerr << "Error, invalid N=" << N << ".\n", exit(1);
-		lattice = Lattice2d(N, param.longvec("A_bond_indices"), param.longvec("B_bond_indices"));
+		// A square lattice
+		if (Lx > 0 && Ly > 0)
+		{
+			// If N is nonzero, it has to be consistent with l_x, l_y
+			if (N > 0 && N != Lx * Ly)
+				cerr << "Error, invalid N = " << N << ", not equal to l_x * l_y.\n", exit(1);
+		}
+		else if (Lx == 0 && Ly == 1)
+			Lx = N;
+		else
+			cerr << "Error, invalid (l_x, l_y) = " << Lx << "," << Ly << ".\n", exit(1);
+		lattice = Lattice2d(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
 	}
 
 	SpinHalfSystem C(N);
@@ -282,7 +295,7 @@ int main(int argc, char *argv[])
 	cout << "Compute exp(i*tau*L) as an MPO... ";
 	cout.flush();
 
-	const double t_0 = param.val("t_0");
+	const double t_0 = param.val("t_init");
 	const double tau = param.val("tau");
 	const double t_f = param.val("t_final");
 	const double t_total = t_f - t_0;
