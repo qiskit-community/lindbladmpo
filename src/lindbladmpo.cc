@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
 	}
 	//-----------------------------------------------------
 	ofstream entropy_file(output_prefix + ".global.dat");
-	entropy_file << "#time\tRe{Tr{rho}}\tS_2\tOSEE(center)\tBondDimension(max)\ttot_duration(hr)" << endl;
+	entropy_file << "#time\tRe{Tr{rho}}\tS_2\tOSEE(center)\tBondDimension(max)\ttot_duration(ms)" << endl;
 	entropy_file.precision(15);
 	//-----------------------------------------------------
 	const int obs = param.longval("output_step");
@@ -377,10 +377,10 @@ int main(int argc, char *argv[])
 		const double t = n * tau;
 		// Print data about this time step
 		auto t_step = steady_clock::now();
-		auto tot_duration = duration_cast<seconds>(t_step - t_start_sim);
-		sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
-		cout << "\nSolution time t = " << n * tau << "\t--------------------------";
-		cout << ",\tTotal simulation duration: " << buf << endl;
+		auto tot_duration = duration_cast<milliseconds>(t_step - t_start_sim);
+		sprintf(buf, "%.2fhr", tot_duration.count() / 3600000.);
+		cout << "\nSolution time t = " << n * tau << "\t----------------------";
+		cout << "\tTotal simulation duration: " << buf << endl;
 		if (obs > 0)
 		{
 			if ((n % obs) == 0 || n == nt)
@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
 				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
 				entropy_file << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max
-				        << " \t" << buf << endl;
+				        << " \t" << tot_duration.count() << endl;
 
 				// --------------------------------------------------
 				// Compute 1-qubit observables and write them to file
