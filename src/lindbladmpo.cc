@@ -360,8 +360,8 @@ int main(int argc, char *argv[])
 		}
 	}
 	//-----------------------------------------------------
-	ofstream entropy_file(output_prefix + ".entropy.dat");
-	entropy_file << "#time\tS_2\tOSEE(center)\tBondDimension(max)" << endl;
+	ofstream entropy_file(output_prefix + ".global.dat");
+	entropy_file << "#time\tRe{Tr{rho}}\tS_2\tOSEE(center)\tBondDimension(max)\ttot_duration(hr)" << endl;
 	entropy_file.precision(15);
 	//-----------------------------------------------------
 	const int obs = param.longval("output_step");
@@ -376,7 +376,11 @@ int main(int argc, char *argv[])
 	{
 		const double t = n * tau;
 		// Print data about this time step
-		cout << "Solution time t = " << n * tau << "\t----------------------------\n";
+		auto t_step = steady_clock::now();
+		auto tot_duration = duration_cast<seconds>(t_step - t_start_sim);
+		sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
+		cout << "\nSolution time t = " << n * tau << "\t--------------------------";
+		cout << ",\tTotal simulation duration: " << buf << endl;
 		if (obs > 0)
 		{
 			if ((n % obs) == 0 || n == nt)
@@ -398,7 +402,8 @@ int main(int argc, char *argv[])
 				     << "\n\tCenter bond dimension: " << bd << ",\tMax bond dimension: " << bd_max
 				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
-				entropy_file << t << " \t" << S_2 << " \t" << osee << " \t" << bd_max << endl;
+				entropy_file << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max
+				        << " \t" << buf << endl;
 
 				// --------------------------------------------------
 				// Compute 1-qubit observables and write them to file
@@ -430,7 +435,7 @@ int main(int argc, char *argv[])
 				if (count)
 				{
 					duration_ms = duration_cast<milliseconds>(t_1q_end - t_1q_start);
-					cout << "\n\t" << count << " 1-qubit expectation values saved to file, duration: " << duration_ms.count() / 1000. << "s";
+					cout << "\n\t" << count << " 1-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
 		        // --------------------------------------------------
 				// Compute 2-qubit observables and write them to file
@@ -457,7 +462,7 @@ int main(int argc, char *argv[])
 				if (count)
 				{
 					duration_ms = duration_cast<milliseconds>(t_2q_end - t_1q_end);
-					cout << "\n\t" << count << " 2-qubit expectation values saved to file, duration: " << duration_ms.count() / 1000. << "s";
+					cout << "\n\t" << count << " 2-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
 				cout << endl;
 
@@ -471,10 +476,8 @@ int main(int argc, char *argv[])
 			TE.evolve(C.rho);
 			auto t_evolve_end = steady_clock::now();
 			duration_ms = duration_cast<milliseconds>(t_evolve_end - t_evolve_start);
-			auto tot_duration = duration_cast<seconds>(t_evolve_end - t_start_sim);
-			cout << "done. Duration: " << duration_ms.count() / 1000. << "s";
-			sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
-			cout << ",\tTotal duration so far: " << buf << endl;
+			cout << "done. Duration: " << duration_ms.count() / 1000. << "s" << endl;
+
 			Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
 			if (std::abs(z - 1) > 1e-2)
 				cout << "Warning: Tr[rho]<>1 :" << z << endl;
@@ -494,7 +497,6 @@ int main(int argc, char *argv[])
 		writeToFile(f3, C.sites);
 		cout << "The final state was saved to disk, using 3 files:\n" << f1 << endl << f2 << endl << f3 << endl;
 	}
-	cout << endl;
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
