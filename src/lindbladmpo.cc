@@ -24,6 +24,7 @@ using namespace itensor;
 using namespace std;
 using namespace std::chrono;
 stream2d cout2;
+const string SOLVER_VERSION = "0.1.0";
 
 int main(int argc, char *argv[])
 {
@@ -50,6 +51,7 @@ int main(int argc, char *argv[])
 	vector<long> B = param.longvec("second_bond_indices");
     const unsigned int n_bonds = A.size();
 
+	stringstream strstr = stringstream();
 	if (n_bonds)
 	{
 		// A user-defined lattice given explicitly using the bond couplings. In this case,
@@ -58,7 +60,7 @@ int main(int argc, char *argv[])
 		if (!(Lx == 0 && Ly == 1))
 			cerr << "Error, when bond couplings are specified explicitly, the parameters "
 				"(l_x, l_y) must be left at their default values (0, 1).\n", exit(1);
-		lattice = Lattice2d(N, A, B);
+		lattice = Lattice2d(N, A, B, strstr);
 	}
 	else
 	{
@@ -74,7 +76,7 @@ int main(int argc, char *argv[])
 			Lx = N; // The Lattice2d() constructor below will verify N.
 		else
 			cerr << "Error, invalid (l_x, l_y) = " << Lx << "," << Ly << ".\n", exit(1);
-		lattice = Lattice2d(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
+		lattice = Lattice2d(Lx, Ly, strstr, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
 	}
 	string output_prefix = param.stringval("output_files_prefix");
 	output_prefix += ".N=" + to_string(N);
@@ -82,8 +84,11 @@ int main(int argc, char *argv[])
 	cout2 = stream2d(&cout, &log_file);
 
 	cout2.precision(8);
-	cout2 << "\n";
+	cout2 << "lindbladmpo solver log. Solver version: " << SOLVER_VERSION << "\n";
+    cout2 << "---------------------------------------------\n";
 	param.Print(cout2);
+	cout2 << strstr.str();
+    cout2 << "---------------------------------------------\n";
 
 	SpinHalfSystem C(N);
 

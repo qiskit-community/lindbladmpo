@@ -12,6 +12,8 @@
 
 #ifndef _SIMPLESQUARELATTICE_
 #define _SIMPLESQUARELATTICE_
+
+#include <sstream>
 //____________________________________________________________
 //Super basic lattice class
 //_____________________________________________________
@@ -27,9 +29,9 @@ public:
 
   Lattice2d(){};
   //Constructor of some arbitrary lattice using two list of sites
-  Lattice2d(int N_, vector<long> A, vector<long> B) : N(N_), predefined(false), predefined_chain(false)
+  Lattice2d(int N_, vector<long> A, vector<long> B, std::stringstream &strstr) :
+    N(N_), predefined(false), predefined_chain(false)
   {
-    cout << "A=" << A << "\nB=" << B << endl;
     if (N < 2)
       cerr << "Error: the number of sites N = " << N_ << ", must be >= 2.\n", exit(1);
     const unsigned int n = A.size();
@@ -45,20 +47,12 @@ public:
       I.push_back(A[i]);
       J.push_back(B[i]);
     }
-    cout << "User-defined lattice with " << N << " qbit(s) and " << n << " bonds.\n";
-    cout << "List of bonds:\n";
-    if (I.size() == 0)
-    {
-      cout << " [empty]" << endl;
-    }
-    else
-    {
-      cout << I << endl;
-      cout << J << endl;
-    }
+    strstr << "Initializing a user defined lattice with " << N << " qubits and " << n << " bonds.\n";
+    strstr << "A=" << A << "\nB=" << B << endl;
+    ListBonds(strstr);
   }
   // Creation of a Lx * Ly square lattice with or without periodic boundary conditions in the x and y direction
-  Lattice2d(int Lx, int Ly, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly), predefined(true)
+  Lattice2d(int Lx, int Ly, std::stringstream &strstr, bool x_periodic = false, bool y_periodic = false) : N(Lx * Ly), predefined(true)
   {
     if (N < 2)
       cerr << "Error: the number of sites N = " << N << ", must be >= 2.\n", exit(1);
@@ -86,9 +80,6 @@ public:
           index[p] = ++n;
         }
     }
-    for (auto it = index.cbegin(); it != index.cend(); ++it)
-      std::cout << "x=" << it->first.first << " y=" << it->first.second
-                << " #" << it->second << "\n";
 
     for (int x = 0; x < Lx; x++)
       for (int y = 0; y < Ly; y++)
@@ -118,16 +109,24 @@ public:
           J.push_back(index[pair<int, int>(0, y)]);
         }
       }
-    cout << "Square lattice of size l_x=" << Lx << "*l_y=" << Ly << "=" << N << " qubits.\n";
-    cout << "List of bonds:\n";
+
+    strstr << "Initializing a square lattice of size (l_x = " << Lx << ") * (l_y = " << Ly << ") = " << N << " qubits.\n";
+    for (auto it = index.cbegin(); it != index.cend(); ++it)
+      strstr << "x=" << it->first.first << " y=" << it->first.second
+                << " #" << it->second << "\n";
+    ListBonds(strstr);
+  }
+  void ListBonds(std::stringstream &strstr)
+  {
+    strstr << "List of bonds:\n";
     if (I.size() == 0)
     {
-      cout << " [empty]" << endl;
+      strstr << " [empty]" << endl;
     }
     else
     {
-      cout << I << endl;
-      cout << J << endl;
+      strstr << I << endl;
+      strstr << J << endl;
     }
   }
 };

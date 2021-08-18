@@ -263,7 +263,7 @@ void SpinHalfSystem::ConstructIdentity()
 void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
 {
   cout << "<psi|psi>=" << norm(psi) << endl;
-  cout << "Constructing  rho from |psi> (exactly)...";
+  cout << "Constructing rho from |psi> (exactly)...";
   cout.flush();
 
   ITensor right_combined, left_combined;

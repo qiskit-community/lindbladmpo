@@ -250,18 +250,23 @@ public:
   //------------------------------------------------------
   void Print(ostream &o) const
   {
+    o << "Full list of parameters (taken from the command line, input file, and defaults):\n";
     for (map<string, string>::const_iterator it = begin(); it != end(); it++)
     {
       o << it->first << " = " << it->second << endl;
     }
+    o << "--------------------------------------------------------\n";
+
   }
   void Print(stream2d &o) const
   {
+    o << "Full list of parameters (taken from the command line, input file, and defaults):\n";
     for (map<string, string>::const_iterator it = begin(); it != end(); it++)
     {
       o << it->first << " = " << it->second << "\n";
       o.flush();
     }
+    o << "--------------------------------------------------------\n";
   }
   //------------------------------------------------------
   void ReadArguments(int argc, char *argv[])
