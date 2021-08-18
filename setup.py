@@ -21,8 +21,9 @@ s_system = platform.system().lower()
 if s_system == 'windows':
 	s_executable = 'lindbladmpo.exe'
 	s_target_os = 'WINDOWS'
-	print('Note: Please follow the installation guide in the pacakge directory for instructions '
-		  'regarding local installation of cygwin, which is required for solver execution.')
+	print('Note: Windows building of the solver is not currently supported.'
+		  'The installation guide in the pacakge directory contains instructions regarding solver '
+		  'building and local installation of cygwin, which is required for solver execution.')
 else:
 	s_executable = 'lindbladmpo'
 	if s_system == 'darwin':
@@ -54,7 +55,7 @@ with open('README.md') as readme_file:
 		readme_file.read(), flags=re.S | re.M)
 
 setup(
-	name="lindblad-mpo",
+	name="lindbladmpo",
 	version="0.1.0",
 	description="A matrix-product-operators solver for the Lindblad master equation",
 	long_description=README,
