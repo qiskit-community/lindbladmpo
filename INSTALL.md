@@ -52,7 +52,7 @@ In order to leave the ITensor library and download the lindbladmpo repo and buil
     cd ..
     mkdir lindbladmpo
     cd lindbladmpo
-    git clone git@github.com:haggaila/lindbladmpo.git .
+    git clone https://github.com/haggaila/lindbladmpo.git .
     cd src
     make
 
