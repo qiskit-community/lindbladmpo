@@ -8,6 +8,7 @@
 
 import os
 import re
+import shutil
 import platform
 import subprocess
 
@@ -19,15 +20,31 @@ with open('requirements.txt') as f:
 s_system = platform.system().lower()
 if s_system == 'windows':
 	s_executable = 'lindbladmpo.exe'
-	print('Note: Automatic building of the solver executable is not currently supported on Windows.\n'
-		  '\tPlease follow the installation guide in the pacakge directory for instructions regarding\n'
-		  '\tlocal installation of cygwin, and building the solver from source.')
+	s_target_os = 'WINDOWS'
+	print('Note: Please follow the installation guide in the pacakge directory for instructions '
+		  'regarding local installation of cygwin, which is required for solver execution.')
 else:
 	s_executable = 'lindbladmpo'
-	process = subprocess.Popen('make -C ./src/', shell=True)
-	exit_code = process.wait()
-	process = subprocess.Popen(f'cp ./bin/{s_executable} ./lindbladmpo/{s_executable}', shell=True)
+	if s_system == 'darwin':
+		s_target_os = 'MACOS'
+	else:
+		s_target_os = 'LINUX'
 
+os.mkdir('../itensor3')
+process = subprocess.Popen(f'git clone https://github.com/ITensor/ITensor.git ../itensor3/', shell=True)
+exit_code = process.wait()
+if exit_code != 0:
+	pass
+shutil.copy('./src/options.mk', '../itensor3/')
+process = subprocess.Popen(f'make -C ../itensor3/ OS_TARGET={s_target_os}', shell=True)
+exit_code = process.wait()
+if exit_code != 0:
+	pass
+process = subprocess.Popen(f'make -C ./src/ OS_TARGET={s_target_os}', shell=True)
+exit_code = process.wait()
+if exit_code != 0:
+	pass
+shutil.copy('./bin/{s_executable}', './lindbladmpo/')
 
 # Read long description from README.
 with open('README.md') as readme_file:
