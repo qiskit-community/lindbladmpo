@@ -23,6 +23,7 @@
 using namespace itensor;
 using namespace std;
 using namespace std::chrono;
+stream2d cout2;
 
 int main(int argc, char *argv[])
 {
@@ -40,11 +41,6 @@ int main(int argc, char *argv[])
 	if (inputfilename != "")
 		param.ReadFromFile(inputfilename);
 	// Now `param` contains all parameters.
-
-	cout.precision(8);
-	cout << endl;
-	//param.check();
-	param.Print(cout);
 
 	Lattice2d lattice;
 	int N = param.longval("N");
@@ -72,13 +68,22 @@ int main(int argc, char *argv[])
 			// If N is nonzero, it has to be consistent with l_x, l_y
 			if (N > 0 && N != Lx * Ly)
 				cerr << "Error, invalid N = " << N << ", not equal to l_x * l_y.\n", exit(1);
+			N = Lx * Ly; // If N is zero, it is assigned with l_x * l_y
 		}
 		else if (Lx == 0 && Ly == 1)
-			Lx = N;
+			Lx = N; // The Lattice2d() constructor below will verify N.
 		else
 			cerr << "Error, invalid (l_x, l_y) = " << Lx << "," << Ly << ".\n", exit(1);
 		lattice = Lattice2d(Lx, Ly, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
 	}
+	string output_prefix = param.stringval("output_files_prefix");
+	output_prefix += ".N=" + to_string(N);
+	ofstream log_file(output_prefix + ".log.txt");
+	cout2 = stream2d(&cout, &log_file);
+
+	cout2.precision(8);
+	cout2 << "\n";
+	param.Print(cout2);
 
 	SpinHalfSystem C(N);
 
@@ -307,9 +312,6 @@ int main(int argc, char *argv[])
 	cout << "Largest bond dimension of exp(tau*L)  (MPO):" << maxLinkDim(TE.expL1) << endl;
 	const int n_steps = int(t_total / tau + (1e-9 * (t_total / tau)));
 
-	string output_prefix = param.stringval("output_files_prefix");
-	output_prefix += ".N=" + to_string(N);
- 
 	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qbit observables
 	ofstream file_1q(output_prefix + ".obs.1q.dat");

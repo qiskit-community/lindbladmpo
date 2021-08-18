@@ -48,7 +48,7 @@ class stream2d
 public:
 	ostream *ostream1, *ostream2;
 
-	stream2d(ostream *stream1, ostream *stream2)
+	stream2d(ostream *stream1 = NULL, ostream *stream2 = NULL)
 	{
 		ostream1 = stream1;
 		ostream2 = stream2;
@@ -81,6 +81,8 @@ public:
 		return *this;
 	}
 };
+
+extern stream2d cout2;
 
 inline double char2double(char *a)
 {
