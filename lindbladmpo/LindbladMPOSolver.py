@@ -311,6 +311,14 @@ class LindbladMPOSolver:
 					check_msg += "Error 150: " + key + " must be bigger then 0\n"
 					continue
 
+			elif key == "t_init":
+				if not LindbladMPOSolver._is_float(dict_in[key]):
+					check_msg += "Error 155: " + key + " is not a float\n"
+					continue
+				if dict_in[key] > dict_in["t_final"]:
+					check_msg += "Error 156: " + key + " must be smaller or equal to t_final\n"
+					continue
+
 			elif (key == "l_x") or (key == "l_y"):
 				if not LindbladMPOSolver._is_int(dict_in[key]):
 					check_msg += "Error 160: " + key + " should be an integer\n"
@@ -614,6 +622,7 @@ class LindbladMPOSolver:
 					if dict_in["tau"] > dict_in["t_final"]:
 						check_msg += "Error 640: t_final (total time) is smaller then tau (time step for time " \
 									 "evolution)\n "
+						# TODO validate total time as t_final - t_init
 					elif "output_step" in dict_in:
 						if LindbladMPOSolver._is_int(dict_in["output_step"]):
 							if dict_in["output_step"] > 0:

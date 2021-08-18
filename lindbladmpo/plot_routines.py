@@ -8,8 +8,9 @@ def prepare_plot_data(solver: LindbladMPOSolver) -> (np.ndarray, np.ndarray, np.
 	tau = solver.parameters['tau']
 	n_qubits = solver.parameters['N']
 	t_final = solver.parameters['t_final']
+	t_init = solver.parameters.get('t_init', 0.)
 	# output_step = solver.parameters.get('output_step', 1)
-	n_t_steps = int(t_final / (tau * 1)) + 1
+	n_t_steps = int((t_final - t_init) / (tau * 1)) + 1
 	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	i = 0
 	for key in solver.result['1q']:
@@ -18,7 +19,7 @@ def prepare_plot_data(solver: LindbladMPOSolver) -> (np.ndarray, np.ndarray, np.
 			if key[0] == n_qubits:
 				i += 1
 	t_steps = np.arange(0, n_t_steps, int(n_t_steps / 10))
-	t_ticks = np.round(t_steps * tau, 5)
+	t_ticks = np.round(t_init + t_steps * tau, 5)
 	qubits = np.asarray(range(n_qubits))
 	return data, t_steps, t_ticks, qubits
 

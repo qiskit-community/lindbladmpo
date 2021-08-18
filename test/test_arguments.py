@@ -62,6 +62,12 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		out = LindbladMPOSolver._check_argument_correctness(input_dict)
 		self.assertEqual(expected, out)
 
+	def test_arg_t_init_P(self):
+		input_dict = {'t_init': 10, 't_final': 20, 'tau': SH_TAU, 'N': SH_N}
+		expected = ""
+		out = LindbladMPOSolver._check_argument_correctness(input_dict)
+		self.assertEqual(expected, out)
+
 	def test_arg_tau_F1(self):
 		input_dict = {'tau': "20", 'N': SH_N, 't_final': SH_T_FINAL}
 		expected = ""
