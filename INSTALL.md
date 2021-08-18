@@ -39,7 +39,7 @@ Run the following commands in the terminal (on Windows, replace the "cp" command
     git clone https://github.com/ITensor/ITensor.git .
     cp options.mk.sample options.mk
 
-Open options.mk in editor and comment/uncomment the lines configuring the compilation and BLAS/LAPACK platform according to the operating system (Linux, Mac OS or Cygwin on Windows), and save.
+Open options.mk in editor and comment/uncomment the lines configuring the compilation and BLAS/LAPACK platform according to the operating system (Linux, Mac OS or Cygwin on Windows), and save. Alternatively, within the lindbladmpo repository (see below) there is an options.mk file that can also be copied to the itensor directory, where the choice of operating system is done once by defining a variable at the top of the file (or setting it from the command line invokation of make).
 
 Run the following command in the Linux/Mac OS terminal, or on Windows, navigate inside the Cygwin64 Terminal to the same directory and type:
 
@@ -60,7 +60,7 @@ The above script will work for the default locations. In order to override where
 
     make LIBRARY_DIR="..."  - here insert the path for the itensor library, for example "/cygdrive/c/Users/Goran/itensor3"
 
-In order to run a first test of the solver, type in the Linux terminal:
+In order to run a first test of the solver (with output to the console, and result files saved), type in the Linux terminal:
 
     cd ../bin/
     ./lindbladmpo
