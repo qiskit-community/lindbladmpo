@@ -87,8 +87,9 @@ int main(int argc, char *argv[])
 	cout2 << "lindbladmpo solver log. Solver version: " << SOLVER_VERSION << "\n";
     cout2 << "---------------------------------------------\n";
 	param.Print(cout2);
+    cout2 << "------------------------------------------------------------------\n";
 	cout2 << strstr.str();
-    cout2 << "---------------------------------------------\n";
+    cout2 << "------------------------------------------------------------------\n";
 
 	SpinHalfSystem C(N);
 
