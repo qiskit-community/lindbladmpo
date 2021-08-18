@@ -1,10 +1,10 @@
-#	Edit LIBRARY_DIR to point at the location of your ITensor library
+#	Edit ITENSOR3_DIR to point at the location of your ITensor library
 #   source folder (this is the folder that has options.mk in it, and where
 #	this_dir.mk is created after itensor is built using make).
 #	The value below is used unless make is invoked with a command line
-#	argument of the form: make LIBRARY_DIR=" ... ".
-ifeq ($(LIBRARY_DIR),)
-LIBRARY_DIR=../../itensor3
+#	argument of the form: make ITENSOR3_DIR=" ... ".
+ifeq ($(ITENSOR3_DIR),)
+ITENSOR3_DIR=../../itensor3
 endif
 
 #	Running 'make' will compile the solver executable and name it to the
@@ -22,10 +22,10 @@ CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc
 
 #################################################################
 
-include $(LIBRARY_DIR)/this_dir.mk
-include $(LIBRARY_DIR)/options.mk
+include $(ITENSOR3_DIR)/this_dir.mk
+include $(ITENSOR3_DIR)/options.mk
 
-TENSOR_HEADERS=$(LIBRARY_DIR)/itensor/core.h
+TENSOR_HEADERS=$(ITENSOR3_DIR)/itensor/core.h
 
 #Directory for the executable
 EXEDIR=../bin
