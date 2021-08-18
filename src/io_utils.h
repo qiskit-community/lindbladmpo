@@ -43,6 +43,45 @@ ostream &operator<<(ostream &o, const vector<T> &v)
 }
 //____________________________________________________________
 
+class stream2d
+{
+public:
+	ostream *ostream1, *ostream2;
+
+	stream2d(ostream *stream1, ostream *stream2)
+	{
+		ostream1 = stream1;
+		ostream2 = stream2;
+	};
+
+	template<class T>
+	stream2d& operator<<(T val)
+	{
+		if (ostream1)
+			*ostream1 << val;
+		if (ostream2)
+			*ostream2 << val;
+		return *this;
+	};
+
+	void precision(streamsize pr)
+	{
+		if (ostream1)
+			ostream1->precision(pr);
+		if (ostream2)
+			ostream2->precision(pr);
+	}
+
+	stream2d& flush()
+	{
+		if (ostream1)
+			ostream1->flush();
+		if (ostream2)
+			ostream2->flush();
+		return *this;
+	}
+};
+
 inline double char2double(char *a)
 {
   char *end_ptr;
@@ -212,6 +251,14 @@ public:
     for (map<string, string>::const_iterator it = begin(); it != end(); it++)
     {
       o << it->first << " = " << it->second << endl;
+    }
+  }
+  void Print(stream2d &o) const
+  {
+    for (map<string, string>::const_iterator it = begin(); it != end(); it++)
+    {
+      o << it->first << " = " << it->second << "\n";
+      o.flush();
     }
   }
   //------------------------------------------------------
