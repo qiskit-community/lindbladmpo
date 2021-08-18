@@ -14,7 +14,7 @@ endif
 ifeq ($(OS_TARGET),LINUX)
 
 ## GNU GCC compiler
-CCCOM=g++ -m64 -std=c++17 -Wa,-mbig-obj -fconcepts -fPIC
+CCCOM=g++ -m64 -std=c++17 -fconcepts -fPIC
 
 else ifeq ($(OS_TARGET),MACOS)
 
@@ -35,7 +35,7 @@ else
 ## Intel C++ Compiler not recommended,
 ## As of June 2016 it does not fully support C++17
 
-end
+endif
 
 #########
 
@@ -112,7 +112,7 @@ BLAS_LAPACK_LIBFLAGS=-lpthread -L/usr/lib -lblas -llapack
 #PLATFORM=acml
 #BLAS_LAPACK_LIBFLAGS=-L/opt/acml5.1.0/gfortran64/lib -lacml -lgfortran -lpthread
 
-end
+endif
 
 #########
 ## [3]

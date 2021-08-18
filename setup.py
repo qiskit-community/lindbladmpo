@@ -37,7 +37,7 @@ else:
 		raise Exception("Cloning of ITensor repo using a git command failed.")
 	shutil.copy('./src/options.mk', '../itensor3/')
 
-	process = subprocess.Popen(f'make -C ../itensor3/ OS_TARGET={s_target_os}', shell=True)
+	process = subprocess.Popen(f'cd .. && cd itensor3 && make -C ../itensor3/ OS_TARGET={s_target_os}', shell=True)
 	exit_code = process.wait()
 	if exit_code != 0:
 		pass
@@ -45,7 +45,7 @@ else:
 	exit_code = process.wait()
 	if exit_code != 0:
 		pass
-	shutil.copy('./bin/{s_executable}', './lindbladmpo/')
+	shutil.copy(f'./bin/{s_executable}', './lindbladmpo/')
 
 # Read long description from README.
 with open('README.md') as readme_file:
