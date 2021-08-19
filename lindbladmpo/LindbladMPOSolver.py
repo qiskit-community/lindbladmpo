@@ -92,10 +92,11 @@ class LindbladMPOSolver:
 		b_uuid = parameters.get("b_unique_id", False)
 		s_id_suffix = ''
 		if b_uuid:
-			s_id_suffix = uuid.uuid4().hex
-			print("Generating a unique id for this simulation: " + s_id_suffix)
-			s_id_suffix = '.' + s_id_suffix
+			s_uuid = uuid.uuid4().hex
+			print("Generating a unique id for this simulation: " + s_uuid)
+			s_id_suffix = '.' + s_uuid
 			s_output_path += s_id_suffix
+			parameters["unique_id"] = s_uuid
 		n_qubits = parameters.get("N")
 		s_N_suffix = f".N={n_qubits}"
 		s_input_file = s_output_path + s_N_suffix + ".input.txt"

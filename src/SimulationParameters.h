@@ -34,8 +34,9 @@ public:
         //Whether the final state (density matrix) will be saved to disk.
         operator[]("b_save_final_state") = "0";   
                                               
-        operator[]("input_file") = ""; //if not "" => name of the file from which some parameters must be read (in addition to the command line ones). If empty => 
-        operator[]("output_files_prefix") = "lindblad"; //Path and prefix of the file names where various simulation output is written
+        operator[]("unique_id") = ""; // An optional unique id identifying the simulation. Not currently used (except for being saved in the input and log files).
+        operator[]("input_file") = ""; // If not empty => name of the file from which some parameters must be read (in addition to the command line ones).
+        operator[]("output_files_prefix") = "lindblad"; // Path and prefix of the file names where various simulation output is written
 
     }
 };
