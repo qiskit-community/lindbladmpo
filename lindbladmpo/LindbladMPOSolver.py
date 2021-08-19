@@ -213,7 +213,7 @@ class LindbladMPOSolver:
 		Returns:
 			result : the arguments for the simulator
 		"""
-		full_filename = s_output_path + ".obs.1q.dat"
+		full_filename = s_output_path + ".obs-1q.dat"
 		print("Loading 1-qubit observables from file:")
 		print(full_filename)
 		file = open(full_filename, "r")
@@ -236,7 +236,7 @@ class LindbladMPOSolver:
 		Returns:
 			result (dictionary): the arguments for the simulator
 		"""
-		full_filename = s_output_path + ".obs.2q.dat"
+		full_filename = s_output_path + ".obs-2q.dat"
 		print("Loading 2-qubit observables from file:")
 		print(full_filename)
 		file = open(full_filename, "r")
