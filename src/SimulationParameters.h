@@ -35,6 +35,7 @@ public:
         operator[]("b_save_final_state") = "0";   
                                               
         operator[]("unique_id") = ""; // An optional unique id identifying the simulation. Not currently used (except for being saved in the input and log files).
+        operator[]("metadata") = ""; // An optional user information, ignored by the solver (except for being saved in the input and log files).
         operator[]("input_file") = ""; // If not empty => name of the file from which some parameters must be read (in addition to the command line ones).
         operator[]("output_files_prefix") = "lindblad"; // Path and prefix of the file names where various simulation output is written
 

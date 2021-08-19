@@ -471,6 +471,15 @@ class LindbladMPOSolver:
 					check_msg += "Error 420: " + key + " is not a small float format (ae-b where a and b are numbers)\n"
 					continue
 
+			elif key == "metadata":
+				if not isinstance(dict_in[key], str):
+					check_msg += "Error 422: " + key + " is not a string\n"
+					continue
+				if '\n' in dict_in[key]:
+					check_msg += "Error 423: " "The metadata string cannot contain the new line "\
+								 "character code ('\\n'). Please reformat the string\n"
+					continue
+
 			elif key == "output_files_prefix":
 				pass
 			elif key == "load_files_prefix":

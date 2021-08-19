@@ -332,6 +332,18 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		out = LindbladMPOSolver._check_argument_correctness(input_dict)
 		self.assertEqual(expected, out)
 
+	def test_arg_metadata_F1(self):
+		input_dict = {'metadata': "CR/LF \n", 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
+		expected = ""
+		out = LindbladMPOSolver._check_argument_correctness(input_dict)
+		self.assertNotEqual(expected, out)
+
+	def test_arg_metadata_F2(self):
+		input_dict = {'metadata': 0, 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
+		expected = ""
+		out = LindbladMPOSolver._check_argument_correctness(input_dict)
+		self.assertNotEqual(expected, out)
+
 	def test_arg_cut_off_rho_F1(self):
 		input_dict = {'cut_off_rho': [1, 1], 'N': SH_N, 't_final': SH_T_FINAL, 'tau': SH_TAU}
 		expected = ""
@@ -464,6 +476,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		input_dict['b_force_rho_trace'] = False
 		input_dict['b_force_rho_Hermitian'] = True
 		input_dict['output_files_prefix'] = "./"
+		input_dict['metadata'] = "We agree to disagree."
 		input_dict['1q_components'] = ["x", "y", "z"]
 		input_dict['1q_indices'] = [1, 3, 4]
 		input_dict['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
