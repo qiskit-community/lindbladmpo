@@ -11,6 +11,7 @@
 // under the License.
 
 #include "Pauli.h"
+#include "io_utils.h"
 #include "mps_mpo_utils.h"
 #include "itensor/all.h"
 #include <string>
@@ -262,9 +263,9 @@ void SpinHalfSystem::ConstructIdentity()
 //Convert a pure state (psi) of the chain into a density matrix rho (projector onto psi)
 void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
 {
-  cout << "<psi|psi>=" << norm(psi) << endl;
-  cout << "Constructing rho from |psi> (exactly)...";
-  cout.flush();
+  cout2 << "<psi|psi>=" << norm(psi) << "\n";
+  cout2 << "Constructing rho from |psi> (exactly)...";
+  cout2.flush();
 
   ITensor right_combined, left_combined;
 
@@ -387,15 +388,15 @@ void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
       }
     }
   }
-  cout << "done.\n";
-  cout.flush();
-  cout << "Bond dimension in the center:" << BondDim(rho, N / 2) << endl;
-  cout << "rho.orthogonalize...";
-  cout.flush();
+  cout2 << "done.\n";
+  cout2.flush();
+  cout2 << "Bond dimension in the center:" << BondDim(rho, N / 2) << "\n";
+  cout2 << "rho.orthogonalize...";
+  cout2.flush();
   rho.orthogonalize(args);
-  cout << "done.\n";
-  cout.flush();
-  cout << "New bond dimension in the center:" << BondDim(rho, N / 2) << endl;
+  cout2 << "done.\n";
+  cout2 << "New bond dimension in the center:" << BondDim(rho, N / 2) << "\n";
+  cout2.flush();
 }
 //Expectation value of some single-site operator
 Cplx SpinHalfSystem::Expect(const string &opname, int i) const
@@ -461,8 +462,8 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
 void SpinHalfSystem::MakeRhoHermitian(Args args)
 {
 	auto time_step = steady_clock::now();
-	cout << "\tMake rho Hermitian; Max bond-dim: " << maxLinkDim(rho) << " -> ";
-	cout.flush();
+	cout2 << "\tMake rho Hermitian; Max bond-dim: " << maxLinkDim(rho) << " -> ";
+	cout2.flush();
 	MPS rd(rho); // Copy
 	// Next, take the Hermitian conjugate of rd
   for (int i = 1; i <= N; i += N - 1)
@@ -512,9 +513,9 @@ void SpinHalfSystem::MakeRhoHermitian(Args args)
   }
 	rho.plusEq(rd, args);
 	rho *= 0.5;
-	cout << maxLinkDim(rho);
+	cout2 << maxLinkDim(rho);
 	auto time_end = steady_clock::now();
 	auto duration = duration_cast<milliseconds>(time_end - time_step);
-	cout << ". Duration: " << duration.count() / 1000. << "s" << endl;
-	cout.flush();
+	cout2 << ". Duration: " << duration.count() / 1000. << "s" << "\n";
+	cout2.flush();
 }

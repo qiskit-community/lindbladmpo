@@ -84,20 +84,8 @@ public:
 
 extern stream2d cout2;
 
-inline double char2double(char *a)
-{
-  char *end_ptr;
-  const double x = strtod(a, &end_ptr);
-  if (end_ptr == a || ('\0' != *end_ptr))
-    cerr << endl
-         << "ERROR :" << a
-         << " is not a valid format for a double."
-         << endl,
-        exit(1);
-  return x;
-}
 //____________________________________________________________
-vector<string> &split(const string &s, char delimiter, vector<std::string> &elems)
+inline vector<string> &split(const string &s, char delimiter, vector<std::string> &elems)
 {
   stringstream ss(s);
   string item;
@@ -110,7 +98,7 @@ vector<string> &split(const string &s, char delimiter, vector<std::string> &elem
   }
   return elems;
 }
-vector<string> split(const string &s, char delimiter)
+inline vector<string> split(const string &s, char delimiter)
 {
   vector<string> elems;
   split(s, delimiter, elems);
@@ -118,7 +106,7 @@ vector<string> split(const string &s, char delimiter)
 }
 
 // trim a string 
-void trim(string &s)
+inline void trim(string &s)
 {
   s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
                                   { return !std::isspace(ch); }));
@@ -187,7 +175,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -199,7 +187,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -211,7 +199,7 @@ public:
       }
       catch (...)
       {
-        cerr << "Error: was expecting a long int and instead got '" << it->second << "'\n", exit(1);
+        cout2 << "Error: was expecting a long int and instead got '" << it->second << "'\n", exit(1);
       }
       return i;
     }
@@ -222,7 +210,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -233,7 +221,7 @@ public:
         return true;
       if (s == "0" || s == "false")
         return false;
-      cerr << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false (case-insensitive), or 1/0\n", exit(1);
+      cout2 << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false (case-insensitive), or 1/0\n", exit(1);
     }
   } //------------------------------------------------------
   string stringval(string var_name) const
@@ -241,7 +229,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
     else
@@ -297,7 +285,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
     }
     else
     {
@@ -312,7 +300,7 @@ public:
         }
         catch (...)
         {
-          cerr << "Error: was expecting a double and instead got " << s << endl, exit(1);
+          cout2 << "Error: was expecting a double and instead got " << s << "\n", exit(1);
         }
         vec.push_back(x);
       }
@@ -327,7 +315,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
     }
     else
     {
@@ -342,7 +330,7 @@ public:
         }
         catch (...)
         {
-          cerr << "Error: was expecting a long int and instead got '" << s << "'\n", exit(1);
+          cout2 << "Error: was expecting a long int and instead got '" << s << "'\n", exit(1);
         }
         vec.push_back(i);
       }
@@ -357,7 +345,7 @@ public:
     map<string, string>::const_iterator it = find(var_name);
     if (it == end())
     {
-      cerr << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
     }
     else
     {
@@ -371,6 +359,19 @@ public:
 #endif
 
 /*
+inline double char2double(char *a)
+{
+  char *end_ptr;
+  const double x = strtod(a, &end_ptr);
+  if (end_ptr == a || ('\0' != *end_ptr))
+    cerr << endl
+         << "ERROR :" << a
+         << " is not a valid format for a double."
+         << endl,
+        exit(1);
+  return x;
+}
+
 //____________________________________________________________
 class Parameters_old : public map<string, double>
 {

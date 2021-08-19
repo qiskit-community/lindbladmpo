@@ -23,7 +23,8 @@
 using namespace itensor;
 using namespace std;
 using namespace std::chrono;
-stream2d cout2;
+
+stream2d cout2 = stream2d(&cerr, NULL);
 const string SOLVER_VERSION = "0.1.0";
 
 int main(int argc, char *argv[])
@@ -102,11 +103,11 @@ int main(int argc, char *argv[])
 		file_name += ".N=" + to_string(N);
 		string f1 = file_name + ".state.ops";
 		string f3 = file_name + ".state.sites";
-		cout << "Opening '" << f1 << "' and '" << f3 << "'...";
-		cout.flush();
+		cout2 << "Opening '" << f1 << "' and '" << f3 << "'...";
+		cout2.flush();
 		readFromFile(f3, C.sites);
 		readFromFile(f1, C.siteops);
-		cout << "done.\n";
+		cout2 << "done.\n";
 		C.rho = MPS(C.siteops);
 		// Rho is still undefined but its structure is initialized using C.siteops
 		C.Lindbladian = AutoMPO(C.siteops);
@@ -127,7 +128,7 @@ int main(int argc, char *argv[])
 	vector<string> a_init = param.stringvec("init_Pauli_state");
 	unsigned int a_init_len = a_init.size();
 	if (a_init_len != 1 && int(a_init_len) != N)
-		cerr << "Error: the parameter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+		cout2 << "Error: the parameter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
 	if (a_init_len == 1)
 		a_init = vector<string>(N, a_init[0]);
 
@@ -137,18 +138,18 @@ int main(int argc, char *argv[])
 	{ //Read the density matrix from disk
 	    string file_name = load_prefix;
 		file_name += ".N=" + to_string(N) + ".state.rho";
-		cout << "Read the initial rho from the file '" << file_name << "'...";
-		cout.flush();
+		cout2 << "Read the initial rho from the file '" << file_name << "'...";
+		cout2.flush();
 		readFromFile(file_name, C.rho);
-		cout << "done.\n";
+		cout2 << "done.\n";
 		if (param.val("b_initial_rho_orthogonalization") != 0)
 		{
-			cout << "C.rho.orthogonalize...";
-			cout.flush();
+			cout2 << "C.rho.orthogonalize...";
+			cout2.flush();
 			C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
 				"MaxDim", param.longval("max_dim_rho")));
-			cout << "done.\n";
-			cout.flush();
+			cout2 << "done.\n";
+			cout2.flush();
 		}
 	}
 	else
@@ -188,16 +189,16 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, ri = 1, Cplx(R1, I1));
-				cout << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, ri = 1) << endl;
-				cout << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, ri = 1) << endl;
+				cout2 << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, ri = 1) << "\n";
 			}
 			if (site_number == N)
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, Cplx(R1, I1));
-				cout << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, li = 1) << endl;
-				cout << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, li = 1) << endl;
+				cout2 << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, li = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, li = 1) << "\n";
 			}
 			if (site_number > 1 && site_number < N)
 			{
@@ -205,32 +206,32 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, ri = 1, Cplx(R1, I1));
-				cout << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << endl;
-				cout << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << endl;
+				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
 			}
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6, "MaxDim", 1));
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
-		cout << "psi2rho done.\n";
-		cout.flush();
+		cout2 << "psi2rho done.\n";
+		cout2.flush();
 	}
 
 	Cplx tr = C.trace_rho();
-	cout << "Tr{rho} before re-normalization: " << tr << endl;
+	cout2 << "Tr{rho} before re-normalization: " << tr << "\n";
 	C.rho /= tr; //Normalize rho so that Tr[rho]=1 (otherwise we would have Tr[rho^2]=MPS norm=1)
 	tr = C.trace_rho();
-	cout << "Tr{rho} after re-normalization: " << tr << endl;
+	cout2 << "Tr{rho} after re-normalization: " << tr << "\n";
 
-	cout << "Tr{rho^2} =";
-	cout.flush();
+	cout2 << "Tr{rho^2} =";
+	cout2.flush();
 	const Cplx tr2 = C.trace_rho2();
-	cout << tr2 << endl;
+	cout2 << tr2 << "\n";
 	if (psi_defined)
 	{
 		if (std::abs(tr - 1) > 1e-1 || std::abs(tr2 - 1) > 1e-1)
-			cerr << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
+			cout2 << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
 		//Check a few simple observables, using rho and psi
 		vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
 		vector<double> psi_factor = {2., 1., 1., 2., 2.};
@@ -245,13 +246,13 @@ int main(int argc, char *argv[])
 				Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites);
 				err += std::abs(with_rho - with_psi);
 				if (std::abs(with_rho - with_psi) > 1e-2)
-				cerr << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
-					<< "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << endl,
+				cout2 << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
+					<< "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << "\n",
 					exit(1);
 			}
 		}
 	//err /= N * ops.size();
-	//cout << "Compare observables " << ops << " in |psi> and rho: average precision=" << err << endl;
+	//cout2 << "Compare observables " << ops << " in |psi> and rho: average precision=" << err << "\n";
 	}
 	//-----------------------------------------------------
 	//Construct the Lindbladian from the parameters (unitary and dissipative terms)
@@ -270,7 +271,7 @@ int main(int argc, char *argv[])
 	MPO LDL = nmultMPO(L, prime(LD));
 	LDL.mapPrime(2, 1); //itensor v3
 
-	cout << "Maximum bond dimension of L^dag*L (MPO):" << maxLinkDim(LDL) << endl;
+	cout2 << "Maximum bond dimension of L^dag*L (MPO):" << maxLinkDim(LDL) << "\n";
 	auto sweeps = Sweeps(param.longval("sweepsRho"));
 	//Specify max number of states kept each sweep
 	const int m = param.longval("max_dim_rho");
@@ -303,8 +304,8 @@ int main(int argc, char *argv[])
 	}
 	*/
 	//-----------------------------------------------------
-	cout << "Compute exp(i*tau*L) as an MPO... ";
-	cout.flush();
+	cout2 << "Compute exp(i*tau*L) as an MPO... ";
+	cout2.flush();
 
 	const double t_0 = param.val("t_init");
 	const double tau = param.val("tau");
@@ -313,9 +314,9 @@ int main(int argc, char *argv[])
 	const int o = param.val("Trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
 	TE.init(tau, C.Lindbladian, argsRho, o);
-	cout << "done.\n";
-	cout.flush();
-	cout << "Largest bond dimension of exp(tau*L)  (MPO):" << maxLinkDim(TE.expL1) << endl;
+	cout2 << "done.\n";
+	cout2.flush();
+	cout2 << "Largest bond dimension of the MPO exp(tau*L): " << maxLinkDim(TE.expL1) << "\n";
 	const int n_steps = int(t_total / tau + (1e-9 * (t_total / tau)));
 
 	//-----------------------------------------------------
@@ -326,10 +327,10 @@ int main(int argc, char *argv[])
 	for (auto &s : components)
 	{
 		if (s.length() != 1)
-			cerr << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+			cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
 		char c = toupper(s[0]);
 		if (c != 'X' && c != 'Y' && c != 'Z')
-			cerr << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+			cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
 	}
 	vector<long> sit = param.longvec("1q_sites");
 	if (sit.size() == 0)
@@ -340,7 +341,7 @@ int main(int argc, char *argv[])
 	for (int i : sit)
 	{
 		if (i < 1 || i > N)
-			cerr << "Error: invalid site i=" << i << " found in list `1q_sites`.\n", exit(1);
+			cout2 << "Error: invalid site i=" << i << " found in list `1q_sites`.\n", exit(1);
 	}
 	file_1q.precision(15);
 	//-----------------------------------------------------
@@ -350,7 +351,7 @@ int main(int argc, char *argv[])
 	file_2q.precision(15);
 	vector<long> sit2 = param.longvec("2q_sites");
 	if (sit2.size() % 2 == 1)
-		cerr << "Error: the list of sites given in the parameter `2q_sites` should have an even length.\n", exit(1);
+		cout2 << "Error: the list of sites given in the parameter `2q_sites` should have an even length.\n", exit(1);
 
 	if (sit2.size() == 0)
 	{ //If no sites are given explicitely we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
@@ -365,21 +366,21 @@ int main(int argc, char *argv[])
 	{
 		const int i = sit2[n], j = sit2[n + 1];
 		if (i < 1 || i > N)
-			cerr << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
+			cout2 << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
 		if (j < 1 || j > N)
-			cerr << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
+			cout2 << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
 	}
 
 	auto components2 = param.stringvec("2q_components");
 	for (auto &s : components2)
 	{
 		if (s.length() != 2)
-			cerr << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
+			cout2 << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
 		for (int n = 0; n <= 1; n++)
 		{
 			char c = toupper(s[n]);
 			if (c != 'X' && c != 'Y' && c != 'Z')
-				cerr << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
+				cout2 << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
 		}
 	}
 	//-----------------------------------------------------
@@ -391,7 +392,8 @@ int main(int argc, char *argv[])
 
 	auto t_init_end = steady_clock::now();
 	auto duration_ms = duration_cast<milliseconds>(t_init_end - t_start_sim);
-	cout << "\nSimulation initialization duration: " << duration_ms.count() / 1000. << "s" << endl;
+	cout2 << "\nSimulation initialization duration: " << duration_ms.count() / 1000. << "s" << "\n";
+	cout2.flush();
 
 	char buf[100];
 	const bool b_force_rho_Hermitian = param.boolval("b_force_rho_Hermitian");
@@ -402,8 +404,9 @@ int main(int argc, char *argv[])
 		auto t_now = steady_clock::now();
 		auto tot_duration = duration_cast<milliseconds>(t_now - t_start_sim);
 		sprintf(buf, "%.2fhr", tot_duration.count() / 3600000.);
-		cout << "\nSolution time t = " << t << " ----------------------";
-		cout << " Total run duration: " << buf << endl;
+		cout2 << "\nSolution time t = " << t << " ----------------------";
+		cout2 << " Total run duration: " << buf << "\n";
+		cout2.flush();
 		if (output_step > 0)
 		{
 			if ((n % output_step) == 0 || n == n_steps)
@@ -421,7 +424,7 @@ int main(int argc, char *argv[])
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
 
-				cout << "\tTr{rho}=" << tr << ", Rényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
+				cout2 << "\tTr{rho}=" << tr << ", Rényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
 				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
 				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
@@ -445,7 +448,7 @@ int main(int argc, char *argv[])
 					  if (tolower(s[0]) == 'z')
 					    expectation_value = C.Expect("Sz", i);
 					  if (abs(expectation_value.imag()) > 1e-3)
-					    cout << "Warning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real\n";
+					    cout2 << "Warning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real\n";
 					  file_1q << char(toupper(s[0])) << "\t" << t << "\t" << i
 					          << "\t" << expectation_value.real() << endl;
 					  count++;
@@ -458,7 +461,7 @@ int main(int argc, char *argv[])
 				if (count)
 				{
 					duration_ms = duration_cast<milliseconds>(t_1q_end - t_1q_start);
-					cout << "\n\t" << count << " 1-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+					cout2 << "\n\t" << count << " 1-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
 		        // --------------------------------------------------
 				// Compute 2-qubit observables and write them to file
@@ -474,7 +477,7 @@ int main(int argc, char *argv[])
 						c2 += char(tolower(s[1]));
 						Cplx expectation_value = C.Expect(c1, i, c2, j);
 						if (abs(expectation_value.imag()) > 1e-3)
-						cout << "Warning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
+						cout2 << "Warning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
 						file_2q << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << t << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
 						count++;
 					}
@@ -485,27 +488,29 @@ int main(int argc, char *argv[])
 				if (count)
 				{
 					duration_ms = duration_cast<milliseconds>(t_2q_end - t_1q_end);
-					cout << "\n\t" << count << " 2-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+					cout2 << "\n\t" << count << " 2-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
-				cout << endl;
+				cout2 << "\n";
+				cout2.flush();
 
 	        //-----------------------------------------------------------------------------------------
 			}
 		}
 		if (n < n_steps)
 		{
-			cout << "\t" << "Time evolving the state -> ";
+			cout2 << "\t" << "Time evolving the state -> ";
 			auto t_evolve_start = steady_clock::now();
 			TE.evolve(C.rho);
 			auto t_evolve_end = steady_clock::now();
 			duration_ms = duration_cast<milliseconds>(t_evolve_end - t_evolve_start);
-			cout << "done. Duration: " << duration_ms.count() / 1000. << "s" << endl;
+			cout2 << "done. Duration: " << duration_ms.count() / 1000. << "s" << "\n";
 
 			Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
 			if (std::abs(z - 1) > 1e-2)
-				cout << "Warning: Tr[rho]<>1 :" << z << endl;
+				cout2 << "Warning: Tr[rho]<>1 :" << z << "\n";
 			if (param.val("b_force_rho_trace") != 0)
 				C.rho /= z;
+			cout2.flush();
 		}
 	}
 
@@ -518,19 +523,20 @@ int main(int argc, char *argv[])
 		writeToFile(f2, C.rho);
 		string f3 = output_prefix + ".state.sites";
 		writeToFile(f3, C.sites);
-		cout << "The final state was saved to disk, using 3 files:\n" << f1 << endl << f2 << endl << f3 << endl;
+		cout2 << "The final state was saved to disk, using 3 files:\n" << f1 << "\n" << f2 << "\n" << f3 << "\n";
 	}
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
-	cout << "\nTotal simulation duration: " << buf << endl;
+	cout2 << "\nTotal simulation duration: " << buf << "\n";
+	cout2.flush();
 	return 0;
 }
 
 // Old initialization code
 /*
   if (param.stringval("load_purestate_file") != "" && param.stringval("load_state_file") != "")
-    cerr << "Error, conflict in parameters:load_purestate_file=" << param.stringval("load_purestate_file")
+    cout2 << "Error, conflict in parameters:load_purestate_file=" << param.stringval("load_purestate_file")
          << " and load_state_file=" << param.stringval("load_purestate_file") << ". They should not be both defined\n",
         exit(1);
 
@@ -603,7 +609,7 @@ int main(int argc, char *argv[])
         else
         {
           if (param.longval("up_init") != 0 && param.longval("down_init") != 0)
-            cerr << "Error: conflicting initialization options for the DMRG:up_init and  down_init.\n", exit(1);
+            cout2 << "Error: conflicting initialization options for the DMRG:up_init and  down_init.\n", exit(1);
 
           if (param.longval("up_init") != 0)
           {
@@ -628,7 +634,7 @@ int main(int argc, char *argv[])
         MyDMRGObserver obs(psi, param.val("energy")); //Convergence criterium on the energy passed to the DMRGObserver
 
         const double energy = dmrg(psi, H0, sweeps, obs, "Quiet");
-        cout << "Initial energy=" << energy << endl;
+        cout2 << "Initial energy=" << energy << "\n";
         if (param.stringval("save_purestate_file") != "")
         {
           string file_name = param.stringval("save_purestate_file");
@@ -642,7 +648,7 @@ int main(int argc, char *argv[])
           writeToFile(f3, C.sites);
           writeToFile(f1, C.siteops);
           writeToFile(f2, psi);
-          cout << "the final pure state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
+          cout2 << "the final pure state was written to disk, in files " << f1 << ", " << f2 << " and " << f3 << ".\n";
         }
       }
       else
@@ -650,41 +656,41 @@ int main(int argc, char *argv[])
         string file_name = param.stringval("load_purestate_file");
         file_name += "_N=" + to_string(N) + ".psi";
         psi = MPS(C.sites);
-        cout << "Read the initial pure state (wave-function) from file '" << file_name << "'...";
-        cout.flush();
+        cout2 << "Read the initial pure state (wave-function) from file '" << file_name << "'...";
+        cout2.flush();
         readFromFile(file_name, psi);
-        cout << "done.\n";
+        cout2 << "done.\n";
       }
       psi_defined = true;
 
       //Compute the density matrix rho associated to the pure state |psi>
       C.psi2rho(psi, argsRho);
-      cout << "psi2rho done.\n";
-      cout.flush();
+      cout2 << "psi2rho done.\n";
+      cout2.flush();
     }
     else
     { //Read the density matrix from disk
 
       string file_name = param.stringval("load_state_file");
       file_name += "_N=" + to_string(N) + ".rho";
-      cout << "Read the initial rho from the file '" << file_name << "'...";
-      cout.flush();
+      cout2 << "Read the initial rho from the file '" << file_name << "'...";
+      cout2.flush();
       readFromFile(file_name, C.rho);
-      cout << "done.\n";
+      cout2 << "done.\n";
       if (param.val("InitialOrthoRho") != 0)
       {
-        cout << "C.rho.orthogonalize...";
-        cout.flush();
+        cout2 << "C.rho.orthogonalize...";
+        cout2.flush();
         C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
-        cout << "done.\n";
-        cout.flush();
+        cout2 << "done.\n";
+        cout2.flush();
       }
     }
   }
   else
   {
     //Start from rho ~ identity (infinite temperature density matrix)
-    cout << "Initialize rho ~ identity (infinite temperature density matrix).\n";
+    cout2 << "Initialize rho ~ identity (infinite temperature density matrix).\n";
     C.rho = C.Identity;
   }
 */

@@ -13,6 +13,8 @@
 #ifndef _LINDBLADIAN_
 #define _LINDBLADIAN_
 
+#include "io_utils.h"
+
 using namespace itensor;
 using namespace std;
 
@@ -32,11 +34,11 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     unsigned int h_z_len = h_z.size();
 
     if (h_x_len != 1 && L.predefined && !L.predefined_chain)
-        cerr << "Error: the paramter h_x has " << h_x_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_x should be uniform for such a lattice.\n", exit(1);
+        cout2 << "Error: the parameter h_x has " << h_x_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_x should be uniform for such a lattice.\n", exit(1);
     if (h_y_len != 1 && L.predefined && !L.predefined_chain)
-        cerr << "Error: the paramter h_y has " << h_y_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_y should be uniform for such a lattice.\n", exit(1);
+        cout2 << "Error: the parameter h_y has " << h_y_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_y should be uniform for such a lattice.\n", exit(1);
     if (h_z_len != 1 && L.predefined && !L.predefined_chain)
-        cerr << "Error: the paramter h_z has " << h_z_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_z should be uniform for such a lattice.\n", exit(1);
+        cout2 << "Error: the parameter h_z has " << h_z_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". h_z should be uniform for such a lattice.\n", exit(1);
 
     vector<double> g_0 = param.doublevec("g_0");
     vector<double> g_1 = param.doublevec("g_1");
@@ -46,18 +48,18 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     unsigned int g_2_len = g_2.size();
 
     if (g_0_len != 1 && L.predefined && !L.predefined_chain)
-        cerr << "Error: the paramter g_0 has " << g_0_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_0 should be uniform for such a lattice.\n", exit(1);
+        cout2 << "Error: the parameter g_0 has " << g_0_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_0 should be uniform for such a lattice.\n", exit(1);
     if (g_1_len != 1 && L.predefined && !L.predefined_chain)
-        cerr << "Error: the paramter g_1 has " << g_1_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_1 should be uniform for such a lattice.\n", exit(1);
+        cout2 << "Error: the parameter g_1 has " << g_1_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_1 should be uniform for such a lattice.\n", exit(1);
     if (g_2_len != 1 && L.predefined && !L.predefined_chain)
-        cerr << "Error: the paramter g_2 has " << g_2_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_2 should be uniform for such a lattice.\n", exit(1);
+        cout2 << "Error: the parameter g_2 has " << g_2_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_2 should be uniform for such a lattice.\n", exit(1);
 
     if (h_x_len != 1 && h_x_len != N)
-        cerr << "Error: the paramter h_x has " << h_x_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter h_x has " << h_x_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (h_y_len != 1 && h_y_len != N)
-        cerr << "Error: the paramter h_y has " << h_y_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter h_y has " << h_y_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (h_z_len != 1 && h_z_len != N)
-        cerr << "Error: the paramter h_z has " << h_z_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter h_z has " << h_z_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (h_x_len == 1)
         h_x = vector<double>(N, h_x[0]);
     if (h_y_len == 1)
@@ -70,27 +72,26 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 
     if ((J_z.size() != 1 || J.size() != 1) && L.predefined)
     {
-        cerr << "Error: J_z.size()=" << J_z.size() << " and " << J.size() << " but L.predefined=" << L.predefined << ". Couplings J and J_z must be uniform in such a predefined lattice.\n", exit(1);
+        cout2 << "Error: J_z.size()=" << J_z.size() << " and " << J.size() << " but L.predefined=" << L.predefined << ". Couplings J and J_z must be uniform in such a predefined lattice.\n", exit(1);
     }
 
     if (J.size() != 1 && J.size() != num_bonds)
-        cerr << "Error: the paramter J has " << J.size() << " values but 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the paramter J has " << J.size() << " values but 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
     if (J.size() == 1)
     {
         J = vector<double>(num_bonds, J[0]);
     }
 
     if (J_z.size() != 1 && J_z.size() != num_bonds)
-        cerr << "Error: the paramter J_z has " << J_z.size() << " values but 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the paramter J_z has " << J_z.size() << " values but 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
     if (J_z.size() == 1)
     {
         J_z = vector<double>(num_bonds, J_z[0]);
     }
 
-    cout << "SetHamiltonian with N=" << N << endl;
     for (int dag = 0; dag <= 1; dag++)
     {
-        AutoMPO &auto_L = (dag == 0) ? (C.Lindbladian) : (C.LindbladianDag); //Linbladian operator, or its hermitian conjugate (samething for the unitary terms)
+        AutoMPO &auto_L = (dag == 0) ? (C.Lindbladian) : (C.LindbladianDag); //Lindbladian operator, or its hermitian conjugate (samething for the unitary terms)
 
         //Note about the Lindblad equation: since we evolve rho (and not a wave function), each term in H
         //acts once with a "+" on the right of rho, and once with a "-" to the left of rho (prefix "_" in the operator name)
@@ -131,19 +132,17 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     // Dissipative terms
 
     if (g_0_len != 1 && g_0_len != N)
-        cerr << "Error: the paramter g_0 has " << g_0_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter g_0 has " << g_0_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (g_1_len != 1 && g_1_len != N)
-        cerr << "Error: the paramter g_1 has " << g_1_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter g_1 has " << g_1_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (g_2_len != 1 && g_2_len != N)
-        cerr << "Error: the paramter g_2 has " << g_2_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter g_2 has " << g_2_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
     if (g_0_len == 1)
         g_0 = vector<double>(N, g_0[0]);
     if (g_1_len == 1)
         g_1 = vector<double>(N, g_1[0]);
     if (g_2_len == 1)
         g_2 = vector<double>(N, g_2[0]);
-    // OLD: const double gamma = param.val("gamma");
-    // cout << "Strength of the Lindblad terms, gamma=" << gamma << endl;
 
     for (int i = 1; i <= int(N); i++)
         // AddSingleSpinBath:

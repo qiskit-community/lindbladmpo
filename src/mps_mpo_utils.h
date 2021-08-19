@@ -12,6 +12,7 @@
 
 #ifndef _MPS_MPO_UTILS_
 #define _MPS_MPO_UTILS_
+#include "io_utils.h"
 #include "itensor/all.h"
 #include <string>
 #include <vector>
@@ -31,12 +32,12 @@ public:
   bool checkDone(const Args &args = Args::global())
   {
     const double energy = args.getReal("Energy", 0);
-    cout << "    Change in <L^+ L>: " << energy - previous_energy << "\trelative change: " << (energy - previous_energy) / (abs(previous_energy) + 1e-15) << endl;
+    cout2 << "    Change in <L^+ L>: " << energy - previous_energy << "\trelative change: " << (energy - previous_energy) / (abs(previous_energy) + 1e-15) << "\n";
     if (relative)
     {
       if (abs(energy - previous_energy) / (abs(previous_energy) + 1e-15) < precision)
       {
-        cout << "   <L^+ L> has converged (relative change <" << precision << ") => stop the DMRG.\n";
+        cout2 << "   <L^+ L> has converged (relative change <" << precision << ") => stop the DMRG.\n";
         return true;
       }
       else
@@ -49,7 +50,7 @@ public:
     {
       if (abs(energy - previous_energy) < precision)
       {
-        cout << "   Energy has converged (change <" << precision << ") => stop the DMRG.\n";
+        cout2 << "   Energy has converged (change <" << precision << ") => stop the DMRG.\n";
         return true;
       }
       else
