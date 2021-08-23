@@ -31,15 +31,17 @@ else:
 	else:
 		s_target_os = 'LINUX'
 
-	os.mkdir('../itensor3')
-	process = subprocess.Popen(f'git clone https://github.com/ITensor/ITensor.git ../itensor3/', shell=True)
+	process = subprocess.Popen(f'git clone https://github.com/ITensor/ITensor.git itensor3/', shell=True)
 	exit_code = process.wait()
 	if exit_code != 0:
 		raise Exception("Cloning of ITensor repo using a git command failed.")
-	shutil.copy('./src/options.mk', '../itensor3/')
+	shutil.copy('./src/options.mk', 'itensor3/')
+        
+	exit_code = subprocess.call(f'cd itensor3 && make configure', shell=True)
+	if exit_code != 0:
+		pass
 
-	process = subprocess.Popen(f'cd .. && cd itensor3 && make -C ../itensor3/ OS_TARGET={s_target_os}', shell=True)
-	exit_code = process.wait()
+	exit_code = subprocess.call(f'cd itensor3/itensor && make build OS_TARGET={s_target_os}', shell=True)
 	if exit_code != 0:
 		pass
 	process = subprocess.Popen(f'make -C ./src/ OS_TARGET={s_target_os}', shell=True)
@@ -47,6 +49,7 @@ else:
 	if exit_code != 0:
 		pass
 	shutil.copy(f'./bin/{s_executable}', './lindbladmpo/')
+	shutil.rmtree('itensor3')
 
 # Read long description from README.
 with open('README.md') as readme_file:
