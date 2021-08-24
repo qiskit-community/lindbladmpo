@@ -44,7 +44,7 @@ else:
 	exit_code = subprocess.call(f'cd itensor3/itensor && make build OS_TARGET={s_target_os}', shell=True)
 	if exit_code != 0:
 		pass
-	process = subprocess.Popen(f'make -C ./src/ OS_TARGET={s_target_os}', shell=True)
+	process = subprocess.Popen(f'make -C ./src/ ITENSOR3_DIR=../itensor3 OS_TARGET={s_target_os}', shell=True)
 	exit_code = process.wait()
 	if exit_code != 0:
 		pass
