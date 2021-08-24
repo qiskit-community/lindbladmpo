@@ -4,7 +4,7 @@
 #	The value below is used unless make is invoked with a command line
 #	argument of the form: make ITENSOR3_DIR=" ... ".
 ifeq ($(ITENSOR3_DIR),)
-ITENSOR3_DIR=../itensor3
+ITENSOR3_DIR=../../itensor3
 endif
 
 #	Running 'make' will compile the solver executable and name it to the
