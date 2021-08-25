@@ -86,7 +86,7 @@ inline int BondDim(const MPO &H, int i)
   return (bond_index.dim());
 }
 //____________________________________________________________________
-double Entropy(MPS psi, int i); //returns the von Neumann entropy on some bond (i,i+1)
+double Entropy(MPS psi, int i,int local_space_dim=0); //returns the von Neumann entropy on some bond (i,i+1)
 //____________________________________________________________________
 double OSEE(MPS rho, int i);
 void prints_SVD_spectrum(ostream &o, MPS psi, int i);
