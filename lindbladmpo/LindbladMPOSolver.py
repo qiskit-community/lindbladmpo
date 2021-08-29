@@ -160,6 +160,24 @@ class LindbladMPOSolver:
 					if parameters[key][len(parameters[key]) - 1] != pauli:
 						file.write(",")
 				file.write("\n")
+			elif key == '1q_indices':
+				file.write(key + " = ")
+				n_indices = len(parameters[key])
+				for i_site, site in enumerate(parameters[key]):
+					file.write(str(site + 1))
+					# +1 because Python indices are 0-based, while iTensor's are 1-based
+					if i_site != n_indices - 1:
+						file.write(",")
+				file.write("\n")
+			elif key == '2q_indices':
+				file.write(key + " = ")
+				n_tuples = len(parameters[key])
+				for i_2q_tuple, _2q_tuple in enumerate(parameters[key]):
+					file.write(str(_2q_tuple[0] + 1) + ',' + str(_2q_tuple[1] + 1))
+					# +1 because Python indices are 0-based, while iTensor's are 1-based
+					if i_2q_tuple != n_tuples - 1:
+						file.write(",")
+				file.write("\n")
 			else:
 				file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
 		if AB_indices:
@@ -223,7 +241,7 @@ class LindbladMPOSolver:
 			words = line.strip().split()
 			if not words:
 				continue
-			result[(int(words[2]), words[0], float(words[1]))] = float(str(words[3]))
+			result[(int(words[2]), words[1], float(words[0]))] = float(str(words[3]))
 		file.close()
 		return result
 
@@ -246,7 +264,7 @@ class LindbladMPOSolver:
 			words = line.strip().split()
 			if not words:
 				continue
-			result[(int(words[2]), int(words[3]), words[0], float(words[1]))] = float(words[4])
+			result[(int(words[2]), int(words[3]), words[1], float(words[0]))] = float(words[4])
 		file.close()
 		return result
 

@@ -163,7 +163,7 @@ public:
         }
         else
         {
-          cout << "Warning: the input line :"
+          cout << "\nWarning: the input line :"
                << line << " has been ignored (no '=')." << endl;
         }
       }
