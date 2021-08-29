@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qbit observables
 	ofstream file_1q(output_prefix + ".obs-1q.dat");
-	file_1q << "#time\tcomponent\tindex\tvalue" << endl;
+	file_1q << "#time\toperator\tindex\tvalue" << endl;
 	auto components = param.stringvec("1q_components");
 	for (auto &s : components)
 	{
@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
 	//-----------------------------------------------------
 	// Some preparation/checks for the 2-qbit observables
 	ofstream file_2q(output_prefix + ".obs-2q.dat");
-	file_2q << "#time\tcomponent\tindex_1\tindex_2\tvalue" << endl;
+	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
 	file_2q.precision(15);
 	vector<long> sit2 = param.longvec("2q_indices");
 	if (sit2.size() % 2 == 1)
