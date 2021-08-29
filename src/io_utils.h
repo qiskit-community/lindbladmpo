@@ -62,7 +62,7 @@ public:
 		if (ostream2)
 			*ostream2 << val;
 		return *this;
-	};
+	}
 
 	void precision(streamsize pr)
 	{

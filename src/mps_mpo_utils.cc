@@ -13,7 +13,7 @@
 #include "mps_mpo_utils.h"
 
 //____________________________________________________________________
-double Entropy(MPS psi, int i) //returns the von Neumann entropy on some bond (i,i+1)
+double Entropy(MPS psi, int i,int local_space_dim) //returns the von Neumann entropy on some bond (i,i+1)
 {
   auto bond_index=commonIndex(psi.A(i),psi.A(i+1),"Link");
   int bond_dim=bond_index.dim();
@@ -22,10 +22,19 @@ double Entropy(MPS psi, int i) //returns the von Neumann entropy on some bond (i
   ITensor wf = psi.A(i)*psi.A(i+1);
   auto U = psi.A(i);
   ITensor S,V;
-  //Remark: We know that the rank of wf is at most bond_dim, so we specify
+  //Remark: We know that the rank of wf is at most min(bond_dim,int(pow(local_space_dim,min(i,N-i)))), so we specify
   //this value to the SVD routine, in order to avoid many spurious small singular values (like ~ 1e-30)
   //which should in fact be exaclty zero.
-  auto spectrum = svd(wf,U,S,V,{"MaxDim",bond_dim});
+  //if the argument local_space_dim is not provided (defults to 0) the max rank is simply taken to be bond_dim
+  const int N=length(psi);
+  int maxb;
+  if (local_space_dim>0) {
+      maxb =min(bond_dim, int(pow(local_space_dim,min(i,N-i))));
+  } else {
+      maxb=bond_dim;
+  }
+  auto spectrum = svd(wf,U,S,V,{"MaxDim",maxb});
+
   Real SvN = 0.;
   Real sum=0;
 //  cout2<<"\tSingular value decomposition: dim="<<spectrum.numEigsKept()<<"\n";
@@ -41,7 +50,7 @@ double Entropy(MPS psi, int i) //returns the von Neumann entropy on some bond (i
 //____________________________________________________________________
 double OSEE(MPS rho, int i) {//rho is a density matrix (in MPS form)
   const Cplx tr2=innerC(rho,rho);
-  const double s= Entropy(rho,i);
+  const double s= Entropy(rho,i,4);//4 is the local space dimension for rho
   return s/tr2.real()+log(tr2.real());
 }
 //____________________________________________________________________
