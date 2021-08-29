@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 		if (c != 'X' && c != 'Y' && c != 'Z')
 			cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
 	}
-	vector<long> sit = param.longvec("1q_sites");
+	vector<long> sit = param.longvec("1q_indices");
 	if (sit.size() == 0)
 	{ //If no sites are given explicitely we consider all: 1,...,N
 	    sit.resize(N);
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
 	for (int i : sit)
 	{
 		if (i < 1 || i > N)
-			cout2 << "Error: invalid site i=" << i << " found in list `1q_sites`.\n", exit(1);
+			cout2 << "Error: invalid index i=" << i << " found in list `1q_indices`.\n", exit(1);
 	}
 	file_1q.precision(15);
 	//-----------------------------------------------------
@@ -349,9 +349,9 @@ int main(int argc, char *argv[])
 	ofstream file_2q(output_prefix + ".obs-2q.dat");
 	file_2q << "#Component\ttime_t\tsite_i\tsite_j\tExpectationValue" << endl;
 	file_2q.precision(15);
-	vector<long> sit2 = param.longvec("2q_sites");
+	vector<long> sit2 = param.longvec("2q_indices");
 	if (sit2.size() % 2 == 1)
-		cout2 << "Error: the list of sites given in the parameter `2q_sites` should have an even length.\n", exit(1);
+		cout2 << "Error: the list of indices given in the parameter `2q_indices` should have an even length.\n", exit(1);
 
 	if (sit2.size() == 0)
 	{ //If no sites are given explicitely we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
@@ -366,9 +366,9 @@ int main(int argc, char *argv[])
 	{
 		const int i = sit2[n], j = sit2[n + 1];
 		if (i < 1 || i > N)
-			cout2 << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
+			cout2 << "Error: invalid index i=" << i << " found in list `2q_indices`.\n", exit(1);
 		if (j < 1 || j > N)
-			cout2 << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
+			cout2 << "Error: invalid index i=" << i << " found in list `2q_indices`.\n", exit(1);
 	}
 
 	auto components2 = param.stringvec("2q_components");
