@@ -424,9 +424,11 @@ int main(int argc, char *argv[])
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
 
-				cout2 << "\tTr{rho}=" << tr << ", Rényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
-				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
-				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
+				cout2 << "\tTr{rho}: " << tr << ", Rényi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
+//				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
+				if (!b_force_rho_Hermitian)
+				     cout2 << "\n\tMax bond dimension: " << bd_max;
+				cout2 << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
 				entropy_file << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max
 				        << " \t" << tot_duration.count() << endl;
