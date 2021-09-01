@@ -462,7 +462,7 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
 void SpinHalfSystem::MakeRhoHermitian(Args args)
 {
 	auto time_step = steady_clock::now();
-	cout2 << "\tMake rho Hermitian; Max bond-dim: " << maxLinkDim(rho) << " -> ";
+	cout2 << "\tMake rho Hermitian; Max bond dimension: " << maxLinkDim(rho) << " -> ";
 	cout2.flush();
 	MPS rd(rho); // Copy
 	// Next, take the Hermitian conjugate of rd

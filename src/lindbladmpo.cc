@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qbit observables
 	ofstream file_1q(output_prefix + ".obs-1q.dat");
-	file_1q << "#Component\ttime_t\tsite_i\tExpectationValue" << endl;
+	file_1q << "#time\toperator\tindex\tvalue" << endl;
 	auto components = param.stringvec("1q_components");
 	for (auto &s : components)
 	{
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 		if (c != 'X' && c != 'Y' && c != 'Z')
 			cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
 	}
-	vector<long> sit = param.longvec("1q_sites");
+	vector<long> sit = param.longvec("1q_indices");
 	if (sit.size() == 0)
 	{ //If no sites are given explicitely we consider all: 1,...,N
 	    sit.resize(N);
@@ -341,17 +341,17 @@ int main(int argc, char *argv[])
 	for (int i : sit)
 	{
 		if (i < 1 || i > N)
-			cout2 << "Error: invalid site i=" << i << " found in list `1q_sites`.\n", exit(1);
+			cout2 << "Error: invalid index i=" << i << " found in list `1q_indices`.\n", exit(1);
 	}
 	file_1q.precision(15);
 	//-----------------------------------------------------
 	// Some preparation/checks for the 2-qbit observables
 	ofstream file_2q(output_prefix + ".obs-2q.dat");
-	file_2q << "#Component\ttime_t\tsite_i\tsite_j\tExpectationValue" << endl;
+	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
 	file_2q.precision(15);
-	vector<long> sit2 = param.longvec("2q_sites");
+	vector<long> sit2 = param.longvec("2q_indices");
 	if (sit2.size() % 2 == 1)
-		cout2 << "Error: the list of sites given in the parameter `2q_sites` should have an even length.\n", exit(1);
+		cout2 << "Error: the list of indices given in the parameter `2q_indices` should have an even length.\n", exit(1);
 
 	if (sit2.size() == 0)
 	{ //If no sites are given explicitely we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
@@ -366,9 +366,9 @@ int main(int argc, char *argv[])
 	{
 		const int i = sit2[n], j = sit2[n + 1];
 		if (i < 1 || i > N)
-			cout2 << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
+			cout2 << "Error: invalid index i=" << i << " found in list `2q_indices`.\n", exit(1);
 		if (j < 1 || j > N)
-			cout2 << "Error: invalid site i=" << i << " found in list `2q_sites`.\n", exit(1);
+			cout2 << "Error: invalid index i=" << i << " found in list `2q_indices`.\n", exit(1);
 	}
 
 	auto components2 = param.stringvec("2q_components");
@@ -424,9 +424,11 @@ int main(int argc, char *argv[])
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
 
-				cout2 << "\tTr{rho}=" << tr << ", Rényi Entropy S_2 =" << S_2 // << ",\tTr{rho^2} =" << tr2
-				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
-				     << "\n\tOperator space entanglement entropy at center bond: " << osee;
+				cout2 << "\tTr{rho}: " << tr << ", Rényi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
+//				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
+				if (!b_force_rho_Hermitian)
+				     cout2 << "\n\tMax bond dimension: " << bd_max;
+				cout2 << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
 				entropy_file << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max
 				        << " \t" << tot_duration.count() << endl;
@@ -448,8 +450,8 @@ int main(int argc, char *argv[])
 					  if (tolower(s[0]) == 'z')
 					    expectation_value = C.Expect("Sz", i);
 					  if (abs(expectation_value.imag()) > 1e-3)
-					    cout2 << "Warning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real\n";
-					  file_1q << char(toupper(s[0])) << "\t" << t << "\t" << i
+					    cout2 << "\nWarning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real.\n";
+					  file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i
 					          << "\t" << expectation_value.real() << endl;
 					  count++;
 					}
@@ -477,8 +479,8 @@ int main(int argc, char *argv[])
 						c2 += char(tolower(s[1]));
 						Cplx expectation_value = C.Expect(c1, i, c2, j);
 						if (abs(expectation_value.imag()) > 1e-3)
-						cout2 << "Warning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
-						file_2q << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << t << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
+						cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
+						file_2q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
 						count++;
 					}
 				}
@@ -499,6 +501,7 @@ int main(int argc, char *argv[])
 		if (n < n_steps)
 		{
 			cout2 << "\t" << "Time evolving the state -> ";
+			cout2.flush();
 			auto t_evolve_start = steady_clock::now();
 			TE.evolve(C.rho);
 			auto t_evolve_end = steady_clock::now();
@@ -507,7 +510,7 @@ int main(int argc, char *argv[])
 
 			Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
 			if (std::abs(z - 1) > 1e-2)
-				cout2 << "Warning: Tr[rho]<>1 :" << z << "\n";
+				cout2 << "\nWarning: Tr[rho]<>1 :" << z << "\n";
 			if (param.val("b_force_rho_trace") != 0)
 				C.rho /= z;
 			cout2.flush();
