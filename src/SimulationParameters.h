@@ -29,7 +29,7 @@ public:
         operator[]("init_Pauli_state") = "+z";                                                                  
         //If not equal to "" the initial state (density matrix rho) will be read from the disk.
         //Give a filename if you want to read a previous density matrix from disk, as the initial state of the time evolution. 
-        //Note that initial state is in fact stored in three files, with names names *_N=*.state.ops, *_N=*.state.sites and*_N=*.state.rho
+        //Note that initial state is in fact stored in three files, with names *.state.ops, *.state.sites and *.state.rho
         operator[]("load_files_prefix") = "";
         //Whether the final state (density matrix) will be saved to disk.
         operator[]("b_save_final_state") = "0";   

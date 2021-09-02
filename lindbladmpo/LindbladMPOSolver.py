@@ -5,17 +5,35 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
-
 import subprocess
 import uuid
-from typing import Dict
+from typing import Dict, Optional
 import numpy as np
 import platform
 import os
 
 
 class LindbladMPOSolver:
-	def __init__(self, parameters, s_cygwin_path = None, s_solver_path = None):
+	"""Evolve multi-qubit Lindblad dynamics with a high-performance matrix-product-operators solver."""
+
+	DEFAULT_EXECUTABLE_PATH = '/../bin/lindbladmpo'
+	"""Name and location of the solver executable. Will be appended with '.exe' for Windows."""
+
+	DEFAULT_CYGWIN_PATH = "C:/cygwin64/bin/bash.exe"
+	"""Default path for the cygwin executable, which is used to invoke the solver (Windows only)."""
+
+	def __init__(self, parameters: Optional[dict] = None,
+				 s_cygwin_path: Optional[str] = None, s_solver_path: Optional[str] = None):
+		"""Initialize the instance, and possibly build the input file from the parameters.
+
+		Args:
+			parameters: The model parameters. If not None, the member build() function is
+				invoked to build the input file.
+			s_cygwin_path: On Windows only, indicates the cygwin executable path. A default
+				location will be assigned if this argument is not pass.
+			s_solver_path: Indicates the solver executable path. A default location will be
+				assigned if this argument is not passed.
+		"""
 		self.parameters = parameters
 		self.s_input_file = ''
 		self.s_output_path = ''
@@ -23,22 +41,21 @@ class LindbladMPOSolver:
 		self.s_cygwin_path = s_cygwin_path
 		self.s_solver_path = s_solver_path
 		self.s_id_suffix = ''
-		self.s_N_suffix = ''
 		self.result = {}
+		if parameters is not None:
+			self.build()
 
 	def solve(self):
-		try:
-			self.s_input_file, self.s_output_path, self.s_id_suffix, self.s_N_suffix =\
-				self.build_input_file(self.parameters)
-		except:
-			raise Exception("There was an error creating the input file, aborting program")
+		if self.s_input_file == '':
+			raise Exception("The solver parameters must be verified and the input file created, by invoking build().")
 		exit_code = self.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
 		if exit_code != 0:
-			raise Exception("There was an error executing the solver, aborting program.")
+			raise Exception("There was an error executing the solver.")
 		self.result = self.load_output(self.s_output_path)
 
 	@staticmethod
-	def process_default_paths(s_cygwin_path = None, s_solver_path = None) -> (str, str):
+	def process_default_paths(s_cygwin_path: Optional[str] = None,
+							  s_solver_path: Optional[str] = None) -> (str, str):
 		""" Returns the proper default values for the cygwin path and solver path according to the system
 			platform, for each of those parameter that is None, otherwise the parameter is returned unchanged.
 		Args:
@@ -53,56 +70,60 @@ class LindbladMPOSolver:
 			s_system = platform.system().lower()
 			if s_system == 'windows':
 				# On Windows we execute the solver using the cygwin bash. The default path is the following.
-				s_cygwin_path1 = "C:/cygwin64/bin/bash.exe"
+				s_cygwin_path1 = LindbladMPOSolver.DEFAULT_CYGWIN_PATH
 
 				# s_solver_path should be of the form "/cygdrive/c/ ... ", and we use below a path relative
 				# to the current file's path in the package
 				s_solver_path1 = s_solver_path1.replace(':', '')
 				s_solver_path1 = s_solver_path1.replace('\\', '/')
 				s_solver_path1 = "/cygdrive/" + s_solver_path1
-				s_solver_path1 += '/../bin/lindbladmpo.exe'
+				s_solver_path1 += LindbladMPOSolver.DEFAULT_EXECUTABLE_PATH + '.exe'
 			else:
 				s_cygwin_path1 = ''
-				s_solver_path1 += '/../bin/lindbladmpo'
+				s_solver_path1 += LindbladMPOSolver.DEFAULT_EXECUTABLE_PATH
 			if s_cygwin_path is None:
 				s_cygwin_path = s_cygwin_path1
 			if s_solver_path is None:
 				s_solver_path = s_solver_path1
 		return s_cygwin_path, s_solver_path
 
-	@staticmethod
-	def build_input_file(parameters: Dict) -> (str, str, str, str):
-		""" Writing the input parameters from the input dictionary to txt file
+	def build(self, parameters: Optional[dict] = None):
+		"""Write the parameters dictionary to the `.input.txt` file the solver expects.
+
+		Initializes also the member fields:
+			self.s_input_file: File name of solver input file,
+			self.s_output_prefix: Prefix for solver output path,
+			self.s_id_suffix: The unique id suffix (possibly empty),
+			All fields are initialized based on the user settings in the parameters dictionary
+			(or default values if not assigned).
+
 		Args:
-			parameters (dictionary): the arguments for the simulator
-		Returns:
-			(s_input_file, s_output_path, s_id_suffix): File name of solver input file, file prefix for solver output,
-			 based on the user settings in the parameters dictionary (or default values if not assigned), and possibly
-			appended with a unique id (if requested), the unique id string (possibly empty), and the file
-			names suffix denoting the number of qubit, e.g. ".N=8".
+			parameters: The model parameters.
 		"""
-		check_output = LindbladMPOSolver._check_argument_correctness(parameters)
+		if parameters is not None:
+			self.parameters = parameters
+		parameters = self.parameters
+		check_params = self._verify_parameters()
 		# check if there is a problem with the input, if "" returned there is no problem
-		if check_output != "":
-			raise Exception(check_output)
+		if check_params != "":
+			raise Exception(check_params)
 		# check if the user defined an input file name
-		s_output_path = parameters.get("output_files_prefix", "")
+		s_output_path: str = parameters.get("output_files_prefix", "")
 		if s_output_path == "" or s_output_path[-1] in ('/', '.', '\\'):
 			s_output_path += "lindblad"
 		b_uuid = parameters.get("b_unique_id", False)
-		s_id_suffix = ''
 		if b_uuid:
 			s_uuid = uuid.uuid4().hex
 			print("Generating a unique id for this simulation: " + s_uuid)
-			s_id_suffix = '.' + s_uuid
-			s_output_path += s_id_suffix
 			parameters["unique_id"] = s_uuid
-		n_qubits = parameters.get("N")
-		s_N_suffix = f".N={n_qubits}"
-		s_input_file = s_output_path + s_N_suffix + ".input.txt"
+		else:
+			s_uuid = parameters.get("unique_id", "")
+		s_id_suffix = ''
+		if s_uuid != "":
+			s_id_suffix = '.' + s_uuid
+		s_output_path += s_id_suffix
+		s_input_file = s_output_path + ".input.txt"
 
-		print("Creating solver input file:")
-		print(s_input_file)
 		AB_indices = False
 		first_bond_indices = []
 		second_bond_indices = []
@@ -113,7 +134,6 @@ class LindbladMPOSolver:
 		if 'J_z' in parameters.keys():
 			if type(parameters['J_z']) == np.ndarray:
 				interactions.append('J_z')
-		file = open(s_input_file, "w")
 		if len(interactions) == 2:
 			if parameters['J'].shape == parameters['J_z'].shape:
 				AB_indices = True
@@ -123,7 +143,7 @@ class LindbladMPOSolver:
 							first_bond_indices.append(i + 1)
 							second_bond_indices.append(j + 1)
 			else:
-				raise Exception("J and J_z are not of the same size, aborting program.")
+				raise Exception("J and J_z are not of the same size.")
 		elif len(interactions) == 1:
 			AB_indices = True
 			for i in range(parameters[interactions[0]].shape[0]):
@@ -131,11 +151,15 @@ class LindbladMPOSolver:
 					if parameters[interactions[0]][i, j] != 0:
 						first_bond_indices.append(i + 1)
 						second_bond_indices.append(j + 1)
+
+		print("Creating solver input file:")
+		print(s_input_file)
+		file = open(s_input_file, "w")
 		for key in parameters.keys():
 			if key == "b_unique_id":
 				pass
 			elif key == "output_files_prefix":
-				file.write(key + ' = ' + s_output_path + "\n")
+				file.write(key + ' = ' + s_output_path + "\n")  # The solver will add '.N=?' itself
 			elif (key == 'J' or key == 'J_z') and type(parameters[key]) == np.ndarray and len(parameters[key]) > 1:
 				# check if to create bond indices arrays
 				not_first_value = False
@@ -153,16 +177,17 @@ class LindbladMPOSolver:
 					if i + 1 != parameters[key].shape[0]:
 						file.write(",")
 				file.write("\n")
-			elif key == '1q_components' or key == '2q_components':
+			elif key == 'init_Pauli_state' or key == '1q_components' or key == '2q_components':
+				n_indices = len(parameters[key])
 				file.write(key + " = ")
-				for pauli in parameters[key]:
-					file.write(str(pauli).strip("'"))
-					if parameters[key][len(parameters[key]) - 1] != pauli:
+				for i_op, op in enumerate(parameters[key]):
+					file.write(str(op).strip("'"))
+					if i_op != n_indices - 1:
 						file.write(",")
 				file.write("\n")
 			elif key == '1q_indices':
-				file.write(key + " = ")
 				n_indices = len(parameters[key])
+				file.write(key + " = ")
 				for i_site, site in enumerate(parameters[key]):
 					file.write(str(site + 1))
 					# +1 because Python indices are 0-based, while iTensor's are 1-based
@@ -185,7 +210,9 @@ class LindbladMPOSolver:
 			file.write("second_bond_indices = " + str(second_bond_indices).strip("[]").replace(' ', '') + "\n")
 		s_input_file = os.path.abspath(file.name).replace("\\", "/")
 		file.close()
-		return s_input_file, s_output_path + s_N_suffix, s_id_suffix, s_N_suffix
+		self.s_input_file = s_input_file
+		self.s_output_path = s_output_path
+		self.s_id_suffix = s_id_suffix
 
 	@staticmethod
 	def execute(s_cygwin_path = None, s_solver_path = None, s_input_file = "") -> int:
@@ -224,12 +251,12 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def _read_1q_output_into_dict(s_output_path: str) -> Dict:
-		""" Reads the 1 qubit output file and returns a dictionary with the values in the format:
-		key (tuple) = (qubit (int), Axis (string), time (float)) : value = expectation value (float)
+		""" Reads the 1-qubit solver output file and returns a dictionary with the values.
 		Args:
 			s_output_path : file location
 		Returns:
-			result : the arguments for the simulator
+			result : A dictionary with the format
+				key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
 		"""
 		full_filename = s_output_path + ".obs-1q.dat"
 		print("Loading 1-qubit observables from file:")
@@ -247,12 +274,13 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def _read_2q_output_into_dict(s_output_path: str) -> Dict:
-		""" Reads the 2 qubit output file and returns a dictionary with the values in the format:
-		key = (qubit1 (int), qubit2 (int), Axis1 (string), Axis2 (string) ,time (float)), value = expectation value (float)
+		""" Reads the 2-qubit solver output file and returns a dictionary with the values.
 		Args:
 			s_output_path (string): file location
 		Returns:
-			result (dictionary): the arguments for the simulator
+			result : A dictionary with the format:
+				key (tuple) = (qubit1 (int), qubit2 (int), operator (string),
+					time (float)): expectation value (float)
 		"""
 		full_filename = s_output_path + ".obs-2q.dat"
 		print("Loading 2-qubit observables from file:")
@@ -281,132 +309,128 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	# returns the number of qubits based on the given parameters, returns -1 if found an error
-	def _get_number_of_qubits(dict_in: Dict) -> int:
-		l_x_is_0 = False
-		if "l_x" in dict_in:
-			if dict_in["l_x"] == 0:
-				l_x_is_0 = True
-		if ("l_x" in dict_in) and ("l_y" in dict_in) and (not l_x_is_0):
-			if LindbladMPOSolver._is_int(dict_in["l_x"]) and LindbladMPOSolver._is_int(dict_in["l_y"]):
-				return dict_in["l_x"] * dict_in["l_y"]
-		elif "N" in dict_in:
-			if LindbladMPOSolver._is_int(dict_in["N"]):
-				return dict_in["N"]
+	def _get_number_of_qubits(parameters: Dict) -> int:
+		if "N" in parameters:
+			if LindbladMPOSolver._is_int(parameters["N"]):
+				return parameters["N"]
 		return -1
 
-	@staticmethod
-	def _check_argument_correctness(dict_in: Dict) -> str:
-		"""Returns a detailed Error message if dict_in arguments are not in the correct format.
+	def _verify_parameters(self, ignore_params: Optional[list] = None) -> str:
+		"""Returns a detailed Error message if parameters are not in the correct format.
+
 		Args:
-			dict_in: a dictionary with the parameters for the simulation, keys as arguments and values as values.
+			ignore_params: A list with parameter names that this solver does not recognize, but
+				should be ignored in the verification (so that an error message for unknown parameters
+				is not issued). This is useful for derived classes.
 		Returns:
-			A detailed Error message if dict_in arguments are not in the correct format (which is stated in the spec of the simulator).
-			else, returns "" (checks passed).
-		Raises:
-			Nothing, all issues will come out in the output returned.
+			A detailed error message if parameters arguments are not in the correct format (which
+				is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
 		"""
+		parameters = self.parameters
 		check_msg = ""
-		if ("N" not in dict_in) or ("t_final" not in dict_in) or ("tau" not in dict_in):
+		if ("N" not in parameters) or ("t_final" not in parameters) or ("tau" not in parameters):
 			check_msg += "Error 110: N, t_final and tau must be defined as they don't have default values\n"
 			return check_msg
-		for key in dict.keys(dict_in):
-			if isinstance(dict_in[key], str) and "" == dict_in[key]:  # ignore empty entrances/space holders <"">
+		for key in dict.keys(parameters):
+			if isinstance(parameters[key], str) and "" == parameters[key]:  # ignore empty entrances/space holders <"">
 				continue
 			flag_continue = False
 
 			if key == "N":
-				if not LindbladMPOSolver._is_int(dict_in[key]):
+				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 120: " + key + " should be an integer\n"
 					continue
-				if dict_in[key] <= 0:
+				if parameters[key] <= 0:
 					check_msg += "Error 130: " + key + " should be bigger/equal to 1 (integer)\n"
 					continue
 
-			elif (key == "t_final") or key == "tau":
-				if not LindbladMPOSolver._is_float(dict_in[key]):
+			elif key == "t_init" or key == "t_final" or key == "tau":
+				if not LindbladMPOSolver._is_float(parameters[key]):
 					check_msg += "Error 140: " + key + " is not a float\n"
 					continue
-				if dict_in[key] <= 0:
-					check_msg += "Error 150: " + key + " must be bigger then 0\n"
+				if key != "t_init" and parameters[key] <= 0:
+					check_msg += "Error 150: " + key + " must be larger then 0\n"
 					continue
-
-			elif key == "t_init":
-				if not LindbladMPOSolver._is_float(dict_in[key]):
-					check_msg += "Error 155: " + key + " is not a float\n"
-					continue
-				if dict_in[key] > dict_in["t_final"]:
-					check_msg += "Error 156: " + key + " must be smaller or equal to t_final\n"
+				if key == "t_init" and parameters[key] > parameters["t_final"]:
+					check_msg += "Error 151: " + key + " must be equal or smaller than t_final\n"
 					continue
 
 			elif (key == "l_x") or (key == "l_y"):
-				if not LindbladMPOSolver._is_int(dict_in[key]):
+				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 160: " + key + " should be an integer\n"
 					continue
-				if dict_in[key] < 0:
-					check_msg += "Error 170: " + key + " should be bigger/equal to 1 (integer)\n"
+				if parameters[key] < 0:
+					check_msg += "Error 170: " + key + " should be equal or larger than 1 (integer)\n"
 					continue
 
 			elif key == "output_step":
-				if not LindbladMPOSolver._is_int(dict_in[key]):
+				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 180: " + key + " should be an integer\n"
 					continue
-				if dict_in[key] < 0:
+				if parameters[key] < 0:
 					check_msg += "Error 190: " + key + " should be bigger/equal to 0 (integer)\n"
 					continue
 
 			elif (key == "h_x") or (key == "h_y") or (key == "h_z") or \
 					(key == "g_0") or (key == "g_1") or (key == "g_2"):
-				if LindbladMPOSolver._is_float(dict_in[key]):
+				if LindbladMPOSolver._is_float(parameters[key]):
 					continue
-				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(dict_in)
+				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
 				if number_of_qubits == -1:
-					check_msg += "Error 200: " + key + " could not be validated because 'N' (or alternatively l_x, " \
-													   "l_y) are not defined properly\n "
+					check_msg += "Error 200: " + key + " could not be validated because 'N' " \
+													   "(or alternatively l_x, l_y) are not " \
+													   "defined properly\n "
 					continue
-				if isinstance(dict_in[key], list):
-					if len(dict_in[key]) != number_of_qubits:
-						check_msg += "Error 210: " + key + " is not a float / N size list / numpy array (of floats)\n"
+				if isinstance(parameters[key], list):
+					if len(parameters[key]) != number_of_qubits:
+						check_msg += "Error 210: " + key + " is not a float / N-legnth list / " \
+														   "numpy array (of floats)\n"
 						continue
-					for element in dict_in[key]:
+					for element in parameters[key]:
 						if not LindbladMPOSolver._is_float(element):
-							check_msg += "Error 220: " + key + "is not a float / N size list / numpy array (of " \
-															   "floats)\n "
+							check_msg += "Error 220: " + key + "is not a float / N-legnth list " \
+															   "/ numpy array (of floats)\n "
 							flag_continue = True
 							break
 					if flag_continue:
 						continue
-				elif isinstance(dict_in[key], np.ndarray):
-					if (str((dict_in[key]).dtype).find("int") == -1) and (
-							str((dict_in[key]).dtype).find("float") == -1):
-						check_msg += "Error 230: " + key + " is not a float / N size list / numpy array (of floats)\n"
+				elif isinstance(parameters[key], np.ndarray):
+					if (str((parameters[key]).dtype).find("int") == -1) and (
+							str((parameters[key]).dtype).find("float") == -1):
+						check_msg += "Error 230: " + key + " is not a float / N-legnth list / " \
+														   "numpy array (of floats)\n"
 						continue
-					if dict_in[key].size == 1:
+					if parameters[key].size == 1:
 						continue
-					if (dict_in[key].shape[0] != number_of_qubits) or (dict_in[key].shape[0] != dict_in[key].size):
-						check_msg += "Error 240: " + key + " is not a float / N size list / numpy array (of floats)\n"
+					if (parameters[key].shape[0] != number_of_qubits) or (parameters[key].shape[0] != parameters[key].size):
+						check_msg += "Error 240: " + key + " is not a float / N-legnth list / " \
+														   "numpy array (of floats)\n"
 						continue
 				else:
-					check_msg += "Error 250: " + key + " is not a float / N size list / numpy array (of floats)\n"
+					check_msg += "Error 250: " + key + " is not a float / N-legnth list / numpy " \
+													   "array (of floats)\n"
 					continue
 
 			elif (key == "J_z") or (key == "J"):
-				if LindbladMPOSolver._is_float(dict_in[key]):
+				if LindbladMPOSolver._is_float(parameters[key]):
 					continue
-				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(dict_in)
+				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
 				if number_of_qubits == -1:
-					check_msg += "Error 260: " + key + " could not be validated because 'N' (or alternatively l_x, " \
-													   "l_y) are not defined properly\n"
+					check_msg += "Error 260: " + key + " could not be validated because 'N' " \
+													   "(or alternatively l_x, l_y) are not " \
+													   "defined properly\n"
 					continue
-				if isinstance(dict_in[key], list):
-					if len(dict_in[key]) != number_of_qubits:
-						check_msg += "Error 270: " + key + " should be a constant, or a square matrix (nested " \
-														   "list/np.array) in the size of number_of_qubits^2 of floats\n"
+				if isinstance(parameters[key], list):
+					if len(parameters[key]) != number_of_qubits:
+						check_msg += "Error 270: " + key + " should be a constant, or a square " \
+														   "matrix (nested list/np.array) of " \
+														   "floats with a size of N^2\n"
 						continue
-					for lst in dict_in[key]:
+					for lst in parameters[key]:
 						if not isinstance(lst, list):
-							check_msg += "Error 280: " + key + "should be a constant, or a square matrix (nested " \
-															   "list/np.array) in the size of number_of_qubits^2 of " \
-															   "floats\n "
+							check_msg += "Error 280: " + key + "should be a constant, or a square " \
+															   "matrix (nested list/np.array) of " \
+															   "floats with a size of N^2\n "
 							flag_continue = True
 							break
 						if len(lst) != number_of_qubits:
@@ -426,21 +450,21 @@ class LindbladMPOSolver:
 							break
 					if flag_continue:
 						continue
-				elif isinstance(dict_in[key], np.ndarray):
-					if (str((dict_in[key]).dtype).find("int") == -1) and (
-							str((dict_in[key]).dtype).find("float") == -1):
+				elif isinstance(parameters[key], np.ndarray):
+					if (str((parameters[key]).dtype).find("int") == -1) and (
+							str((parameters[key]).dtype).find("float") == -1):
 						check_msg += "Error 310: " + key + "should be a constant, or a square matrix (nested " \
 														   "list/np.array) in the size of number_of_qubits^2 of " \
 														   "floats\n "
 						continue
-					if dict_in[key].size == 1:
+					if parameters[key].size == 1:
 						continue
-					if dict_in[key].shape[0] != number_of_qubits:
+					if parameters[key].shape[0] != number_of_qubits:
 						check_msg += "Error 320: " + key + "should be a constant, or a square matrix (nested " \
 														   "list/np.array) in the size of number_of_qubits^2 of " \
 														   "floats\n "
 						continue
-					if dict_in[key].shape[0] ** 2 != dict_in[key].size:
+					if parameters[key].shape[0] ** 2 != parameters[key].size:
 						check_msg += "Error 330: " + key + "should be a constant, or a square matrix (nested " \
 														   "list/np.array) in the size of number_of_qubits^2 of " \
 														   "floats\n "
@@ -451,57 +475,54 @@ class LindbladMPOSolver:
 					continue
 
 			elif key == "init_Pauli_state":
-				if not isinstance(dict_in[key], str):
-					check_msg += "Error 350: " + key + " is not a string\n"
+				if not isinstance(parameters[key], str) and not isinstance(parameters[key], list):
+					check_msg += "Error 350: " + key + " must not be a string or a list of strings\n"
 					continue
-				str_as_lst = list(dict_in[key])
-				if len(str_as_lst) != 2:
-					check_msg += "Error 360: " + key + " is a string but not of length 2 !\n"
-					continue
-				if (str_as_lst[0] != '+') and (str_as_lst[0] != "-"):
-					check_msg += "Error 370: " + key + " can only be one of these: +x, -x, +y, -y, +z, -z\n"
-					continue
-				if (str_as_lst[1] != "x") and (str_as_lst[1] != "y") and (str_as_lst[1] != "z"):
-					check_msg += "Error 380: " + key + " can only be one of these: +x, -x, +y, -y, +z, -z\n"
-					continue
+				init_list = [parameters[key]] if isinstance(parameters[key], str) else parameters[key]
+				for s_init in init_list:
+					if not isinstance(s_init, str):
+						check_msg += "Error 360: each member of " + key + " must be a string\n"
+						continue
+					allowed_init = ['+x', '-x', '+y', '-y', '+z', '-z']
+					if s_init.lower() not in allowed_init:
+						check_msg += "Error 370: " + key + " can only be one of: +x, -x, +y, -y, +z, -z\n"
+						continue
 
 			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
 					key == "b_force_rho_Hermitian") or (key == "b_unique_id") or (key == "b_save_final_state")):
-				if not isinstance(dict_in[key], bool):
-					check_msg += "Error 390: " + key + " should be a boolean True or False as its a switch\n"
+				if not isinstance(parameters[key], bool):
+					check_msg += "Error 390: " + key + " should be a boolean True or False\n"
 					continue
 
 			elif key == "trotter_order":
-				if not LindbladMPOSolver._is_int(dict_in[key]):
+				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 400: " + key + " should be 2, 3 or 4\n"
 					continue
-				if (dict_in[key] != 2) and (dict_in[key] != 3) and (dict_in[key] != 4):
+				if (parameters[key] != 2) and (parameters[key] != 3) and (parameters[key] != 4):
 					check_msg += "Error 401: " + key + " should be 2, 3 or 4\n"
 					continue
 
 			elif (key == "min_dim_rho") or (key == "max_dim_rho"):  # int
-				if not LindbladMPOSolver._is_int(dict_in[key]):
-					check_msg += "Error 410: " + key + " should be an integer\n"
+				if not LindbladMPOSolver._is_int(parameters[key]) or parameters[key] < 0:
+					check_msg += "Error 410: " + key + " must be a non-negative integer\n"
 					continue
 
 			elif (key == "cut_off") or (key == "cut_off_rho"):
-				if not LindbladMPOSolver._is_float(dict_in[key]):
-					check_msg += "Error 420: " + key + " is not a small float format (ae-b where a and b are numbers)\n"
+				if not LindbladMPOSolver._is_float(parameters[key]):
+					check_msg += "Error 420: " + key + " is not a float\n"
 					continue
 
 			elif key == "metadata":
-				if not isinstance(dict_in[key], str):
+				if not isinstance(parameters[key], str):
 					check_msg += "Error 422: " + key + " is not a string\n"
 					continue
-				if '\n' in dict_in[key]:
+				if '\n' in parameters[key]:
 					check_msg += "Error 423: " "The metadata string cannot contain the new line "\
 								 "character code ('\\n'). Please reformat the string\n"
 					continue
 
-			elif key == "output_files_prefix":
-				pass
-			elif key == "load_files_prefix":
-				if not isinstance(dict_in[key], str):
+			elif key == "load_files_prefix" or key == "output_files_prefix":
+				if not isinstance(parameters[key], str):
 					check_msg += "Error 425: " + key + " is not a string\n"
 					continue
 
@@ -509,15 +530,15 @@ class LindbladMPOSolver:
 				x_c = 0
 				y_c = 0
 				z_c = 0
-				if not isinstance(dict_in[key], list):
-					check_msg += "Error 430: " + key + " should get a list of sizes 1,2,3 with x,y,z)\n"
+				if not isinstance(parameters[key], list):
+					check_msg += "Error 430: " + key + " should be a list of size 1,2,3 with x,y,z)\n"
 					continue
-				if len(dict_in[key]) > 3:
-					check_msg += "Error 440: " + key + " should get a list of sizes 1,2,3 with x,y,z)\n"
+				if len(parameters[key]) > 3:
+					check_msg += "Error 440: " + key + " should be a list of size 1,2,3 with x,y,z)\n"
 					continue
-				for val in dict_in[key]:
+				for val in parameters[key]:
 					if not isinstance(val, str):
-						check_msg += "Error 441: " + key + " only gets x,y,z (or a subset)\n"
+						check_msg += "Error 441: " + key + " only takes x,y,z (or a subset)\n"
 						flag_continue = True
 						break
 					val = str.lower(val)
@@ -528,26 +549,26 @@ class LindbladMPOSolver:
 					elif val == "z":
 						z_c += 1
 					else:
-						check_msg += "Error 450: " + key + " only gets x,y,z (or a subset)\n"
+						check_msg += "Error 450: " + key + " only takes x,y,z (or a subset)\n"
 						flag_continue = True
 						break
 				if flag_continue:
 					continue
 				if (x_c > 1) or (y_c > 1) or (z_c > 1):
-					check_msg += "Error 460: " + key + " only gets x,y,z (or a subset)\n"
+					check_msg += "Error 460: " + key + " only takes x,y,z (or a subset)\n"
 					continue
 
 			elif key == "1q_indices":
-				if dict_in[key] != "":
-					if not isinstance(dict_in[key], list):
+				if parameters[key] != "":
+					if not isinstance(parameters[key], list):
 						check_msg += "Error 470: " + key + " should be an integer list (1,2,3,4..)\n"
 						continue
-					number_of_qubits = LindbladMPOSolver._get_number_of_qubits(dict_in)
+					number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
 					if number_of_qubits == -1:
 						check_msg += "Error 480: " + key + "could not be validated because 'N' (or alternatively l_x," \
 														   " l_y) are not defined properly\n "
 						continue
-					for element in dict_in[key]:
+					for element in parameters[key]:
 						if not LindbladMPOSolver._is_int(element):
 							check_msg += "Error 490: " + key + " should be an integer list (1,2,3,4..)\n"
 							flag_continue = True
@@ -559,24 +580,24 @@ class LindbladMPOSolver:
 							break
 					if flag_continue:
 						continue
-					if len(dict_in[key]) > number_of_qubits:
+					if len(parameters[key]) > number_of_qubits:
 						check_msg += "Error 510: " + key + " 's length should be smaller/equal then the amount of " \
 														   "qubits\n "
 						continue
-					if not len(set(dict_in[key])) == len(dict_in[key]):
+					if not len(set(parameters[key])) == len(parameters[key]):
 						check_msg += "Error 520: " + key + " 's List does not contains all unique elements"
 						continue
 
 			elif key == "2q_components":
-				if not isinstance(dict_in[key], list):
+				if not isinstance(parameters[key], list):
 					check_msg += "Error 530: " + key + "only receives xx,yy,zz,xy,xz,yz (or a subset) as a strings " \
 													   "list\n"
 					continue
-				if len(dict_in[key]) > 6:
+				if len(parameters[key]) > 6:
 					check_msg += "Error 540: " + key + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
 					continue
 				check_me = [0, 0, 0, 0, 0, 0]
-				for val in dict_in[key]:
+				for val in parameters[key]:
 					val = str.lower(val)
 					if val == "xx":
 						check_me[0] += 1
@@ -605,15 +626,15 @@ class LindbladMPOSolver:
 					continue
 
 			elif key == "2q_indices":  # expecting an integer tuples list
-				if not isinstance(dict_in[key], list):
+				if not isinstance(parameters[key], list):
 					check_msg += "Error 570: " + key + " should be an list of tuples of size 2, containing integer\n"
 					continue
-				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(dict_in)
+				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
 				if number_of_qubits == -1:
 					check_msg += "Error 580: " + key + " could not be validated because 'N' (or alternatively l_x, " \
 													   "l_y) are not defined properly\n"
 					continue
-				for tup in dict_in[key]:
+				for tup in parameters[key]:
 					if not isinstance(tup, tuple):
 						check_msg += "Error 590: " + key + " should be an list of tuples of size 2, containing " \
 														   "integer\n "
@@ -633,29 +654,29 @@ class LindbladMPOSolver:
 				if flag_continue:
 					continue
 
-				if len(dict_in[key]) > number_of_qubits ** 2:
+				if len(parameters[key]) > number_of_qubits ** 2:
 					check_msg += "Error 620: " + key + " 's length should be smaller then the amount of qubits^2\n"
 					continue
-				if not len(set(dict_in[key])) == len(dict_in[key]):
+				if not len(set(parameters[key])) == len(parameters[key]):
 					check_msg += "Error 630: " + key + " 's List does not contains all unique elements"
 					continue
 
-			else:
-				check_msg += "Error: invalid key (parameter) inserted: " + key + "\n"
-		# End of: "for key in dict.keys(dict_in)"
+			elif ignore_params is None or key not in ignore_params:
+				check_msg += "Error: unknown parameter key passed: " + key + "\n"
+		# End of: "for key in dict.keys(parameters)"
 		# More cross-parameter checks:
-		if ("t_final" in dict_in) and ("tau" in dict_in):
-			if (LindbladMPOSolver._is_float(dict_in["tau"])) and (LindbladMPOSolver._is_float(dict_in["t_final"])):
-				if (dict_in["tau"] > 0) and (dict_in["t_final"] > 0):
-					if dict_in["tau"] > dict_in["t_final"]:
+		if ("t_final" in parameters) and ("tau" in parameters):
+			if (LindbladMPOSolver._is_float(parameters["tau"])) and (LindbladMPOSolver._is_float(parameters["t_final"])):
+				if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
+					if parameters["tau"] > parameters["t_final"]:
 						check_msg += "Error 640: t_final (total time) is smaller then tau (time step for time " \
 									 "evolution)\n "
 						# TODO validate total time as t_final - t_init
-					elif "output_step" in dict_in:
-						if LindbladMPOSolver._is_int(dict_in["output_step"]):
-							if dict_in["output_step"] > 0:
-								if dict_in["output_step"] * dict_in["tau"] > dict_in["t_final"]:
-									check_msg += "Error 650: Output_step multiplied by tau, is bigger then t_final (" \
+					elif "output_step" in parameters:
+						if LindbladMPOSolver._is_int(parameters["output_step"]):
+							if parameters["output_step"] > 0:
+								if parameters["output_step"] * parameters["tau"] > parameters["t_final"]:
+									check_msg += "Error 650: output_step multiplied by tau, is bigger then t_final (" \
 												 "output_step in units of tau, times tau is bigger then the " \
 												 "simulation time)\n "
 		return check_msg

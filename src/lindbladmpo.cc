@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
 		lattice = Lattice2d(Lx, Ly, strstr, param.boolval("b_periodic_x"), param.boolval("b_periodic_y"));
 	}
 	string output_prefix = param.stringval("output_files_prefix");
-	output_prefix += ".N=" + to_string(N);
 	ofstream log_file(output_prefix + ".log.txt");
 	cout2 = stream2d(&cout, &log_file);
 
@@ -100,7 +99,6 @@ int main(int argc, char *argv[])
 //      if (param.stringval("load_purestate_file") != "")
 //          file_name = param.stringval("load_purestate_file");
 		string file_name = load_prefix;
-		file_name += ".N=" + to_string(N);
 		string f1 = file_name + ".state.ops";
 		string f3 = file_name + ".state.sites";
 		cout2 << "Opening '" << f1 << "' and '" << f3 << "'...";
@@ -137,7 +135,7 @@ int main(int argc, char *argv[])
 	if (load_prefix != "")
 	{ //Read the density matrix from disk
 	    string file_name = load_prefix;
-		file_name += ".N=" + to_string(N) + ".state.rho";
+		file_name += ".state.rho";
 		cout2 << "Read the initial rho from the file '" << file_name << "'...";
 		cout2.flush();
 		readFromFile(file_name, C.rho);
@@ -182,6 +180,8 @@ int main(int argc, char *argv[])
 			    R0 = sqrt05;
 				I1 = -sqrt05;
 			}
+			else
+				cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state (should be in {+x, -x, +y, -y, +z, -z}).\n", exit(1)
 
             auto spin_ind = siteIndex(psi, site_number);
             if (site_number == 1)
