@@ -5,6 +5,7 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+import collections
 import subprocess
 import uuid
 from typing import Dict, Optional
@@ -245,12 +246,13 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def load_output(s_output_path: str):
-		result = {'1q': LindbladMPOSolver._read_1q_output_into_dict(s_output_path),
-				  '2q': LindbladMPOSolver._read_2q_output_into_dict(s_output_path)}
+		result = {'obs-1q': LindbladMPOSolver._read_1q_observables(s_output_path),
+				  'obs-2q': LindbladMPOSolver._read_2q_observables(s_output_path),
+				  'global': LindbladMPOSolver._read_global_output(s_output_path)}
 		return result
 
 	@staticmethod
-	def _read_1q_output_into_dict(s_output_path: str) -> Dict:
+	def _read_1q_observables(s_output_path: str) -> Dict:
 		""" Reads the 1-qubit solver output file and returns a dictionary with the values.
 		Args:
 			s_output_path : file location
@@ -262,7 +264,7 @@ class LindbladMPOSolver:
 		print("Loading 1-qubit observables from file:")
 		print(full_filename)
 		file = open(full_filename, "r")
-		result = {}
+		result = collections.OrderedDict()
 		file.readline()
 		for line in file:
 			words = line.strip().split()
@@ -273,7 +275,31 @@ class LindbladMPOSolver:
 		return result
 
 	@staticmethod
-	def _read_2q_output_into_dict(s_output_path: str) -> Dict:
+	def _read_global_output(s_output_path: str) -> Dict:
+		""" Reads the global data solver output file and returns a dictionary with the values.
+		Args:
+			s_output_path : file location
+		Returns:
+			result : A dictionary with the format
+				key = time (float) : (Re{Tr{rho}}, S_2, OSEE(center), BondDimension(max), tot_duration(ms))
+		"""
+		full_filename = s_output_path + ".global.dat"
+		print("Loading global output data from file:")
+		print(full_filename)
+		file = open(full_filename, "r")
+		result = collections.OrderedDict()
+		file.readline()
+		for line in file:
+			words = line.strip().split()
+			if not words:
+				continue
+			result[float(words[0])] =\
+				(float(words[1]), float(words[2]), float(words[3]), float(words[4]), float(words[5]))
+		file.close()
+		return result
+
+	@staticmethod
+	def _read_2q_observables(s_output_path: str) -> Dict:
 		""" Reads the 2-qubit solver output file and returns a dictionary with the values.
 		Args:
 			s_output_path (string): file location
@@ -286,7 +312,7 @@ class LindbladMPOSolver:
 		print("Loading 2-qubit observables from file:")
 		print(full_filename)
 		file = open(full_filename, "r")
-		result = {}
+		result = collections.OrderedDict()
 		file.readline()
 		for line in file:
 			words = line.strip().split()

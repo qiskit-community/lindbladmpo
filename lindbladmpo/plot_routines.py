@@ -13,11 +13,13 @@ def prepare_plot_data(solver: LindbladMPOSolver) -> (np.ndarray, np.ndarray, np.
 	n_t_steps = int((t_final - t_init) / (tau * 1)) + 1
 	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	i = 0
-	for key in solver.result['1q']:
-		if key[1] == 'Z':
-			data[key[0] - 1, i] = solver.result['1q'][key]
-			if key[0] == n_qubits:
-				i += 1
+	_1q_obs = solver.result.get('obs-1q', None)
+	if _1q_obs is not None:
+		for key in _1q_obs:
+			if key[1] == 'Z':
+				data[key[0] - 1, i] = _1q_obs[key]
+				if key[0] == n_qubits:
+					i += 1
 	t_steps = np.arange(0, n_t_steps, int(n_t_steps / 10))
 	t_ticks = np.round(t_init + t_steps * tau, 5)
 	qubits = np.asarray(range(n_qubits))

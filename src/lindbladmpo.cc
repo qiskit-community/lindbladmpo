@@ -479,7 +479,7 @@ int main(int argc, char *argv[])
 						c2 += char(tolower(s[1]));
 						Cplx expectation_value = C.Expect(c1, i, c2, j);
 						if (abs(expectation_value.imag()) > 1e-3)
-						cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
+							cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
 						file_2q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
 						count++;
 					}
