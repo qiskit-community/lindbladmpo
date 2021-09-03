@@ -25,6 +25,27 @@ def prepare_plot_data(solver: LindbladMPOSolver) -> (np.ndarray, np.ndarray, np.
 	qubits = np.asarray(range(n_qubits))
 	return data, t_steps, t_ticks, qubits
 
+def prepare_data_chain(solver: LindbladMPOSolver, obs) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+	tau = solver.parameters['tau']
+	n_qubits = solver.parameters['N']
+	driven_qubit = int(n_qubits / 2)
+	t_final = solver.parameters['t_final']
+	n_t_steps = int(t_final / (tau * 1)) + 1
+	data = np.full(shape = (5, n_t_steps), dtype = float, fill_value = np.nan)
+	qubits = np.asarray([0, driven_qubit - 1, driven_qubit, driven_qubit + 1, n_qubits - 1])
+	t_steps = np.arange(0, n_t_steps, int(n_t_steps / 10))
+	t_ticks = np.round(t_steps * tau, 5)
+	if len(obs) == 1:
+		sel_dict = '1q'
+	else:
+		sel_dict = '2q'
+	i = 0
+	print(solver.result[sel_dict])
+	for qubit in qubits:
+		for step in t_steps:
+			data[np.nonzero(qubits == qubit)[0][0], step] = solver.result[sel_dict][(qubit + 1, obs, float(t_ticks[step]))]
+	return data, t_steps, t_ticks, qubits
+
 
 def plot_space_time(data: np.ndarray, t_steps: np.ndarray, t_ticks: np.ndarray, qubits: np.ndarray,
 					ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
