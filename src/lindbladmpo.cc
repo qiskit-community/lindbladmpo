@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 				I1 = -sqrt05;
 			}
 			else
-				cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state (should be in {+x, -x, +y, -y, +z, -z}).\n", exit(1)
+				cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state (should be in {+x, -x, +y, -y, +z, -z}).\n", exit(1);
 
             auto spin_ind = siteIndex(psi, site_number);
             if (site_number == 1)
@@ -319,10 +319,22 @@ int main(int argc, char *argv[])
 	cout2 << "Largest bond dimension of the MPO exp(tau*L): " << maxLinkDim(TE.expL1) << "\n";
 	const int n_steps = int(t_total / tau + (1e-9 * (t_total / tau)));
 
-	//-----------------------------------------------------
-	// Some preparation/checks for the 1-qbit observables
+	// Open output files
+
 	ofstream file_1q(output_prefix + ".obs-1q.dat");
+	file_1q.precision(15);
 	file_1q << "#time\toperator\tindex\tvalue" << endl;
+	ofstream file_2q(output_prefix + ".obs-2q.dat");
+	file_2q.precision(15);
+	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
+	ofstream file_global(output_prefix + ".global.dat");
+	file_global.precision(15);
+//	file_global << "#time\ttr_rho\tS_2\tOSEE_center\tmax_bond_dim\tduration_ms" << endl;
+	file_global << "#time\tquantity\tvalue" << endl;
+
+	//-----------------------------------------------------
+	// Some preparation/checks for the 1-qubit observables
+
 	auto components = param.stringvec("1q_components");
 	for (auto &s : components)
 	{
@@ -343,18 +355,14 @@ int main(int argc, char *argv[])
 		if (i < 1 || i > N)
 			cout2 << "Error: invalid index i=" << i << " found in list `1q_indices`.\n", exit(1);
 	}
-	file_1q.precision(15);
 	//-----------------------------------------------------
-	// Some preparation/checks for the 2-qbit observables
-	ofstream file_2q(output_prefix + ".obs-2q.dat");
-	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
-	file_2q.precision(15);
+	// Some preparation/checks for the 2-qubit observables
 	vector<long> sit2 = param.longvec("2q_indices");
 	if (sit2.size() % 2 == 1)
 		cout2 << "Error: the list of indices given in the parameter `2q_indices` should have an even length.\n", exit(1);
 
 	if (sit2.size() == 0)
-	{ //If no sites are given explicitely we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
+	{ //If no sites are given explicitly we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
 		for (int i = 1; i <= N; i++)
 			for (int j = 1; j <= N; j++)
 			{
@@ -383,13 +391,9 @@ int main(int argc, char *argv[])
 				cout2 << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
 		}
 	}
-	//-----------------------------------------------------
-	ofstream entropy_file(output_prefix + ".global.dat");
-	entropy_file << "#time\tRe{Tr{rho}}\tS_2\tOSEE(center)\tBondDimension(max)\ttot_duration(ms)" << endl;
-	entropy_file.precision(15);
+
 	//-----------------------------------------------------
 	const int output_step = param.longval("output_step");
-
 	auto t_init_end = steady_clock::now();
 	auto duration_ms = duration_cast<milliseconds>(t_init_end - t_start_sim);
 	cout2 << "\nSimulation initialization duration: " << duration_ms.count() / 1000. << "s" << "\n";
@@ -430,8 +434,13 @@ int main(int argc, char *argv[])
 				     cout2 << "\n\tMax bond dimension: " << bd_max;
 				cout2 << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
-				entropy_file << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max
-				        << " \t" << tot_duration.count() << endl;
+//				file_global << t << " \t" << tr.real() << " \t" << S_2 << " \t" << osee << " \t" << bd_max << " \t" << tot_duration.count() << endl;
+				file_global << t << " \t" << "tr_rho\t" << tr.real() << "\n";
+				file_global << t << " \t" << "S_2\t" << S_2 << "\n";
+				file_global << t << " \t" << "OSEE_center\t" << osee << "\n";
+				file_global << t << " \t" << "max_bond_dim\t" << bd_max << "\n";
+				file_global << t << " \t" << "duration_ms\t" << tot_duration.count() << "\n";
+				file_global << endl; // Skip a line between time steps
 
 				// --------------------------------------------------
 				// Compute 1-qubit observables and write them to file
@@ -457,8 +466,7 @@ int main(int argc, char *argv[])
 					}
 //					file_1q << endl;
 				}
-				file_1q << endl; // Skip a line between each time step
-				file_1q.flush();
+				file_1q << endl; // Skip a line between time steps
 				auto t_1q_end = steady_clock::now();
 				if (count)
 				{
@@ -484,8 +492,7 @@ int main(int argc, char *argv[])
 						count++;
 					}
 				}
-				file_2q << endl; //Skip a line between each time step
-				file_2q.flush();
+				file_2q << endl; //Skip a line between time steps
 				auto t_2q_end = steady_clock::now();
 				if (count)
 				{
@@ -528,11 +535,15 @@ int main(int argc, char *argv[])
 		writeToFile(f3, C.sites);
 		cout2 << "The final state was saved to disk, using 3 files:\n" << f1 << "\n" << f2 << "\n" << f3 << "\n";
 	}
+	file_global.close();
+	file_1q.close();
+	file_2q.close();
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
 	cout2 << "\nTotal simulation duration: " << buf << "\n";
 	cout2.flush();
+	log_file.close();
 	return 0;
 }
 
