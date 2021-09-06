@@ -246,23 +246,26 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def load_output(s_output_path: str):
-		result = {'obs-1q': LindbladMPOSolver._read_1q_observables(s_output_path),
-				  'obs-2q': LindbladMPOSolver._read_2q_observables(s_output_path),
-				  'global': LindbladMPOSolver._read_global_output(s_output_path)}
+		result = {}
+		s_output_type = 'obs-1q'
+		result[s_output_type] = LindbladMPOSolver._read_data_file(s_output_path, s_output_type)
+		s_output_type = 'obs-2q'
+		result[s_output_type] = LindbladMPOSolver._read_data_file(s_output_path, s_output_type)
+		s_output_type = 'global'
+		result[s_output_type] = LindbladMPOSolver._read_data_file(s_output_path, s_output_type)
 		return result
 
 	@staticmethod
-	def _read_1q_observables(s_output_path: str) -> Dict:
+	def _read_data_file(s_output_path: str, s_output_type: str) -> Dict:
 		""" Reads the 1-qubit solver output file and returns a dictionary with the values.
 		Args:
 			s_output_path : file location
 		Returns:
 			result : A dictionary with the format
-				key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
+			TODO: key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
 		"""
-		full_filename = s_output_path + ".obs-1q.dat"
-		print("Loading 1-qubit observables from file:")
-		print(full_filename)
+		full_filename = s_output_path + f".{s_output_type}.dat"
+		print("Loading output data file: " + full_filename)
 		file = open(full_filename, "r")
 		result = collections.OrderedDict()
 		file.readline()
@@ -270,57 +273,38 @@ class LindbladMPOSolver:
 			words = line.strip().split()
 			if not words:
 				continue
-			result[(int(words[2]), words[1], float(words[0]))] = float(str(words[3]))
+			LindbladMPOSolver._read_data_line(s_output_type, words, result)
 		file.close()
 		return result
 
 	@staticmethod
-	def _read_global_output(s_output_path: str) -> Dict:
-		""" Reads the global data solver output file and returns a dictionary with the values.
-		Args:
-			s_output_path : file location
-		Returns:
-			result : A dictionary with the format
-				key = time (float) : (Re{Tr{rho}}, S_2, OSEE(center), BondDimension(max), tot_duration(ms))
-		"""
-		full_filename = s_output_path + ".global.dat"
-		print("Loading global output data from file:")
-		print(full_filename)
-		file = open(full_filename, "r")
-		result = collections.OrderedDict()
-		file.readline()
-		for line in file:
-			words = line.strip().split()
-			if not words:
-				continue
-			result[float(words[0])] =\
-				(float(words[1]), float(words[2]), float(words[3]), float(words[4]), float(words[5]))
-		file.close()
-		return result
-
-	@staticmethod
-	def _read_2q_observables(s_output_path: str) -> Dict:
-		""" Reads the 2-qubit solver output file and returns a dictionary with the values.
-		Args:
-			s_output_path (string): file location
-		Returns:
-			result : A dictionary with the format:
-				key (tuple) = (qubit1 (int), qubit2 (int), operator (string),
-					time (float)): expectation value (float)
-		"""
-		full_filename = s_output_path + ".obs-2q.dat"
-		print("Loading 2-qubit observables from file:")
-		print(full_filename)
-		file = open(full_filename, "r")
-		result = collections.OrderedDict()
-		file.readline()
-		for line in file:
-			words = line.strip().split()
-			if not words:
-				continue
-			result[(int(words[2]), int(words[3]), words[1], float(words[0]))] = float(words[4])
-		file.close()
-		return result
+	def _read_data_line(s_output_type: str, words: list, result: Dict):
+		t = words[0]
+		op = words[1]
+		val = float(words[-1])
+		if s_output_type == 'obs-1q':
+			q_index1 = int(words[2]) - 1
+			# data files are storing 1-based indices because of iTensor, while we use 0-based indices
+			q_indices = (q_index1,)
+		elif s_output_type == 'obs-2q':
+			q_index1 = int(words[2]) - 1
+			# data files are storing 1-based indices because of iTensor, while we use 0-based indices
+			q_index2 = int(words[3]) - 1
+			q_indices = (q_index1, q_index2)
+		elif s_output_type == 'global':
+			q_indices = ()
+		else:
+			raise Exception(f"Unknown output type {s_output_type}.")
+		# The result dictionary is indexed by a tuple, first entry is a name, second entry is
+		# a tuple of qubit indices - 0 indices for the global data, 1 for 1Q observables, 2 for 2Q.
+		obs_data = result.get((op.lower(), q_indices), None)
+		# obs_data is a tuple, first entry is a list of times, second entry holds the values.
+		if obs_data is None:
+			obs_data = (list(), list())
+			result[(op.lower(), q_indices)] = obs_data
+		# TODO: optimize the list appends
+		obs_data[0].append(t)
+		obs_data[1].append(val)
 
 	@staticmethod
 	# checks if the value is int (for cleaner code)
