@@ -113,11 +113,11 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Sy")
   {
-    Op = ITensor(s, sP); //itensor v3 ???
-    Op.set(ud_, uu, -Cplx_i);
-    Op.set(dd_, du, -Cplx_i);
-    Op.set(du_, dd, Cplx_i);
-    Op.set(uu_, ud, Cplx_i);
+    Op = ITensor(s, sP); //itensor v3
+    Op.set(ud_, uu, Cplx_i);
+    Op.set(dd_, du, Cplx_i);
+    Op.set(du_, dd, -Cplx_i);
+    Op.set(uu_, ud, -Cplx_i);
   }
   else if (opname == "_Sz")
   {
@@ -147,10 +147,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   else if (opname == "_Sy")
   {
     Op = ITensor(s, sP);
-    Op.set(dd, ud_, -Cplx_i);
-    Op.set(du, uu_, -Cplx_i);
-    Op.set(uu, du_, Cplx_i);
-    Op.set(ud, dd_, Cplx_i);
+    Op.set(dd, ud_, Cplx_i);
+    Op.set(du, uu_, Cplx_i);
+    Op.set(uu, du_, -Cplx_i);
+    Op.set(ud, dd_, -Cplx_i);
   }
   else if (opname == "Sz_Sz")
   {
