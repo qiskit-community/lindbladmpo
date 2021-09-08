@@ -140,15 +140,6 @@ int main(int argc, char *argv[])
 		cout2.flush();
 		readFromFile(file_name, C.rho);
 		cout2 << "done.\n";
-		if (param.val("b_initial_rho_orthogonalization") != 0)
-		{
-			cout2 << "C.rho.orthogonalize...";
-			cout2.flush();
-			C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
-				"MaxDim", param.longval("max_dim_rho")));
-			cout2 << "done.\n";
-			cout2.flush();
-		}
 	}
 	else
 	{
@@ -215,6 +206,15 @@ int main(int argc, char *argv[])
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
 		cout2 << "psi2rho done.\n";
+		cout2.flush();
+	}
+	if (param.val("b_initial_rho_orthogonalization") != 0) {
+		cout2 << "C.rho.orthogonalize...";
+		cout2.flush();
+		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
+			"MaxDim", param.longval("max_dim_rho")));
+		cout2 << "done.\n";
+		cout2 << "New max bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
 		cout2.flush();
 	}
 

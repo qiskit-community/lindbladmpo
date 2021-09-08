@@ -391,12 +391,17 @@ void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
   cout2 << "done.\n";
   cout2.flush();
   cout2 << "Max bond dimension of rho:" << maxLinkDim(rho) << "\n";
-  cout2 << "rho.orthogonalize...";
-  cout2.flush();
-  rho.orthogonalize(args);
-  cout2 << "done.\n";
-  cout2 << "New max bond dimension:" << maxLinkDim(rho) << "\n";
-  cout2.flush();
+  /*
+  const bool orthogonalize_rho_after_psi2rho=true;
+  if (orthogonalize_rho_after_psi2rho) {
+    cout2 << "rho.orthogonalize...";
+    cout2.flush();
+    rho.orthogonalize(args);
+    cout2 << "done.\n";
+    cout2 << "New max bond dimension:" << maxLinkDim(rho) << "\n";
+    cout2.flush();
+  }
+  */
 }
 //Expectation value of some single-site operator
 Cplx SpinHalfSystem::Expect(const string &opname, int i) const
