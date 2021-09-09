@@ -160,7 +160,7 @@ def plot_1q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 
 
 def plot_2q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
-					   qubit_pairs: Optional[List[Tuple[int]]] = None,
+					   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	obs_data_list = []
 	tex_labels = []

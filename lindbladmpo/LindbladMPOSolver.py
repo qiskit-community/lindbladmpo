@@ -154,6 +154,7 @@ class LindbladMPOSolver:
 						second_bond_indices.append(j + 1)
 
 		print("Creating solver input file:")
+		s_input_file = s_input_file.replace("\\", "/")
 		print(s_input_file)
 		file = open(s_input_file, "w")
 		for key in parameters.keys():
@@ -209,7 +210,6 @@ class LindbladMPOSolver:
 		if AB_indices:
 			file.write("first_bond_indices = " + str(first_bond_indices).strip("[]").replace(' ', '') + "\n")
 			file.write("second_bond_indices = " + str(second_bond_indices).strip("[]").replace(' ', '') + "\n")
-		s_input_file = os.path.abspath(file.name).replace("\\", "/")
 		file.close()
 		self.s_input_file = s_input_file
 		self.s_output_path = s_output_path
@@ -541,10 +541,10 @@ class LindbladMPOSolver:
 				y_c = 0
 				z_c = 0
 				if not isinstance(parameters[key], list):
-					check_msg += "Error 430: " + key + " should be a list of size 1,2,3 with x,y,z)\n"
+					check_msg += "Error 430: " + key + " should be a list of size 1,2,3 with x,y,z\n"
 					continue
 				if len(parameters[key]) > 3:
-					check_msg += "Error 440: " + key + " should be a list of size 1,2,3 with x,y,z)\n"
+					check_msg += "Error 440: " + key + " should be a list of size 1,2,3 with x,y,z\n"
 					continue
 				for val in parameters[key]:
 					if not isinstance(val, str):
