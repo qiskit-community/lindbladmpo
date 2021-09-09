@@ -158,8 +158,7 @@ int main(int argc, char *argv[])
 			else if (s_init == "-z")
 				R1 = 1.;
 			else if (s_init == "+x")
-				//R0 = R1 = sqrt05;
-				R0 = R1 =1.;
+				R0 = R1 = sqrt05;
 			else if (s_init == "+y")
 				R0 = I1 = sqrt05;
 			else if (s_init == "-x")
