@@ -229,17 +229,6 @@ int main(int argc, char *argv[])
 	const Cplx tr2 = C.trace_rho2();
 	cout2 << tr2 << "\n";
 
-if (param.val("b_initial_rho_orthogonalization") != 0) {
-		cout2 << "C.rho.orthogonalize...";
-		cout2.flush();
-		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
-			"MaxDim", param.longval("max_dim_rho")));
-		cout2 << "done.\n";
-		cout2 << "New max bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
-		cout2.flush();
-	}
-
-
 	if (psi_defined)
 	{
 		if (std::abs(tr - 1) > 1e-1 || std::abs(tr2 - 1) > 1e-1)
