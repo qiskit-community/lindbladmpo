@@ -263,7 +263,7 @@ void SpinHalfSystem::ConstructIdentity()
 //Convert a pure state (psi) of the chain into a density matrix rho (projector onto psi)
 void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
 {
-  cout2 << "<psi|psi>=" << norm(psi) << "\n";
+  cout2 << "Norm of |psi>: (<psi|psi>)^(1/2)=" << norm(psi) << "\n";
   cout2 << "Constructing rho from |psi> (exactly)...";
   cout2.flush();
 

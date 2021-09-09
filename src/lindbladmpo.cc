@@ -158,7 +158,8 @@ int main(int argc, char *argv[])
 			else if (s_init == "-z")
 				R1 = 1.;
 			else if (s_init == "+x")
-				R0 = R1 = sqrt05;
+				//R0 = R1 = sqrt05;
+				R0 = R1 =1.;
 			else if (s_init == "+y")
 				R0 = I1 = sqrt05;
 			else if (s_init == "-x")
@@ -228,6 +229,18 @@ int main(int argc, char *argv[])
 	cout2.flush();
 	const Cplx tr2 = C.trace_rho2();
 	cout2 << tr2 << "\n";
+
+if (param.val("b_initial_rho_orthogonalization") != 0) {
+		cout2 << "C.rho.orthogonalize...";
+		cout2.flush();
+		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
+			"MaxDim", param.longval("max_dim_rho")));
+		cout2 << "done.\n";
+		cout2 << "New max bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
+		cout2.flush();
+	}
+
+
 	if (psi_defined)
 	{
 		if (std::abs(tr - 1) > 1e-1 || std::abs(tr2 - 1) > 1e-1)
@@ -235,7 +248,7 @@ int main(int argc, char *argv[])
 		//Check a few simple observables, using rho and psi
 		vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
 		vector<double> psi_factor = {2., 1., 1., 2., 2.};
-
+		double n2=norm(psi);n2*=n2;//<psi|psi>
 		double err = 0;
 		for (int i = 1; i <= N; i++)
 		{
@@ -243,10 +256,10 @@ int main(int argc, char *argv[])
 			{
 				const string &opname = ops[o];
 				Cplx with_rho = C.Expect(opname, i);
-				Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites);
+				Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites)/n2;
 				err += std::abs(with_rho - with_psi);
 				if (std::abs(with_rho - with_psi) > 1e-2)
-				cout2 << "Error: <psi|" << opname << "(" << i << ")|psi>=" << with_psi << "\t"
+				cout2 << "Error: <psi|" << opname << "(" << i << ")|psi> / <psi|psi> =" << with_psi << "\t"
 					<< "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << "\n",
 					exit(1);
 			}
