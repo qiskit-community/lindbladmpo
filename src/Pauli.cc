@@ -105,7 +105,6 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Sx")
   {
-    //Op = ITensor(s,sP); //itensor v3
     Op.set(ud_, uu, 1.0);
     Op.set(dd_, du, 1.0);
     Op.set(du_, dd, 1.0);
@@ -113,11 +112,11 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Sy")
   {
-    Op = ITensor(s, sP); //itensor v3
-    Op.set(ud_, uu, Cplx_i);
-    Op.set(dd_, du, Cplx_i);
-    Op.set(du_, dd, -Cplx_i);
-    Op.set(uu_, ud, -Cplx_i);
+    Op = ITensor(s, sP);
+    Op.set(ud_, uu, -Cplx_i);
+    Op.set(dd_, du, -Cplx_i);
+    Op.set(du_, dd, Cplx_i);
+    Op.set(uu_, ud, Cplx_i);
   }
   else if (opname == "_Sz")
   {
@@ -147,10 +146,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   else if (opname == "_Sy")
   {
     Op = ITensor(s, sP);
-    Op.set(dd, ud_, Cplx_i);
-    Op.set(du, uu_, Cplx_i);
-    Op.set(uu, du_, -Cplx_i);
-    Op.set(ud, dd_, -Cplx_i);
+    Op.set(dd, ud_, -Cplx_i);
+    Op.set(du, uu_, -Cplx_i);
+    Op.set(uu, du_, Cplx_i);
+    Op.set(ud, dd_, Cplx_i);
   }
   else if (opname == "Sz_Sz")
   {
@@ -391,17 +390,6 @@ void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
   cout2 << "done.\n";
   cout2.flush();
   cout2 << "Max bond dimension of rho:" << maxLinkDim(rho) << "\n";
-  /*
-  const bool orthogonalize_rho_after_psi2rho=true;
-  if (orthogonalize_rho_after_psi2rho) {
-    cout2 << "rho.orthogonalize...";
-    cout2.flush();
-    rho.orthogonalize(args);
-    cout2 << "done.\n";
-    cout2 << "New max bond dimension:" << maxLinkDim(rho) << "\n";
-    cout2.flush();
-  }
-  */
 }
 //Expectation value of some single-site operator
 Cplx SpinHalfSystem::Expect(const string &opname, int i) const

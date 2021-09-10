@@ -180,16 +180,16 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, ri = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, ri = 1) << "\n";
-				cout2 << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
 			}
 			if (site_number == N)
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ",up)=" << elt(psi(site_number), spin_ind = 1, li = 1) << "\n";
-				cout2 << "psi(site " << site_number << ",down)=" << elt(psi(site_number), spin_ind = 2, li = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
+				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
 			}
 			if (site_number > 1 && site_number < N)
 			{
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 
 	Cplx tr = C.trace_rho();
 	cout2 << "Tr{rho} before re-normalization: " << tr << "\n";
-	C.rho /= tr; //Normalize rho so that Tr[rho]=1 (otherwise we would have Tr[rho^2]=MPS norm=1)
+	C.rho /= tr; //Normalize rho so that Tr[rho]=1
 	tr = C.trace_rho();
 	cout2 << "Tr{rho} after re-normalization: " << tr << "\n";
 
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 		//Check a few simple observables, using rho and psi
 		vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
 		vector<double> psi_factor = {2., 1., 1., 2., 2.};
-		double n2=norm(psi);n2*=n2;//<psi|psi>
+		double n2=norm(psi);n2*=n2;//n2=<psi|psi>
 		double err = 0;
 		for (int i = 1; i <= N; i++)
 		{
@@ -252,8 +252,6 @@ int main(int argc, char *argv[])
 					exit(1);
 			}
 		}
-	//err /= N * ops.size();
-	//cout2 << "Compare observables " << ops << " in |psi> and rho: average precision=" << err << "\n";
 	}
 	//-----------------------------------------------------
 	//Construct the Lindbladian from the parameters (unitary and dissipative terms)
