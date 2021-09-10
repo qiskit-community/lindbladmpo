@@ -61,10 +61,6 @@ class SpinHalfSystem {
   //Lindbladian operator (coded as an autoMPO)
   AutoMPO Lindbladian;
 
-  //Hermitian conjugate of the Lindbladian operator (coded as an autoMPO)
-  //This is used to minimize L^dagger*L, and hence get the steady state "directly"
-  AutoMPO LindbladianDag;
-  
   //Adds a single-spin term to the Lindbladian above
   void AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site);
   

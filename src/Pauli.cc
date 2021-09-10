@@ -21,23 +21,6 @@ using namespace std::chrono;
 
 PauliSite::PauliSite() {}
 PauliSite::PauliSite(Index I) : s(I) {}
-// v3 with QN
-/*
-PauliSite::PauliSite(Args const &args)
-{
-  auto ts = TagSet("Site,PSite");
-  if (args.defined("SiteNumber"))
-    ts.addTags("n=" + str(args.getInt("SiteNumber")));
-
-  s = Index(QN({"Sz", 0}), 1,
-            QN({"Sz", -1}), 1,
-            QN({"Sz", +1}), 1,
-            QN({"Sz", 0}), 1,
-            Out, ts);
-}
-*/
-//
-// V3 without QN
 
 PauliSite::PauliSite(Args const &args)
 {
