@@ -180,9 +180,13 @@ class LindbladMPOSolver:
 						file.write(",")
 				file.write("\n")
 			elif key == 'init_Pauli_state' or key == '1q_components' or key == '2q_components':
-				n_indices = len(parameters[key])
+				if isinstance(parameters[key], str):
+					val_list = [parameters[key]]
+				else:
+					val_list = parameters[key]
+				n_indices = len(val_list)
 				file.write(key + " = ")
-				for i_op, op in enumerate(parameters[key]):
+				for i_op, op in enumerate(val_list):
 					file.write(str(op).strip("'"))
 					if i_op != n_indices - 1:
 						file.write(",")
