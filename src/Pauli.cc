@@ -217,7 +217,7 @@ complex<double> SpinHalfSystem::trace_rho2() const
 SpinHalfSystem::SpinHalfSystem(int size) : N(size),
                                            sites(N, {"ConserveQNs=", false}),
                                            siteops(N), rho(siteops),
-                                           Lindbladian(siteops), LindbladianDag(siteops)
+                                           Lindbladian(siteops)
 {
 }
 void SpinHalfSystem::ConstructIdentity()
@@ -430,22 +430,6 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
   Lindbladian += -z * 0.5, "projDn", site;
 
   z = GammaDephasing * Cplx_i;
-  Lindbladian += z, "Sz_Sz", site;
-  Lindbladian += -z * 0.5, "Id", site;
-  Lindbladian += -z * 0.5, "Id", site;
-
-  // L^dagger
-  z = -GammaMinus * Cplx_i;
-  LindbladianDag += z, "_S+S-", site;
-  LindbladianDag += -z * 0.5, "_projUp", site;
-  LindbladianDag += -z * 0.5, "projUp", site;
-
-  z = -GammaPlus * Cplx_i;
-  LindbladianDag += z, "_S-S+", site;
-  LindbladianDag += -z * 0.5, "_projDn", site;
-  LindbladianDag += -z * 0.5, "projDn", site;
-
-  z = -GammaDephasing * Cplx_i;
   Lindbladian += z, "Sz_Sz", site;
   Lindbladian += -z * 0.5, "Id", site;
   Lindbladian += -z * 0.5, "Id", site;

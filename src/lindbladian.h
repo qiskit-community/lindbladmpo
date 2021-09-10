@@ -95,9 +95,8 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         J_z = vector<double>(num_bonds, J_z_0);
     }
 
-    for (int dag = 0; dag <= 1; dag++)
-    {
-        AutoMPO &auto_L = (dag == 0) ? (C.Lindbladian) : (C.LindbladianDag); //Lindbladian operator, or its hermitian conjugate (samething for the unitary terms)
+    
+        AutoMPO &auto_L = C.Lindbladian;
 
         //Note about the Lindblad equation: since we evolve rho (and not a wave function), each term in H
         //acts once with a "+" on the right of rho, and once with a "-" to the left of rho (prefix "_" in the operator name)
@@ -105,13 +104,13 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         for (unsigned int n = 0; n < num_bonds; n++)
         {
             int i = L.I[n], j = L.J[n];
-            auto_L += J[n], "S+", i, "S-", j;
-            auto_L += J[n], "S-", i, "S+", j;
-            auto_L += .5 * J_z[n], "Sz", i, "Sz", j;
+            auto_L += -J[n], "S+", i, "S-", j;
+            auto_L += -J[n], "S-", i, "S+", j;
+            auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
 
-            auto_L += -J[n], "_S+", i, "_S-", j;
-            auto_L += -J[n], "_S-", i, "_S+", j;
-            auto_L += -.5 * J_z[n], "_Sz", i, "_Sz", j;
+            auto_L += J[n], "_S+", i, "_S-", j;
+            auto_L += J[n], "_S-", i, "_S+", j;
+            auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
         }
 
         //Magnetic field terms:
@@ -133,7 +132,6 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
                 auto_L += .5 * h_z[j - 1], "_Sz", j;
             }
         }
-    }
     // -----------------------------------------------------------
     // Dissipative terms
 

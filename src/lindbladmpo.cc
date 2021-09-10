@@ -109,7 +109,6 @@ int main(int argc, char *argv[])
 		C.rho = MPS(C.siteops);
 		// Rho is still undefined but its structure is initialized using C.siteops
 		C.Lindbladian = AutoMPO(C.siteops);
-		C.LindbladianDag = AutoMPO(C.siteops);
 	}
 
     C.ConstructIdentity(); // Construct the density matrix corresponding to infinite temperature
@@ -258,50 +257,6 @@ int main(int argc, char *argv[])
 
 	SetLindbladian(C, param, lattice);
 
-	//-----------------------------------------------------
-	// Compute Lindblad^dagger * Lindblad
-	/*
-	if (param.longval("dmrgLDL") == 1)
-	{
-	MPO LD = toMPO(C.LindbladianDag);
-	MPO L = toMPO(C.Lindbladian);
-	//MPO LDL=toMPO(C.Lindbladian);nmultMPO(L, LD, LDL); // Now LDL=L^Dager * L    itensor v2
-
-	MPO LDL = nmultMPO(L, prime(LD));
-	LDL.mapPrime(2, 1); //itensor v3
-
-	cout2 << "Maximum bond dimension of L^dag*L (MPO):" << maxLinkDim(LDL) << "\n";
-	auto sweeps = Sweeps(param.longval("sweepsRho"));
-	//Specify max number of states kept each sweep
-	const int m = param.longval("max_dim_rho");
-	if (param.stringval("load_state_file") != "")
-	{ //if we are starting from some previous rho, start with the largest allowed bond dimension
-	  sweeps.maxdim() = m;
-	}
-	else
-	{
-	  //otherwise, increase gradually the matrix dimensions dunring the first sweeps
-	  sweeps.maxdim() =
-	      min(5, m),
-	  min(5, m), min(10, m), min(10, m), min(20, m), min(20, m),
-	  min(50, m), min(50, m), min(50, m),
-	  min(100, m), min(100, m), min(100, m),
-	  min(150, m), min(150, m), min(150, m),
-	  min(200, m), min(200, m), min(200, m),
-	  min(300, m), min(300, m), min(300, m),
-	  min(400, m), min(400, m), min(400, m),
-	  min(500, m), min(500, m), min(500, m), m;
-	}
-	sweeps.cutoff() = param.val("cut_off_rho");
-	//Run the DMRG
-	//Convergence criterium on the energy passed to the DMRGObserver.
-	//3rd argument=true in the constructor of MyDMRGObserver => relative variations |dE/E| are considered
-	MyDMRGObserver obs(C.rho, param.val("LDLconv"), true);
-	dmrg(C.rho, LDL, sweeps, obs, "Quiet");
-	Cplx z = C.trace_rho();
-	C.rho /= z; //Normalize rho so that Tr[rho]=1 (otherwise we would have Tr[rho^2]=MPS norm=1)
-	}
-	*/
 	//-----------------------------------------------------
 	cout2 << "Compute exp(i*tau*L) as an MPO... ";
 	cout2.flush();
