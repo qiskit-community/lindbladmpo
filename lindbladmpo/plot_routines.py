@@ -167,8 +167,9 @@ def plot_2q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	s_obs_name = s_obs_name.lower()
 	for q_pair in qubit_pairs:
 		obs_data, s_tex_label = prepare_curve_data(solver, 'obs-2q', s_obs_name, q_pair)
-		obs_data_list.append(obs_data)
-		tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
+		if obs_data is not None:
+			obs_data_list.append(obs_data)
+			tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
 	s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
 	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver)
