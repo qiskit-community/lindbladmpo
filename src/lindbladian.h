@@ -70,7 +70,7 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     vector<double> J = param.doublevec("J");
     vector<double> J_z = param.doublevec("J_z");
 
-    if ((J_z.size() != 1 || J.size() != 1) && L.predefined)
+    if ((J_z.size() > 1 || J.size() > 1) && L.predefined)
     {
         cout2 << "Error: J_z.size()=" << J_z.size() << " and " << J.size() << " but L.predefined=" << L.predefined << ". Couplings J and J_z must be uniform in such a predefined lattice.\n", exit(1);
     }
