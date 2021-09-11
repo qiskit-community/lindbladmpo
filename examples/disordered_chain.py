@@ -25,13 +25,13 @@ h_z_half_width = 0.
 _2_pi = 2 * np.pi
 np.random.seed(rand_seed)
 h_x = np.zeros(n_qubits, float)
-h_x[int(n_qubits / 2)] = 1. * _2_pi
+h_x[int(n_qubits / 2)] = 0. * _2_pi
 
 h_z = -h_z_half_width + 2 * h_z_half_width * np.random.rand(n_qubits)  # np.ones(n_qubits)  # np.random.rand(n_qubits)  #
 g_0 = .0 * np.ones(n_qubits)
 g_2 = 1.
 J = 0
-t_final = 2
+t_final = 1.
 tau = .02
 
 # Create the parameters dictionary

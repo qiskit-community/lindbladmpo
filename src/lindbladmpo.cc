@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 	vector<string> a_init = param.stringvec("init_Pauli_state");
 	unsigned int a_init_len = a_init.size();
-	if (a_init_len != 1 && int(a_init_len) != N)
+	if (load_prefix == "" && a_init_len != 1 && int(a_init_len) != N)
 		cout2 << "Error: the parameter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
 	if (a_init_len == 1)
 		a_init = vector<string>(N, a_init[0]);
