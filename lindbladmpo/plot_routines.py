@@ -29,13 +29,13 @@ GLOBAL_TEX_LABELS =\
 """Labels in LaTex format for global output data, indexed by their data file entries."""
 
 
-def prepare_time_data(solver: LindbladMPOSolver, n_t_ticks = 10, t_ticks_round = 3)\
+def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
 		-> (np.ndarray, np.ndarray, np.ndarray, int):
 	"""
-	Prepare the time variables used in plotting simulation results from one solver instance.
+	Prepare the time variables used in plotting the results from one simulation.
 
 	Args:
-		solver: The solver object from which basic time parameters are taken.
+		parameters: A dictionary from which the basic time parameters are taken.
 		n_t_ticks: The number of labeled major tick marks to generate for the time axis.
 		t_ticks_round: The number of digits to round time axis tick labels to.
 
@@ -47,9 +47,9 @@ def prepare_time_data(solver: LindbladMPOSolver, n_t_ticks = 10, t_ticks_round =
 			t_tick_labels: The formatted labels of the time axis tick marks.
 			n_t_steps: The number of time steps
 	"""
-	tau = solver.parameters['tau']
-	t_final = solver.parameters['t_final']
-	t_init = solver.parameters.get('t_init', 0.)
+	tau = parameters['tau']
+	t_final = parameters['t_final']
+	t_init = parameters.get('t_init', 0.)
 	# output_step = solver.parameters.get('output_step', 1)
 	# TODO handle output_step
 	n_t_steps = int((t_final - t_init) / (tau * 1)) + 1
@@ -61,9 +61,23 @@ def prepare_time_data(solver: LindbladMPOSolver, n_t_ticks = 10, t_ticks_round =
 	return t_eval, t_tick_indices, t_tick_labels, n_t_steps
 
 
-def prepare_curve_data(solver: LindbladMPOSolver, s_output_type: str, s_obs_name: str,
+def prepare_curve_data(result: dict, s_output_type: str, s_obs_name: str,
 					   q_indices: Tuple[int]) -> ((list, list), str):
-	obs_dict = solver.result[s_output_type]
+	"""
+	Prepare the data used for plotting one curve of simulation observables.
+
+	Args:
+		result: A dictionary from which the observables are taken.
+		s_output_type: The type of output, used a key into the result dict, and also in formatting
+			the descriptive tex label of the data.
+		q_indices: A tuple with the indices of the qubits identifying the observable to plot.
+
+	Returns:
+		A tuple with the following four entries:
+			obs_data: A tuple of two lists, the first being the time points, the second being the data.
+			s_tex_label: A formatted tex label for the data.
+	"""
+	obs_dict = result[s_output_type]
 	obs_data = None
 	s_obs_name = s_obs_name.lower()
 	if obs_dict is not None:
@@ -80,6 +94,19 @@ def prepare_curve_data(solver: LindbladMPOSolver, s_output_type: str, s_obs_name
 
 def plot_curves(obs_data_list: List[Tuple[List]], tex_labels: List[str], s_title = '',
 				ax = None, fontsize = 16):
+	"""
+	Plot multiple curves of simulation observables.
+
+	Args:
+		obs_data_list: A list of obs_data tuples of lists, from which the plotted data is taken.
+		tex_labels: A list of descriptive tex label corresponding to the data.
+		s_title: An optional plot title.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+
+	Returns:
+		An axis object (either the one passed as an argument, or a newly created one).
+	"""
 	if ax is None:
 		_, ax = plt.subplots(figsize = (14, 9))
 	plt.rcParams.update({'font.size': fontsize})
@@ -87,14 +114,15 @@ def plot_curves(obs_data_list: List[Tuple[List]], tex_labels: List[str], s_title
 		plt.plot(obs_data[0], obs_data[1], label = tex_labels[i_curve])
 	plt.legend(fontsize = fontsize)
 	ax.set_xlabel('$t$', fontsize = fontsize)
-	plt.title(s_title)
+	if s_title != '':
+		plt.title(s_title)
 	return ax
 
 
 def prepare_1q_space_time_data(solver: LindbladMPOSolver, s_obs_name: str,
 							   qubits: Optional[Union[List[int], np.ndarray]] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray):
-	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(solver)
+	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(solver.parameters)
 	if qubits is None:
 		N = solver.parameters['N']
 		qubits = np.arange(N)
@@ -102,7 +130,7 @@ def prepare_1q_space_time_data(solver: LindbladMPOSolver, s_obs_name: str,
 	n_qubits = len(qubits)
 	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	for i_q, qubit in enumerate(qubits):
-		obs_data, s_tex_label = prepare_curve_data(solver, 'obs-1q', s_obs_name, (qubit,))
+		obs_data, s_tex_label = prepare_curve_data(solver.result, 'obs-1q', s_obs_name, (qubit,))
 		# TODO add t_eval verification against obs_data[1]
 		data[i_q, :] = obs_data[1]
 	return data, t_tick_indices, t_tick_labels, qubits
@@ -147,12 +175,12 @@ def plot_1q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
 	for qubit in qubits:
-		obs_data, s_tex_label = prepare_curve_data(solver, 'obs-1q', s_obs_name, (qubit,))
+		obs_data, s_tex_label = prepare_curve_data(solver.result, 'obs-1q', s_obs_name, (qubit,))
 		obs_data_list.append(obs_data)
 		tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
 	s_title = f'$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
 	ax.set_xticks(t_tick_indices)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
 	s_file_label = f"sigma_{s_obs_name}"
@@ -166,13 +194,13 @@ def plot_2q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
 	for q_pair in qubit_pairs:
-		obs_data, s_tex_label = prepare_curve_data(solver, 'obs-2q', s_obs_name, q_pair)
+		obs_data, s_tex_label = prepare_curve_data(solver.result, 'obs-2q', s_obs_name, q_pair)
 		if obs_data is not None:
 			obs_data_list.append(obs_data)
 			tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
 	s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
 	ax.set_xticks(t_tick_indices)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
 	s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}"

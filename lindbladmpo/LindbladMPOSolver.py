@@ -250,6 +250,15 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def load_output(s_output_path: str):
+		""" Read the three solver output files and returns a dictionary with the results.
+		Args:
+			s_output_path : prefix of the output files path. To this string the corresponding file
+				endings according to each output type will be appended.
+		Returns:
+			result : A dictionary with three dictionaries storing the different output types.
+				The contained dictionaries have the format:
+				TODO fix: key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
+		"""
 		result = {}
 		s_output_type = 'obs-1q'
 		result[s_output_type] = LindbladMPOSolver._read_data_file(s_output_path, s_output_type)
@@ -261,12 +270,15 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def _read_data_file(s_output_path: str, s_output_type: str) -> Dict:
-		""" Reads the 1-qubit solver output file and returns a dictionary with the values.
+		""" Reads one of the solver output files and returns a dictionary with the data.
 		Args:
-			s_output_path : file location
+			s_output_path : prefix of the output files path. To this string the corresponding file
+				endings according to each output type will be appended.
+			s_output_type : A string defining the observable type, one of the 1-qubit, 2-qubits,
+				or global observables.
 		Returns:
-			result : A dictionary with the format
-			TODO: key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
+			result : A dictionary with the result, in the format
+				TODO fix: key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
 		"""
 		full_filename = s_output_path + f".{s_output_type}.dat"
 		print("Loading output data file: " + full_filename)
