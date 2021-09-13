@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
 		cout2.flush();
 		readFromFile(file_name, C.rho);
 		cout2 << "done.\n";
+		cout2 << "Bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
 	}
 	else
 	{
@@ -208,6 +209,7 @@ int main(int argc, char *argv[])
 		cout2.flush();
 	}
 	if (param.val("b_initial_rho_orthogonalization") != 0) {
+
 		cout2 << "C.rho.orthogonalize...";
 		cout2.flush();
 		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
