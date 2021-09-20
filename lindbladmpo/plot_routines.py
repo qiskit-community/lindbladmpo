@@ -84,9 +84,9 @@ def prepare_curve_data(result: dict, s_output_type: str, s_obs_name: str,
 		obs_data = obs_dict.get((s_obs_name, q_indices))
 	s_tex_label = ""
 	if s_output_type == 'obs-1q':
-		s_tex_label = f"\\sigma^{s_obs_name}_{q_indices[0]}"
+			s_tex_label = f"\\sigma^{s_obs_name}_{{{q_indices[0]}}}"
 	elif s_output_type == 'obs-2q':
-		s_tex_label = f"\\sigma^{s_obs_name[0]}_{q_indices[0]} \\sigma^{s_obs_name[1]}_{q_indices[1]}"
+		s_tex_label = f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} \\sigma^{s_obs_name[1]}_{{{q_indices[1]}}}"
 	elif s_output_type == 'global':
 		s_tex_label = GLOBAL_TEX_LABELS[s_obs_name]
 	return obs_data, s_tex_label
