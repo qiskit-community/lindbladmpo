@@ -474,7 +474,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['b_force_rho_Hermitian'] = True
+		parameters['force_rho_Hermitian_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['metadata'] = "We agree to disagree."
 		parameters['1q_components'] = ["x", "y", "z"]
@@ -523,7 +523,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = "False"  # this should fail
-		parameters['b_force_rho_Hermitian'] = True
+		parameters['force_rho_Hermitian_step'] = 1
 		parameters['output_step'] = 0.6  # this should fail
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "j"]  # this should fail
@@ -572,7 +572,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = "1e-10"
 		parameters['cut_off_rho'] = "1e-11"
 		parameters['b_force_rho_trace'] = "False"
-		parameters['b_force_rho_Hermitian'] = 222
+		parameters['force_rho_Hermitian_step'] = "True"
 		parameters['output_step'] = 0.6
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "j"]
@@ -623,7 +623,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['b_force_rho_Hermitian'] = True
+		parameters['force_rho_Hermitian_step'] = 1
 		parameters['output_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "z"]
@@ -673,7 +673,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['b_force_rho_Hermitian'] = True
+		parameters['force_rho_Hermitian_step'] = 1
 		parameters['output_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "z"]
@@ -722,7 +722,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['b_force_rho_Hermitian'] = True
+		parameters['force_rho_Hermitian_step'] = 1
 		parameters['output_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "z"]

@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
 	}
 	vector<long> sit = param.longvec("1q_indices");
 	if (sit.size() == 0)
-	{ //If no sites are given explicitely we consider all: 1,...,N
+	{ //If no sites are given explicitly we consider all: 1,...,N
 	    sit.resize(N);
 		iota(sit.begin(), sit.end(), 1);
 	}
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
 	cout2.flush();
 
 	char buf[100];
-	const bool b_force_rho_Hermitian = param.boolval("b_force_rho_Hermitian");
+	const long force_rho_Hermitian_step = param.longval("force_rho_Hermitian_step");
 	for (int n = 0; n <= n_steps; n++)
 	{
 		const double t = t_0 + n * tau;
@@ -367,14 +367,13 @@ int main(int argc, char *argv[])
 		cout2 << "\nSolution time t = " << t << " ----------------------";
 		cout2 << " Total run duration: " << buf << "\n";
 		cout2.flush();
+		if (force_rho_Hermitian_step && (n % force_rho_Hermitian_step) == 0)
+			C.MakeRhoHermitian(argsRho);
 		if (output_step > 0)
 		{
 			if ((n % output_step) == 0 || n == n_steps)
 			{
-			// Print and save output data at initial time, final time, and every output_step timesteps
-
-				if (b_force_rho_Hermitian)
-					C.MakeRhoHermitian(argsRho);
+				// Print and save output data at initial time, final time, and every output_step time steps
 
 				tr = C.trace_rho();
 				const Cplx tr2 = C.trace_rho2();
@@ -386,7 +385,7 @@ int main(int argc, char *argv[])
 
 				cout2 << "\tTr{rho}: " << tr << ", Rényi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
 //				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
-				if (!b_force_rho_Hermitian)
+				if (!force_rho_Hermitian_step || (n % force_rho_Hermitian_step) != 0)
 				     cout2 << "\n\tMax bond dimension: " << bd_max;
 				cout2 << "\n\tOperator space entanglement entropy at center bond: " << osee;
 

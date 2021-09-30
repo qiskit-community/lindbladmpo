@@ -21,12 +21,13 @@ from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 GLOBAL_TEX_LABELS =\
 {
 	'tr_rho': '{\\rm tr}\\rho',
-	'S_2': 'S_2',
-	'OSEE_center': 'OSEE_{\\rm center}',
+	's_2': 'S_2',
+	'osee_center': 'OSEE_{\\rm center}',
 	'max_bond_dim': '{\\rm max bond-dim}',
 	'duration_ms': '{\\rm duration(ms)}',
 }
-"""Labels in LaTex format for global output data, indexed by their data file entries."""
+"""Labels in LaTex format for global output data, indexed by their data file entries.
+	Note that key entries here are lower-case."""
 
 
 def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
@@ -62,7 +63,7 @@ def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
 
 
 def prepare_curve_data(result: dict, s_output_type: str, s_obs_name: str,
-					   q_indices: Tuple[int]) -> ((list, list), str):
+					   q_indices: Union[Tuple, Tuple[int]]) -> ((list, list), str):
 	"""
 	Prepare the data used for plotting one curve of simulation observables.
 
@@ -70,7 +71,10 @@ def prepare_curve_data(result: dict, s_output_type: str, s_obs_name: str,
 		result: A dictionary from which the observables are taken.
 		s_output_type: The type of output, used a key into the result dict, and also in formatting
 			the descriptive tex label of the data.
-		q_indices: A tuple with the indices of the qubits identifying the observable to plot.
+		s_obs_name: The name of the specific observable, used a key into the relevant observables dict,
+			and also in formatting the descriptive tex label of the data.
+		q_indices: A tuple with the indices of the qubits identifying the observable to plot, or
+			an empty tuple if the observable is a global one.
 
 	Returns:
 		A tuple with the following four entries:
@@ -204,6 +208,19 @@ def plot_2q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	ax.set_xticks(t_tick_indices)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
 	s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}"
+	_save_fig(b_save_figures, s_file_prefix, s_file_label)
+
+
+def plot_global_obs_curve(solver: LindbladMPOSolver, s_obs_name: str,
+						  ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+	s_obs_name = s_obs_name.lower()
+	obs_data, s_tex_label = prepare_curve_data(solver.result, 'global', s_obs_name, ())
+	s_title = f'${s_tex_label}(t)$'
+	ax = plot_curves([obs_data], [s_title], s_title, ax, fontsize)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
+	ax.set_xticks(t_tick_indices)
+	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
+	s_file_label = s_obs_name
 	_save_fig(b_save_figures, s_file_prefix, s_file_label)
 
 

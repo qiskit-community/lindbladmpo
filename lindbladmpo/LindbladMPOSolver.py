@@ -389,7 +389,7 @@ class LindbladMPOSolver:
 					check_msg += "Error 170: " + key + " should be equal or larger than 1 (integer)\n"
 					continue
 
-			elif key == "output_step":
+			elif key == "output_step" or key == "force_rho_Hermitian_step":
 				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 180: " + key + " should be an integer\n"
 					continue
@@ -515,7 +515,7 @@ class LindbladMPOSolver:
 						continue
 
 			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
-					key == "b_force_rho_Hermitian") or (key == "b_unique_id") or (key == "b_save_final_state")):
+					key == "b_unique_id") or (key == "b_save_final_state")):
 				if not isinstance(parameters[key], bool):
 					check_msg += "Error 390: " + key + " should be a boolean True or False\n"
 					continue
@@ -698,6 +698,7 @@ class LindbladMPOSolver:
 						check_msg += "Error 640: t_final (total time) is smaller then tau (time step for time " \
 									 "evolution)\n "
 						# TODO validate total time as t_final - t_init
+						# TODO validate force_rho_Hermitian_step
 					elif "output_step" in parameters:
 						if LindbladMPOSolver._is_int(parameters["output_step"]):
 							if parameters["output_step"] > 0:

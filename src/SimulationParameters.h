@@ -10,29 +10,35 @@ class SimulationParameters : public Parameters
 public:
     SimulationParameters() //constructor
     {
-        //The parameters below concern the simulation algorithm and approximations, these parameters are not model-specific
-        //THe model-specific parametrs should be defined in ModelParameters.h
+        // The parameters below concern the simulation algorithm and approximations, and are not
+        // model-specific (model-specific parameters should be defined in ModelParameters.h).
 
-        operator[]("t_init") = "0";            //Initial time
-        operator[]("t_final") = "1";            //Final time
-        operator[]("tau") = "0.1";        //time step for the time evolution (should be small for better accuracy)
-        operator[]("output_step") = "1";          //How often (in units of tau) shall we compute (and write to disk) the observables (just <Sz_i> etc. ). Set to zero if you do not want any observable to be computed
+        operator[]("t_init") = "0";         // Initial time.
+        operator[]("t_final") = "1";        // Final time.
+        operator[]("tau") = "0.1";          // Step for the time evolution (should be smaller than
+            // typical oscillation periods in the dynamics, but not too small for good performance)
+        operator[]("output_step") = "1";    // Determines every how many tau time steps to compute
+            // (and save) the observables. If set to 0, no observables are computed.
 
-        operator[]("Trotter_order") = "4"; //Possible choices are 2,3,4. 3 or 4 are recommended.
-        operator[]("max_dim_rho") = "400";  //maximum bond dimension for density matrices
-        operator[]("min_dim_rho") = "1";  //minimum bond dimension for density matrices
-        operator[]("cut_off_rho") = "1e-16"; //maximum truncation error for density matrices
-        operator[]("b_force_rho_trace") = "1";  // We do rho/=trace{rho} at every time step, to keep trace[rho]=1, irrespectively of finite-step errors
-        operator[]("b_force_rho_Hermitian") = "1"; // Replace rho by 0.5*(rho+rho^dagger) before measuring observables. This is recommanded, since it reduces some errors
-        operator[]("b_initial_rho_orthogonalization") = "0";  //if <>0 = > After reading Rho from the disk, perform some orthogonalization/truncation
+        operator[]("Trotter_order") = "4";  // Possible choices are 2, 3, 4. 3 or 4 are recommended.
+        operator[]("max_dim_rho") = "400";  // Maximum bond dimension for density matrices
+        operator[]("min_dim_rho") = "1";    // Minimum bond dimension for density matrices
+        operator[]("cut_off_rho") = "1e-16"; //Maximum truncation error for density matrices
 
-        operator[]("init_Pauli_state") = "+z";                                                                  
-        //If not equal to "" the initial state (density matrix rho) will be read from the disk.
-        //Give a filename if you want to read a previous density matrix from disk, as the initial state of the time evolution. 
-        //Note that initial state is in fact stored in three files, with names *.state.ops, *.state.sites and *.state.rho
-        operator[]("load_files_prefix") = "";
-        //Whether the final state (density matrix) will be saved to disk.
-        operator[]("b_save_final_state") = "0";   
+        operator[]("b_force_rho_trace") = "1";		// Whether to force the density matrix trace to 1,
+            // by substituting rho /= trace{rho} at every time step, compensating for finite-step errors
+        operator[]("force_rho_Hermitian_step") = "1";	// Determines every how many tau time steps
+        	// to replace rho = 0.5 * (rho + rho^dagger). This reduces some errors
+        operator[]("b_initial_rho_orthogonalization") = "0";	// If nonzero, after reading rho from
+         	// a saved file, perform some orthogonalization / truncation operation.
+
+        operator[]("init_Pauli_state") = "+z";
+        operator[]("load_files_prefix") = "";	// If not an empty string, the initial state
+         	// (density matrix rho) is to be read from the file system. Three files are being used,
+         	// with names appended with ".state.ops", ".state.sites" and ".state.rho".
+        operator[]("b_save_final_state") = "0";	// Whether to save the final state (density matrix) to
+        	// the file system. Three files are generated, with the files names starting with the
+        	// `output_files_prefix` string, with the endings ".state.rho", ".state.sites", and ".state.ops".
                                               
         operator[]("unique_id") = ""; // An optional unique id identifying the simulation. Not currently used (except for being saved in the input and log files).
         operator[]("metadata") = ""; // An optional user information, ignored by the solver (except for being saved in the input and log files).
