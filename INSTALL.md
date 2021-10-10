@@ -71,4 +71,4 @@ Or, on Windows, navigate inside the Cygwin64 Terminal on Windows to /bin directo
 
 ## Note on multithreading
 
-The ITensor documentation and make options discuss a few possibilities for multithreading under Linux. The simplest option is to instal the OpenBLAS library, see https://www.openblas.net/ for further information.
+The ITensor documentation and make options discuss a few possibilities for multithreading under Linux. The simplest option (which performs very well) is to install the OpenBLAS library, see https://www.openblas.net/ for further information.
