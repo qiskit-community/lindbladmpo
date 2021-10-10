@@ -68,3 +68,7 @@ In order to run a first test of the solver (with output to the console, and resu
 Or, on Windows, navigate inside the Cygwin64 Terminal on Windows to /bin directory as above, and type:
 
     ./lindbladmpo
+
+## Note on multithreading
+
+The ITensor documentation and make options discuss a few possibilities for multithreading under Linux. The simplest option is to instal the OpenBLAS library, see https://www.openblas.net/ for further information.
