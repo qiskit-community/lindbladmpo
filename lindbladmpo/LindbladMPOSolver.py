@@ -514,8 +514,9 @@ class LindbladMPOSolver:
 						check_msg += "Error 370: " + key + " can only be one of: +x, -x, +y, -y, +z, -z\n"
 						continue
 
-			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or (
-					key == "b_unique_id") or (key == "b_save_final_state")):
+			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or
+				  (key == "b_unique_id") or (key == "b_save_final_state") or
+				  (key == "b_initial_rho_compression")):
 				if not isinstance(parameters[key], bool):
 					check_msg += "Error 390: " + key + " should be a boolean True or False\n"
 					continue

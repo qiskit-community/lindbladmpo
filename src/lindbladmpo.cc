@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 		cout2 << "psi2rho done.\n";
 		cout2.flush();
 	}
-	if (param.val("b_initial_rho_orthogonalization") != 0) {
+	if (param.val("b_initial_rho_compression") != 0) {
 
 		cout2 << "C.rho.orthogonalize...";
 		cout2.flush();
