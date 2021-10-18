@@ -26,6 +26,19 @@ using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
 const string SOLVER_VERSION = "0.1.0";
+//Apply the control-Z gate on some (pure / MPS) state |psi>, at sites (i,j)
+void ApplyControlZGate(MPS &psi, const SiteSet &sites,int i,int j) {
+	AutoMPO initgates(sites);
+	initgates += 1., "Sz", i;
+	initgates += 1., "Sz", j;
+	initgates += -2., "Sz", i,"Sz",j;
+	initgates += 0.5, "Id", i,"Id",j;
+	MPO initgates_mpo= toMPO(initgates,Args("Cutoff",0));
+	//cout<<"MPO initgates_mpo done."<<endl;
+	//cout<<"MPO max bond dim="<< maxLinkDim(initgates_mpo)<<endl;
+	psi=applyMPO(initgates_mpo,psi,Args("Cutoff",0));psi.noPrime("Site");
+	//cout<<"Aplication to psi done."<<endl;
+}
 
 int main(int argc, char *argv[])
 {
@@ -201,7 +214,19 @@ int main(int argc, char *argv[])
 				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
 			}
 		}
-		psi.orthogonalize(Args("Cutoff", 1e-6, "MaxDim", 1));
+		psi.orthogonalize(Args("Cutoff", 1e-6));
+		// Experimental application of control-Z gates on all pairs of sites
+		if (false) {
+			cout2<<"Application of control-Z gates on all pairs of qbits...";
+			for (int i=1;i<=N;i++)
+			for (int j=i+1;j<=N;j++) ApplyControlZGate(psi,C.sites,i,j);
+			psi.orthogonalize(Args("Cutoff",0));
+			cout2<<"done.\n";
+			cout2<<"|psi> MPS max. bond dim.="<< maxLinkDim(psi)<<"\n";
+			//for (int c=1;c<=N-1;c++)
+			int c=N/2;
+			cout2<<"Half-system von Neumann entropy="<<Entropy(psi,c,2)<<"\n";
+		}
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
