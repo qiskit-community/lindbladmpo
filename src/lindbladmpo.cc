@@ -26,6 +26,13 @@ using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
 const string SOLVER_VERSION = "0.1.0";
+
+const double IMAGINARY_THRESHOLD = 1e-4
+// Threshold for the imaginary value of a quantity that should be real, to issue a warning
+
+const double TRACE_RHO_THRESHOLD = 1e-4
+// Threshold for the deviation of the density matrix trace from 1, to issue a warning
+
 //Apply the control-Z gate on some (pure / MPS) state |psi>, at sites (i,j)
 void ApplyControlZGate(MPS &psi, const SiteSet &sites,int i,int j) {
 	AutoMPO initgates(sites);
@@ -257,8 +264,8 @@ int main(int argc, char *argv[])
 
 	if (psi_defined)
 	{
-		if (std::abs(tr - 1) > 1e-1 || std::abs(tr2 - 1) > 1e-1)
-			cout2 << "Error, these traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
+		if (std::abs(tr - 1) > TRACE_RHO_THRESHOLD || std::abs(tr2 - 1) > TRACE_RHO_THRESHOLD)
+			cout2 << "Error, those traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
 		//Check a few simple observables, using rho and psi
 		vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
 		vector<double> psi_factor = {2., 1., 1., 2., 2.};
@@ -272,7 +279,7 @@ int main(int argc, char *argv[])
 				Cplx with_rho = C.Expect(opname, i);
 				Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites)/n2;
 				err += std::abs(with_rho - with_psi);
-				if (std::abs(with_rho - with_psi) > 1e-2)
+				if (std::abs(with_rho - with_psi) > TRACE_RHO_THRESHOLD)
 				cout2 << "Error: <psi|" << opname << "(" << i << ")|psi> / <psi|psi> =" << with_psi << "\t"
 					<< "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << "\n",
 					exit(1);
@@ -434,18 +441,16 @@ int main(int argc, char *argv[])
 				{
 					for (auto &s : components)
 					{
-					  Cplx expectation_value;
-					  if (tolower(s[0]) == 'x')
-						expectation_value = C.Expect("Sx", i);
-					  if (tolower(s[0]) == 'y')
-					    expectation_value = C.Expect("Sy", i);
-					  if (tolower(s[0]) == 'z')
-					    expectation_value = C.Expect("Sz", i);
-					  if (abs(expectation_value.imag()) > 1e-3)
-					    cout2 << "\nWarning: <S^" << s << "(" << i << ")>=" << expectation_value << " is not real.\n";
-					  file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i
-					          << "\t" << expectation_value.real() << endl;
-					  count++;
+						string c1("S");
+						c1 += char(tolower(s[0]));
+						Cplx expectation_value = C.Expect(c1, i);
+						if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
+							cout2 << "\nWarning: <S^" << s << "(" << i << ")> = " << expectation_value <<
+								"; it should be real, but has an imaginary part > " <<
+								IMAGINARY_THRESHOLD << ".\n";
+						file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i
+							  << "\t" << expectation_value.real() << endl;
+						count++;
 					}
 //					file_1q << endl;
 				}
@@ -469,8 +474,11 @@ int main(int argc, char *argv[])
 						c1 += char(tolower(s[0]));
 						c2 += char(tolower(s[1]));
 						Cplx expectation_value = C.Expect(c1, i, c2, j);
-						if (abs(expectation_value.imag()) > 1e-3)
-							cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j << ")>=" << expectation_value << " is not real.\n";
+						if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
+							cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
+								")> = " << expectation_value <<
+								"; it should be real, but has an imaginary part > " <<
+								IMAGINARY_THRESHOLD << ".\n";
 						file_2q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
 						count++;
 					}
@@ -499,8 +507,8 @@ int main(int argc, char *argv[])
 			cout2 << "done. Duration: " << duration_ms.count() / 1000. << "s" << "\n";
 
 			Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
-			if (std::abs(z - 1) > 1e-2)
-				cout2 << "\nWarning: Tr[rho]<>1 :" << z << "\n";
+			if (std::abs(z - 1) > TRACE_RHO_THRESHOLD)
+				cout2 << "\nWarning: Tr[rho] != 1 :" << z << "\n";
 			if (param.val("b_force_rho_trace") != 0)
 				C.rho /= z;
 			cout2.flush();
