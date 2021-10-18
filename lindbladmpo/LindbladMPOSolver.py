@@ -48,7 +48,8 @@ class LindbladMPOSolver:
 
 	def solve(self):
 		if self.s_input_file == '':
-			raise Exception("The solver parameters must be verified and the input file created, by invoking build().")
+			raise Exception("The solver parameters must be verified and the input file created, "
+							"by invoking build().")
 		exit_code = self.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
 		if exit_code != 0:
 			raise Exception("There was an error executing the solver.")
@@ -57,24 +58,25 @@ class LindbladMPOSolver:
 	@staticmethod
 	def process_default_paths(s_cygwin_path: Optional[str] = None,
 							  s_solver_path: Optional[str] = None) -> (str, str):
-		""" Returns the proper default values for the cygwin path and solver path according to the system
-			platform, for each of those parameter that is None, otherwise the parameter is returned unchanged.
+		""" Returns the proper default values for the cygwin path and solver path according to
+			the system platform, for each of those parameter that is None, otherwise the parameter
+			is returned unchanged.
 		Args:
 			s_cygwin_path: the path for the cygwin executable (on Windows).
 			s_solver_path: the path for the solver executable.
 		Returns:
-			(s_cygwin_path, s_solver_path): Default values for the cygwin path and solver path according to
-			the system platform.
+			(s_cygwin_path, s_solver_path): Default values for the cygwin path and solver path
+			according to the system platform.
 		"""
 		if s_cygwin_path is None or s_solver_path is None:
 			s_solver_path1 = os.path.dirname(os.path.abspath(__file__))
 			s_system = platform.system().lower()
 			if s_system == 'windows':
-				# On Windows we execute the solver using the cygwin bash. The default path is the following.
+				# On Windows we execute the solver using the cygwin bash, using the default path:
 				s_cygwin_path1 = LindbladMPOSolver.DEFAULT_CYGWIN_PATH
 
-				# s_solver_path should be of the form "/cygdrive/c/ ... ", and we use below a path relative
-				# to the current file's path in the package
+				# s_solver_path should be of the form "/cygdrive/c/ ... ", and we use below a path
+				# relative to the current file's path in the package
 				s_solver_path1 = s_solver_path1.replace(':', '')
 				s_solver_path1 = s_solver_path1.replace('\\', '/')
 				s_solver_path1 = "/cygdrive/" + s_solver_path1
@@ -161,15 +163,17 @@ class LindbladMPOSolver:
 			if key == "b_unique_id":
 				pass
 			elif key == "output_files_prefix":
-				file.write(key + ' = ' + s_output_path + "\n")  # The solver will add '.N=?' itself
-			elif (key == 'J' or key == 'J_z') and type(parameters[key]) == np.ndarray and len(parameters[key]) > 1:
+				file.write(key + ' = ' + s_output_path + "\n")
+			elif (key == 'J' or key == 'J_z') and type(parameters[key]) == np.ndarray and\
+					len(parameters[key]) > 1:
 				# check if to create bond indices arrays
 				not_first_value = False
 				file.write(key + " = ")
 				for i in range(len(first_bond_indices)):
 					if not_first_value:
 						file.write(",")
-					file.write(str(parameters[key][first_bond_indices[i] - 1, second_bond_indices[i] - 1]))
+					file.write(str(parameters[key][first_bond_indices[i] - 1,
+												   second_bond_indices[i] - 1]))
 					not_first_value = True
 				file.write("\n")
 			elif type(parameters[key]) == np.ndarray:
@@ -212,8 +216,10 @@ class LindbladMPOSolver:
 			else:
 				file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
 		if AB_indices:
-			file.write("first_bond_indices = " + str(first_bond_indices).strip("[]").replace(' ', '') + "\n")
-			file.write("second_bond_indices = " + str(second_bond_indices).strip("[]").replace(' ', '') + "\n")
+			file.write("first_bond_indices = " +
+					   str(first_bond_indices).strip("[]").replace(' ', '') + "\n")
+			file.write("second_bond_indices = " +
+					   str(second_bond_indices).strip("[]").replace(' ', '') + "\n")
 		file.close()
 		self.s_input_file = s_input_file
 		self.s_output_path = s_output_path
@@ -230,7 +236,8 @@ class LindbladMPOSolver:
 		Returns:
 			exit code : the exit code of the solver.
 		"""
-		s_cygwin_path, s_solver_path = LindbladMPOSolver.process_default_paths(s_cygwin_path, s_solver_path)
+		s_cygwin_path, s_solver_path = LindbladMPOSolver.process_default_paths(s_cygwin_path,
+																			   s_solver_path)
 		if s_cygwin_path:
 			call_string = s_cygwin_path + ' --login -c "'
 		else:
@@ -428,7 +435,8 @@ class LindbladMPOSolver:
 						continue
 					if parameters[key].size == 1:
 						continue
-					if (parameters[key].shape[0] != number_of_qubits) or (parameters[key].shape[0] != parameters[key].size):
+					if (parameters[key].shape[0] != number_of_qubits) or\
+							(parameters[key].shape[0] != parameters[key].size):
 						check_msg += "Error 240: " + key + " is not a float / N-legnth list / " \
 														   "numpy array (of floats)\n"
 						continue
@@ -448,28 +456,28 @@ class LindbladMPOSolver:
 					continue
 				if isinstance(parameters[key], list):
 					if len(parameters[key]) != number_of_qubits:
-						check_msg += "Error 270: " + key + " should be a constant, or a square " \
-														   "matrix (nested list/np.array) of " \
-														   "floats with a size of N^2\n"
+						check_msg += "Error 270: " + key +\
+									 " should be a constant, or a square matrix (nested list/np.array)" \
+									 " of N^2 floats\n "
 						continue
 					for lst in parameters[key]:
 						if not isinstance(lst, list):
 							check_msg += "Error 280: " + key + "should be a constant, or a square " \
 															   "matrix (nested list/np.array) of " \
-															   "floats with a size of N^2\n "
+															   "floats with a size N^2\n "
 							flag_continue = True
 							break
 						if len(lst) != number_of_qubits:
-							check_msg += "Error 290: " + key + "should be a constant, or a square matrix (nested " \
-															   "list/np.array) in the size of number_of_qubits^2 of " \
-															   "floats\n "
+							check_msg += "Error 290: " + key +\
+										 "should be a constant, or a square matrix (nested list/" \
+										 "np.array) with N^2 floats\n"
 							flag_continue = True
 							break
 						for val in lst:
 							if not LindbladMPOSolver._is_float(val):
 								check_msg += "Error 300: " + key + "should be a constant, or a square matrix (nested " \
 																   "list/np.array) in the size of number_of_qubits^2 " \
-																   "of floats\n "
+																   "of floats\n"
 								flag_continue = True
 								break
 						if flag_continue:
@@ -481,19 +489,19 @@ class LindbladMPOSolver:
 							str((parameters[key]).dtype).find("float") == -1):
 						check_msg += "Error 310: " + key + "should be a constant, or a square matrix (nested " \
 														   "list/np.array) in the size of number_of_qubits^2 of " \
-														   "floats\n "
+														   "floats\n"
 						continue
 					if parameters[key].size == 1:
 						continue
 					if parameters[key].shape[0] != number_of_qubits:
 						check_msg += "Error 320: " + key + "should be a constant, or a square matrix (nested " \
 														   "list/np.array) in the size of number_of_qubits^2 of " \
-														   "floats\n "
+														   "floats\n"
 						continue
 					if parameters[key].shape[0] ** 2 != parameters[key].size:
 						check_msg += "Error 330: " + key + "should be a constant, or a square matrix (nested " \
 														   "list/np.array) in the size of number_of_qubits^2 of " \
-														   "floats\n "
+														   "floats\n"
 						continue
 				else:
 					check_msg += "Error 340: " + key + " should be a constant, or a square matrix (nested " \
@@ -511,7 +519,7 @@ class LindbladMPOSolver:
 						continue
 					allowed_init = ['+x', '-x', '+y', '-y', '+z', '-z']
 					if s_init.lower() not in allowed_init:
-						check_msg += "Error 370: " + key + " can only be one of: +x, -x, +y, -y, +z, -z\n"
+						check_msg += "Error 370: " + key + " can only be one of: +x,-x,+y,-y,+z, z\n"
 						continue
 
 			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or

@@ -330,9 +330,12 @@ int main(int argc, char *argv[])
 	{
 		const int i = sit2[n], j = sit2[n + 1];
 		if (i < 1 || i > N)
-			cout2 << "Error: invalid index i=" << i << " found in list `2q_indices`.\n", exit(1);
+			cout2 << "Error: invalid index i =" << i << " found in list `2q_indices`.\n", exit(1);
 		if (j < 1 || j > N)
-			cout2 << "Error: invalid index i=" << i << " found in list `2q_indices`.\n", exit(1);
+			cout2 << "Error: invalid index i =" << j << " found in list `2q_indices`.\n", exit(1);
+		if (i == j)
+			cout2 << "Error: an invalid identical index pair (" << i << ") found in list "
+					 "`2q_indices`. Two-qubit observables must involve two distinct qubits.\n", exit(1);
 	}
 
 	auto components2 = param.stringvec("2q_components");
