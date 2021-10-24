@@ -27,7 +27,7 @@ public:
 
         operator[]("b_force_rho_trace") = "1";		// Whether to force the density matrix trace to 1,
             // by substituting rho /= trace{rho} at every time step, compensating for finite-step errors
-        operator[]("force_rho_Hermitian_step") = "1";	// Determines every how many tau time steps
+        operator[]("force_rho_Hermitian_step") = "4";	// Determines every how many tau time steps
         	// to substitute rho = 0.5 * (rho + rho^dagger). This may reduce certain errors, but is
         	// computationally expensive.
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from
