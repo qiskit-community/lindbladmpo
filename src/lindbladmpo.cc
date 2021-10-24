@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
 	cout2 << "done.\n";
 	cout2.flush();
 	cout2 << "Largest bond dimension of the MPO exp(tau*L): " << maxLinkDim(TE.expL1) << "\n";
-	const int n_steps = int(t_total / tau + (1e-9 * (t_total / tau)));
+	const int n_steps = int(t_total / tau);
 
 	// Open output files
 
