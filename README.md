@@ -5,8 +5,8 @@ The code uses matrix-product states (MPS) and matrix-product operator (MPO) stru
 
 # Table of Contents
 
-* Installation guide - [a relative link](INSTALL.md)
-* Background and litterature on the method - [a relative link](BACKGROUND.md)
-* Simulator's model - [a relative link](MODEL.md)
-* Python interface - [a relative link](API_DOCS.md)
-* Code structure - [a relative link](CODE_STRUCTURE.md)
+* [Installation guide](INSTALL.md)
+* [Background and litterature on the method](background.md)
+* [Simulator's model](MODEL.md)
+* [Python interface](API_DOCS.md)
+* [Code structure](CODE_STRUCTURE.md)
