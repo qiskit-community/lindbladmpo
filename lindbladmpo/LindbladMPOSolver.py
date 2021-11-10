@@ -183,7 +183,7 @@ class LindbladMPOSolver:
 					if i + 1 != parameters[key].shape[0]:
 						file.write(",")
 				file.write("\n")
-			elif key == 'init_Pauli_state' or key == '1q_components' or key == '2q_components':
+			elif key == 'init_pauli_state' or key == '1q_components' or key == '2q_components':
 				if isinstance(parameters[key], str):
 					val_list = [parameters[key]]
 				else:
@@ -396,7 +396,7 @@ class LindbladMPOSolver:
 					check_msg += "Error 170: " + key + " should be equal or larger than 1 (integer)\n"
 					continue
 
-			elif key == "output_step" or key == "force_rho_Hermitian_step":
+			elif key == "output_step" or key == "force_rho_hermitian_step":
 				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 180: " + key + " should be an integer\n"
 					continue
@@ -508,7 +508,7 @@ class LindbladMPOSolver:
 													   "list/np.array) in the size of number_of_qubits^2 of floats\n"
 					continue
 
-			elif key == "init_Pauli_state":
+			elif key == "init_pauli_state":
 				if not isinstance(parameters[key], str) and not isinstance(parameters[key], list):
 					check_msg += "Error 350: " + key + " must not be a string or a list of strings\n"
 					continue
@@ -707,7 +707,7 @@ class LindbladMPOSolver:
 						check_msg += "Error 640: t_final (total time) is smaller then tau (time step for time " \
 									 "evolution)\n "
 						# TODO validate total time as t_final - t_init
-						# TODO validate force_rho_Hermitian_step
+						# TODO validate force_rho_hermitian_step
 					elif "output_step" in parameters:
 						if LindbladMPOSolver._is_int(parameters["output_step"]):
 							if parameters["output_step"] > 0:

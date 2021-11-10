@@ -142,10 +142,10 @@ int main(int argc, char *argv[])
 	argsRho.add("MaxDim", param.longval("max_dim_rho"));
 	argsRho.add("Cutoff", param.val("cut_off_rho"));
 
-	vector<string> a_init = param.stringvec("init_Pauli_state");
+	vector<string> a_init = param.stringvec("init_pauli_state");
 	unsigned int a_init_len = a_init.size();
 	if (load_prefix == "" && a_init_len != 1 && int(a_init_len) != N)
-		cout2 << "Error: the parameter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+		cout2 << "Error: the parameter init_pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
 	if (a_init_len == 1)
 		a_init = vector<string>(N, a_init[0]);
 
@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 	const double tau = param.val("tau");
 	const double t_f = param.val("t_final");
 	const double t_total = t_f - t_0;
-	const int o = param.val("Trotter_order");
+	const int o = param.val("trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
 	TE.init(tau, C.Lindbladian, argsRho, o);
 	cout2 << "done.\n";
@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
 	cout2.flush();
 
 	char buf[100];
-	const long force_rho_Hermitian_step = param.longval("force_rho_Hermitian_step");
+	const long force_rho_Hermitian_step = param.longval("force_rho_hermitian_step");
 	for (int n = 0; n <= n_steps; n++)
 	{
 		const double t = t_0 + n * tau;

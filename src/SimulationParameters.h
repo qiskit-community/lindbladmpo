@@ -20,20 +20,20 @@ public:
         operator[]("output_step") = "1";    // Determines every how many tau time steps to compute
             // (and save) the observables. If set to 0, no observables are computed.
 
-        operator[]("Trotter_order") = "4";  // Possible choices are 2, 3, 4. 3 or 4 are recommended.
+        operator[]("trotter_order") = "4";  // Possible choices are 2, 3, 4. 3 or 4 are recommended.
         operator[]("max_dim_rho") = "400";  // Maximum bond dimension for density matrices
         operator[]("min_dim_rho") = "1";    // Minimum bond dimension for density matrices
         operator[]("cut_off_rho") = "1e-16"; //Maximum truncation error for density matrices
 
         operator[]("b_force_rho_trace") = "1";		// Whether to force the density matrix trace to 1,
             // by substituting rho /= trace{rho} at every time step, compensating for finite-step errors
-        operator[]("force_rho_Hermitian_step") = "4";	// Determines every how many tau time steps
+        operator[]("force_rho_hermitian_step") = "4";	// Determines every how many tau time steps
         	// to substitute rho = 0.5 * (rho + rho^dagger). This may reduce certain errors, but is
         	// computationally expensive.
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from
          	// a saved file, perform a re-gauging/compression using iTensor's method orthogonalize().
 
-        operator[]("init_Pauli_state") = "+z";
+        operator[]("init_pauli_state") = "+z";
         operator[]("load_files_prefix") = "";	// If not an empty string, the initial state
          	// (density matrix rho) is to be read from the file system. Three files are being used,
          	// with names appended with ".state.ops", ".state.sites" and ".state.rho".

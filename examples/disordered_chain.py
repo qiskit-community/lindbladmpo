@@ -38,7 +38,7 @@ tau = .02
 solver_params = {'tau': tau, 't_final': t_final, 'cut_off_rho': 1e-12,
 				 'max_dim_rho': 60, 'N': n_qubits, 'b_unique_id': b_unique_id,
 				 'h_x': h_x, 'h_z': h_z, 'g_0': g_0, 'g_2': g_2, 'J': J,
-				 '1q_components': ['x', 'y', 'z'], 'init_Pauli_state': '+x',
+				 '1q_components': ['x', 'y', 'z'], 'init_pauli_state': '+x',
 				 'output_files_prefix': s_output_path + s_file_prefix}
 # Initialize class arguments - the parameters, cygwin path, and MPO executable path
 solver = LindbladMPOSolver(solver_params)
