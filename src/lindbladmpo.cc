@@ -159,7 +159,8 @@ int main(int argc, char *argv[])
 	if ((load_prefix != "" || b_graph_state) && a_init_len > 1)
 		cout2 << "Error: if either load_files_prefix or init_graph_state are nonempty, " <<
 		"init_pauli_state must be left empty or unspecified.\n", exit(1);
-
+	if (b_graph_state)
+		a_init = vector<string>(N, "+x");
 	if (a_init_len == 1)
 		a_init = vector<string>(N, a_init[0]);
 
@@ -175,13 +176,9 @@ int main(int argc, char *argv[])
 		cout2 << "done.\n";
 		cout2 << "Bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
 	}
-	else if (b_graph_state)
-	{
-		cout2 << "init_graph_state is to be implemented!\n", exit(1);
-	}
 	else
 	{
-    // Set the initial wavefunction matrix product state
+    	// Set the initial wavefunction matrix product state
 		auto initState = InitState(C.sites);
 		for (int i = 1; i <= N; ++i) // Start with all spins up
 		initState.set(i, "Up");
@@ -241,10 +238,11 @@ int main(int argc, char *argv[])
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
 		// Experimental application of control-Z gates on all pairs of sites
-		if (false) {
-			cout2<<"Application of control-Z gates on all pairs of qbits...";
+		if (b_graph_state) {
+			cout2 << "Application of control-Z gates on all pairs of qubits. TODO: Use the requested pairs";
 			for (int i=1;i<=N;i++)
-			for (int j=i+1;j<=N;j++) ApplyControlZGate(psi,C.sites,i,j);
+				for (int j=i+1;j<=N;j++)
+					ApplyControlZGate(psi,C.sites,i,j);
 			psi.orthogonalize(Args("Cutoff",0));
 			cout2<<"done.\n";
 			cout2<<"|psi> MPS max. bond dim.="<< maxLinkDim(psi)<<"\n";
