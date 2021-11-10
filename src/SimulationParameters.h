@@ -33,7 +33,14 @@ public:
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from
          	// a saved file, perform a re-gauging/compression using iTensor's method orthogonalize().
 
-        operator[]("init_pauli_state") = "+z";
+        operator[]("init_pauli_state") = "+z";  // Initialize a Pauli state. Can be specified for
+        	// every qubit separately (as a comma-separated list), or uniformly for all qubits.
+        	// The string format is + or - in the first character, and x, y, z in the second
+        	// character, denoting a single-qubit state pointing along the positive/negative
+        	// direction of the specified axis of the Bloch sphere.
+        operator[]("init_graph_state") = "";  // Initialize a graph state. A list of qubit indexes
+        	// is expected with all pairs on which a CZ gate is applied (after starting with all qubits
+        	// along the +x axis).
         operator[]("load_files_prefix") = "";	// If not an empty string, the initial state
          	// (density matrix rho) is to be read from the file system. Three files are being used,
          	// with names appended with ".state.ops", ".state.sites" and ".state.rho".

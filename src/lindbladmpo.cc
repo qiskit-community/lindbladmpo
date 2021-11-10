@@ -142,10 +142,24 @@ int main(int argc, char *argv[])
 	argsRho.add("MaxDim", param.longval("max_dim_rho"));
 	argsRho.add("Cutoff", param.val("cut_off_rho"));
 
+	vector<long> graph_pairs = param.longvec("init_graph_state");
+	if (graph_pairs.size() % 2 == 1)
+		cout2 << "Error: the list of indices given in the parameter `init_graph_state` should " <<
+			"have an even length.\n", exit(1);
+	bool const b_graph_state = (graph_pairs.size() != 0);
+
 	vector<string> a_init = param.stringvec("init_pauli_state");
 	unsigned int a_init_len = a_init.size();
-	if (load_prefix == "" && a_init_len != 1 && int(a_init_len) != N)
-		cout2 << "Error: the parameter init_pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+	if (load_prefix == "" && !b_graph_state && a_init_len != 1 && int(a_init_len) != N)
+		cout2 << "Error: the parameter init_pauli_state has " << a_init_len << " value(s) but 1 or " <<
+		 	N << " value(s) were expected.\n", exit(1);
+	if (load_prefix != "" && b_graph_state)
+		cout2 << "Error: either load_files_prefix or init_graph_state can be nonempty, but not both.\n",
+		exit(1);
+	if ((load_prefix != "" || b_graph_state) && a_init_len > 1)
+		cout2 << "Error: if either load_files_prefix or init_graph_state are nonempty, " <<
+		"init_pauli_state must be left empty or unspecified.\n", exit(1);
+
 	if (a_init_len == 1)
 		a_init = vector<string>(N, a_init[0]);
 
@@ -160,6 +174,10 @@ int main(int argc, char *argv[])
 		readFromFile(file_name, C.rho);
 		cout2 << "done.\n";
 		cout2 << "Bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
+	}
+	else if (b_graph_state)
+	{
+		cout2 << "init_graph_state is to be implemented!\n", exit(1);
 	}
 	else
 	{
