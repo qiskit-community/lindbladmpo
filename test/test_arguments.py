@@ -279,19 +279,19 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		self.assertEqual(expected, out)
 
 	def test_arg_init_Pauli_state_F1(self):
-		parameters = {'init_Pauli_state': "-a", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
+		parameters = {'init_pauli_state': "-a", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
 		out = LindbladMPOSolver._verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_init_Pauli_state_F2(self):
-		parameters = {'init_Pauli_state': -22, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
+		parameters = {'init_pauli_state': -22, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
 		out = LindbladMPOSolver._verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_init_Pauli_state_P(self):
-		parameters = {'init_Pauli_state': "-x", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
+		parameters = {'init_pauli_state': "-x", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
 		out = LindbladMPOSolver._verify_parameters(parameters)
 		self.assertEqual(expected, out)
@@ -463,7 +463,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['g_0'] = [2.222, 4, 2e-2, 777777, -0.3]
 		parameters['g_1'] = np.array([1, 2, 3, 4, 5])
 		parameters['g_2'] = -4e-10
-		parameters['init_Pauli_state'] = "+x"
+		parameters['init_pauli_state'] = "+x"
 		parameters['l_x'] = 5
 		parameters['l_y'] = 1
 		parameters['b_periodic_x'] = True
@@ -474,7 +474,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['force_rho_Hermitian_step'] = 1
+		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['metadata'] = "We agree to disagree."
 		parameters['1q_components'] = ["x", "y", "z"]
@@ -512,7 +512,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['g_0'] = [2.222, 4, 777777, -0.3]  # this should fail
 		parameters['g_1'] = -99
 		parameters['g_2'] = "aaa"  # this should fail
-		parameters['init_Pauli_state'] = "-z"
+		parameters['init_pauli_state'] = "-z"
 		#    parameters['l_x'] =
 		#    parameters['l_y'] =
 		parameters['b_periodic_x'] = 0  # this should fail
@@ -523,7 +523,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = "False"  # this should fail
-		parameters['force_rho_Hermitian_step'] = 1
+		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 0.6  # this should fail
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "j"]  # this should fail
@@ -562,7 +562,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['g_0'] = [2.222, 4]
 		parameters['g_1'] = (-11, 22)
 		parameters['g_2'] = "aaa"
-		parameters['init_Pauli_state'] = "+a2"
+		parameters['init_pauli_state'] = "+a2"
 
 		parameters['b_periodic_x'] = 0
 		parameters['b_periodic_y'] = 1
@@ -572,7 +572,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = "1e-10"
 		parameters['cut_off_rho'] = "1e-11"
 		parameters['b_force_rho_trace'] = "False"
-		parameters['force_rho_Hermitian_step'] = "True"
+		parameters['force_rho_hermitian_step'] = "True"
 		parameters['output_step'] = 0.6
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "j"]
@@ -612,7 +612,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['g_0'] = [2.222, 4, 2e-2, 777777, -0.3]
 		parameters['g_1'] = -99
 		parameters['g_2'] = -4e-10
-		parameters['init_Pauli_state'] = "-y"
+		parameters['init_pauli_state'] = "-y"
 		parameters['l_x'] = 1
 		parameters['l_y'] = 5
 		parameters['b_periodic_x'] = True
@@ -623,7 +623,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['force_rho_Hermitian_step'] = 1
+		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "z"]
@@ -662,7 +662,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['g_0'] = [2.222, 4, 2e-2, 777777, -0.3]
 		parameters['g_1'] = -99
 		parameters['g_2'] = -4e-10
-		parameters['init_Pauli_state'] = "-x"
+		parameters['init_pauli_state'] = "-x"
 		#    parameters['l_x'] =
 		#    parameters['l_y'] =
 		parameters['b_periodic_x'] = True
@@ -673,7 +673,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['force_rho_Hermitian_step'] = 1
+		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "z"]
@@ -711,7 +711,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['g_0'] = [2.222, 4, 2e-2, 777777, -0.3]
 		parameters['g_1'] = -99
 		parameters['g_2'] = -4e-10
-		parameters['init_Pauli_state'] = "+z"
+		parameters['init_pauli_state'] = "+z"
 		#    parameters['l_x'] =
 		#    parameters['l_y'] =
 		parameters['b_periodic_x'] = True
@@ -722,7 +722,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
-		parameters['force_rho_Hermitian_step'] = 1
+		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 1
 		parameters['output_files_prefix'] = "./"
 		parameters['1q_components'] = ["x", "y", "z"]

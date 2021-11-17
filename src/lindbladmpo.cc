@@ -47,6 +47,8 @@ void ApplyControlZGate(MPS &psi, const SiteSet &sites,int i,int j) {
 	//cout<<"Aplication to psi done."<<endl;
 }
 
+void validate_2q_list(vector<long> &vect, int N, string const &list_name);
+
 int main(int argc, char *argv[])
 {
 	ModelParameters param;
@@ -142,10 +144,28 @@ int main(int argc, char *argv[])
 	argsRho.add("MaxDim", param.longval("max_dim_rho"));
 	argsRho.add("Cutoff", param.val("cut_off_rho"));
 
-	vector<string> a_init = param.stringvec("init_Pauli_state");
+	vector<long> graph_pairs = param.longvec("init_graph_state");
+	if (graph_pairs.size() % 2 == 1)
+		cout2 << "Error: the list of indices given in the parameter `init_graph_state` should " <<
+			"have an even length.\n", exit(1);
+	bool const b_graph_state = (graph_pairs.size() != 0);
+
+	vector<string> a_init = param.stringvec("init_pauli_state");
 	unsigned int a_init_len = a_init.size();
-	if (load_prefix == "" && a_init_len != 1 && int(a_init_len) != N)
-		cout2 << "Error: the parameter init_Pauli_state has " << a_init_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+	if (load_prefix == "" && !b_graph_state && a_init_len != 1 && int(a_init_len) != N)
+		cout2 << "Error: the parameter init_pauli_state has " << a_init_len << " value(s) but 1 or " <<
+		 	N << " value(s) were expected.\n", exit(1);
+	if (load_prefix != "" && b_graph_state)
+		cout2 << "Error: either load_files_prefix or init_graph_state can be nonempty, but not both.\n",
+		exit(1);
+	if ((load_prefix != "" || b_graph_state) && a_init_len > 1)
+		cout2 << "Error: if either load_files_prefix or init_graph_state are nonempty, " <<
+		"init_pauli_state must be left empty or unspecified.\n", exit(1);
+	if (b_graph_state)
+	{
+		validate_2q_list(graph_pairs, N, "init_graph_state");
+		a_init = vector<string>(N, "+x");
+	}
 	if (a_init_len == 1)
 		a_init = vector<string>(N, a_init[0]);
 
@@ -163,7 +183,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-    // Set the initial wavefunction matrix product state
+    	// Set the initial wavefunction matrix product state
 		auto initState = InitState(C.sites);
 		for (int i = 1; i <= N; ++i) // Start with all spins up
 		initState.set(i, "Up");
@@ -223,10 +243,15 @@ int main(int argc, char *argv[])
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
 		// Experimental application of control-Z gates on all pairs of sites
-		if (false) {
-			cout2<<"Application of control-Z gates on all pairs of qbits...";
-			for (int i=1;i<=N;i++)
-			for (int j=i+1;j<=N;j++) ApplyControlZGate(psi,C.sites,i,j);
+		if (b_graph_state) {
+			cout2 << "Application of control-Z gates on requested pairs of qubits.";
+//			for (int i=1;i<=N;i++)
+//				for (int j=i+1;j<=N;j++)
+			for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
+			{
+				const int i = graph_pairs[n], j = graph_pairs[n + 1];
+				ApplyControlZGate(psi,C.sites,i,j);
+			}
 			psi.orthogonalize(Args("Cutoff",0));
 			cout2<<"done.\n";
 			cout2<<"|psi> MPS max. bond dim.="<< maxLinkDim(psi)<<"\n";
@@ -299,7 +324,7 @@ int main(int argc, char *argv[])
 	const double tau = param.val("tau");
 	const double t_f = param.val("t_final");
 	const double t_total = t_f - t_0;
-	const int o = param.val("Trotter_order");
+	const int o = param.val("trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
 	TE.init(tau, C.Lindbladian, argsRho, o);
 	cout2 << "done.\n";
@@ -358,17 +383,7 @@ int main(int argc, char *argv[])
 					sit2.push_back(i), sit2.push_back(j);
 			}
 	}
-	for (unsigned int n = 0; n < sit2.size(); n += 2)
-	{
-		const int i = sit2[n], j = sit2[n + 1];
-		if (i < 1 || i > N)
-			cout2 << "Error: invalid index i =" << i << " found in list `2q_indices`.\n", exit(1);
-		if (j < 1 || j > N)
-			cout2 << "Error: invalid index i =" << j << " found in list `2q_indices`.\n", exit(1);
-		if (i == j)
-			cout2 << "Error: an invalid identical index pair (" << i << ") found in list "
-					 "`2q_indices`. Two-qubit observables must involve two distinct qubits.\n", exit(1);
-	}
+	validate_2q_list(sit2, N, "q2_indices");
 
 	auto components2 = param.stringvec("2q_components");
 	for (auto &s : components2)
@@ -391,7 +406,7 @@ int main(int argc, char *argv[])
 	cout2.flush();
 
 	char buf[100];
-	const long force_rho_Hermitian_step = param.longval("force_rho_Hermitian_step");
+	const long force_rho_Hermitian_step = param.longval("force_rho_hermitian_step");
 	for (int n = 0; n <= n_steps; n++)
 	{
 		const double t = t_0 + n * tau;
@@ -536,6 +551,23 @@ int main(int argc, char *argv[])
 	cout2.flush();
 	log_file.close();
 	return 0;
+}
+
+void validate_2q_list(vector<long> &vect, int N, string const &list_name)
+{
+	for (unsigned int n = 0; n < vect.size(); n += 2)
+	{
+		const int i = vect[n], j = vect[n + 1];
+		if (i < 1 || i > N)
+			cout2 << "Error: invalid index i =" << i << " found in list `" << list_name <<
+				"`.\n", exit(1);
+		if (j < 1 || j > N)
+			cout2 << "Error: invalid index i =" << j << " found in list `" << list_name <<
+				"`.\n", exit(1);
+		if (i == j)
+			cout2 << "Error: an invalid identical index pair (" << i << ") found in list `" <<
+				list_name << "`. Two-qubit observables must involve two distinct qubits.\n", exit(1);
+	}
 }
 
 // Old initialization code

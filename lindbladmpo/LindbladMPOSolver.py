@@ -183,7 +183,7 @@ class LindbladMPOSolver:
 					if i + 1 != parameters[key].shape[0]:
 						file.write(",")
 				file.write("\n")
-			elif key == 'init_Pauli_state' or key == '1q_components' or key == '2q_components':
+			elif key == 'init_pauli_state' or key == '1q_components' or key == '2q_components':
 				if isinstance(parameters[key], str):
 					val_list = [parameters[key]]
 				else:
@@ -204,7 +204,7 @@ class LindbladMPOSolver:
 					if i_site != n_indices - 1:
 						file.write(",")
 				file.write("\n")
-			elif key == '2q_indices':
+			elif key == '2q_indices' or key == "init_graph_state":
 				file.write(key + " = ")
 				n_tuples = len(parameters[key])
 				for i_2q_tuple, _2q_tuple in enumerate(parameters[key]):
@@ -382,7 +382,7 @@ class LindbladMPOSolver:
 					check_msg += "Error 140: " + key + " is not a float\n"
 					continue
 				if key != "t_init" and parameters[key] <= 0:
-					check_msg += "Error 150: " + key + " must be larger then 0\n"
+					check_msg += "Error 150: " + key + " must be larger than 0\n"
 					continue
 				if key == "t_init" and parameters[key] > parameters["t_final"]:
 					check_msg += "Error 151: " + key + " must be equal or smaller than t_final\n"
@@ -396,7 +396,7 @@ class LindbladMPOSolver:
 					check_msg += "Error 170: " + key + " should be equal or larger than 1 (integer)\n"
 					continue
 
-			elif key == "output_step" or key == "force_rho_Hermitian_step":
+			elif key == "output_step" or key == "force_rho_hermitian_step":
 				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 180: " + key + " should be an integer\n"
 					continue
@@ -508,7 +508,7 @@ class LindbladMPOSolver:
 													   "list/np.array) in the size of number_of_qubits^2 of floats\n"
 					continue
 
-			elif key == "init_Pauli_state":
+			elif key == "init_pauli_state":
 				if not isinstance(parameters[key], str) and not isinstance(parameters[key], list):
 					check_msg += "Error 350: " + key + " must not be a string or a list of strings\n"
 					continue
@@ -600,7 +600,8 @@ class LindbladMPOSolver:
 						continue
 					number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
 					if number_of_qubits == -1:
-						check_msg += "Error 480: " + key + "could not be validated because 'N' (or alternatively l_x," \
+						check_msg += "Error 480: " + key + "could not be validated because 'N'" \
+														   " (or alternatively l_x," \
 														   " l_y) are not defined properly\n "
 						continue
 					for element in parameters[key]:
@@ -609,24 +610,25 @@ class LindbladMPOSolver:
 							flag_continue = True
 							break
 						if element >= number_of_qubits:
-							check_msg += "Error 500: " + key + " should be an integer list listing qubits, therefore " \
-															   "number range is 0 to 'num of qubits'-1\n"
+							check_msg += "Error 500: " + key + " should be an integer list listing " \
+															   "qubits, therefore integers in the " \
+															   "range 0 to N-1\n"
 							flag_continue = True
 							break
 					if flag_continue:
 						continue
 					if len(parameters[key]) > number_of_qubits:
-						check_msg += "Error 510: " + key + " 's length should be smaller/equal then the amount of " \
-														   "qubits\n "
+						check_msg += "Error 510: " + key + " 's length should be equal/smaller than " \
+														   "the amount of qubits\n "
 						continue
 					if not len(set(parameters[key])) == len(parameters[key]):
-						check_msg += "Error 520: " + key + " 's List does not contains all unique elements"
+						check_msg += "Error 520: " + key + " 's List does not contain unique elements"
 						continue
 
 			elif key == "2q_components":
 				if not isinstance(parameters[key], list):
-					check_msg += "Error 530: " + key + "only receives xx,yy,zz,xy,xz,yz (or a subset) as a strings " \
-													   "list\n"
+					check_msg += "Error 530: " + key + "only receives xx,yy,zz,xy,xz,yz (or a subset) " \
+													   "as a strings list\n"
 					continue
 				if len(parameters[key]) > 6:
 					check_msg += "Error 540: " + key + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
@@ -647,50 +649,55 @@ class LindbladMPOSolver:
 					elif (val == "yz") or (val == "zy"):
 						check_me[5] += 1
 					else:
-						check_msg += "Error 550: " + key + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
+						check_msg += "Error 550: " + key + " only accepts string from xx, yy, zz, xy, " \
+														   "xz, yz (or a permutation thereof)\n"
 						flag_continue = True
 						break
 				if flag_continue:
 					continue
 				for check_val in check_me:
 					if check_val > 1:
-						check_msg += "Error 560: " + key + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
+						check_msg += "Error 550: " + key + " only accepts string from xx, yy, zz, xy, " \
+														   "xz, yz (or a permutation thereof)\n"
 						flag_continue = True
 						break
 				if flag_continue:
 					continue
 
-			elif key == "2q_indices":  # expecting an integer tuples list
+			elif key == "2q_indices" or key == "init_graph_state":  # expecting an integer tuples list
 				if not isinstance(parameters[key], list):
-					check_msg += "Error 570: " + key + " should be an list of tuples of size 2, containing integer\n"
+					check_msg += "Error 570: " + key + " should be an list of tuples of size 2," \
+													   " containing integers\n"
 					continue
 				number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
 				if number_of_qubits == -1:
-					check_msg += "Error 580: " + key + " could not be validated because 'N' (or alternatively l_x, " \
+					check_msg += "Error 580: " + key + " could not be validated because 'N' " \
+													   "(or alternatively l_x, " \
 													   "l_y) are not defined properly\n"
 					continue
 				for tup in parameters[key]:
 					if not isinstance(tup, tuple):
-						check_msg += "Error 590: " + key + " should be an list of tuples of size 2, containing " \
-														   "integer\n "
+						check_msg += "Error 590: " + key + " should be an list of tuples of size 2, " \
+														   "containing integers\n "
 						flag_continue = True
 						break
-					if ((not LindbladMPOSolver._is_int(tup[0])) or (not LindbladMPOSolver._is_int(tup[1])) or (
-							len(tup) != 2)):
-						check_msg += "Error 600: " + key + " should be an list of tuples of size 2, containing " \
-														   "integers\n "
+					if ((not LindbladMPOSolver._is_int(tup[0])) or
+							(not LindbladMPOSolver._is_int(tup[1])) or (len(tup) != 2)):
+						check_msg += "Error 600: " + key + " should be an list of tuples of size 2, " \
+														   "containing integers\n "
 						flag_continue = True
 						break
 					if (tup[0] >= number_of_qubits) or (tup[1] >= number_of_qubits):
-						check_msg += "Error 610: " + key + " should be an list of tuples of size 2, containing " \
-														   "integers smaller/equal then the total number of qubits\n "
+						check_msg += "Error 610: " + key + " should be an list of tuples of size 2, " \
+														   "containing integers equal/smaller than " \
+														   "the total number of qubits\n "
 						flag_continue = True
 						break
 				if flag_continue:
 					continue
 
 				if len(parameters[key]) > number_of_qubits ** 2:
-					check_msg += "Error 620: " + key + " 's length should be smaller then the amount of qubits^2\n"
+					check_msg += "Error 620: " + key + " 's length should be smaller than N^2\n"
 					continue
 				if not len(set(parameters[key])) == len(parameters[key]):
 					check_msg += "Error 630: " + key + " 's List does not contains all unique elements"
@@ -701,18 +708,19 @@ class LindbladMPOSolver:
 		# End of: "for key in dict.keys(parameters)"
 		# More cross-parameter checks:
 		if ("t_final" in parameters) and ("tau" in parameters):
-			if (LindbladMPOSolver._is_float(parameters["tau"])) and (LindbladMPOSolver._is_float(parameters["t_final"])):
+			if (LindbladMPOSolver._is_float(parameters["tau"])) and\
+					(LindbladMPOSolver._is_float(parameters["t_final"])):
 				if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
 					if parameters["tau"] > parameters["t_final"]:
-						check_msg += "Error 640: t_final (total time) is smaller then tau (time step for time " \
-									 "evolution)\n "
+						check_msg += "Error 640: t_final (total time) is smaller than tau (time step " \
+									 "for time evolution)\n "
 						# TODO validate total time as t_final - t_init
-						# TODO validate force_rho_Hermitian_step
+						# TODO validate force_rho_hermitian_step
 					elif "output_step" in parameters:
 						if LindbladMPOSolver._is_int(parameters["output_step"]):
 							if parameters["output_step"] > 0:
 								if parameters["output_step"] * parameters["tau"] > parameters["t_final"]:
-									check_msg += "Error 650: output_step multiplied by tau, is bigger then t_final (" \
-												 "output_step in units of tau, times tau is bigger then the " \
-												 "simulation time)\n "
+									check_msg += "Error 650: output_step multiplied by tau is larger " \
+												 "than t_final (output_step in units of tau, times " \
+												 "tau is larger than the simulation time)\n "
 		return check_msg
