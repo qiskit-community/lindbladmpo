@@ -1,6 +1,6 @@
 # LindbladMPOSolver class
 
-The LindbladMPOSolver class is the python interface of the solver. By calling the 'solve' function, a run configuration file is created and the c++ solver is initiated using the created file as an input.
+The LindbladMPOSolver class is the python interface of the solver. By calling the 'solve' function, a run configuration file is created and the C++ solver is initiated using the created file as an input.
 
 ## class parameters
 
@@ -36,7 +36,7 @@ All the model parameters are passed through the parameters' dict in class init f
     In the case of a pure Pauli stat, the 'init_pauli_state' parameter should be used, in the case of a graph state, the 'init_graph_state' parameter should be used and in the case of a saved internal state the 'load_files_prefix parameter should be used. At each solver object, only one of those parameters should be used and the others should be empty.
 
     * init_pauli_state = "+z" (list[str]): A length-N vector of two-character strings of the form <img src="https://render.githubusercontent.com/render/math?math=\pm a">. Each string indicates the initial state of qubit <img src="https://render.githubusercontent.com/render/math?math=i">. The initial state will be <img src="https://render.githubusercontent.com/render/math?math=\rho(t_0) = \left|\psi_0\rangle\langle \psi_0\right|">, while <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle = \prod_i \right|\pm a_i\rangle">, and the given <img src="https://render.githubusercontent.com/render/math?math=\pm a"> is a Pauli eigenstate: <img src="https://render.githubusercontent.com/render/math?math=\sigma_i^a\left|\pm a_i\rangle = \pm \right|\pm a_i\rangle">. A single such string is also allowed, which will result in an identical initial state for all qubits. Has default value of "+z".
-    * init_graph_state = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, to generate an initial graph state (starting with all qubits pointing along the +x axis). The qubit pairs will represent j and k in the graph state formula - <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle=%20\prod_{(j,k)\in%20V}{CZ}[j,k]%20\prod_i%20\right|+%20x_i\rangle">.
+    * init_graph_state = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, to generate an initial graph state (starting with all qubits pointing along the +x axis). The qubit pairs will represent j and k in the graph state formula - <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle=%20\prod_{(j,k)\in%20V}{CZ}[j,k]%20\prod_i%20\right|%2b%20x_i\rangle">.
     * load_files_prefix = "" (str): The prefix of files as previously saved using the simulator, which the initial state has to be loaded from. An empty string indicates that the initial state is not loaded. See the parameter "b_save_final_state" for more details on the saved files. Has default value of empty string (not used).
 * Lattice specification:
     * l_x = 0 (float): The length of the lattice along the x dimension (<img src="https://render.githubusercontent.com/render/math?math=l_x">). In case of value 0, the number of qubits <img src="https://render.githubusercontent.com/render/math?math=N"> is used, and parameter l_y must be 1. Has default value of 0.
@@ -48,7 +48,7 @@ All the model parameters are passed through the parameters' dict in class init f
     * max_dim_rho = 400 (int): Maximum bond dimension for density matrices. Has default value of 400.
     * cut_off_rho = 1e-16 (float): Maximum truncation error (discarded Schmidt weight) for density matrices. Has default value of 1e-16.
     * b_force_rho_trace = True (bool): Whether to force the density matrix trace to one by substituting <img src="https://render.githubusercontent.com/render/math?math=\rho \to\rho/ {\rm tr}\{\rho\}"> at every time step, compensating for finite-step errors. Has default value of True.
-    * force_rho_hermitian_step = 4 (int): Determines every how many evolution time steps (<img src="https://render.githubusercontent.com/render/math?math=\tau">), to substitute <img src="https://render.githubusercontent.com/render/math?math=\rho \to (\rho + \rho^\dagger)/2">. This may reduce some errors, but is computationally expensive. Has default value of 4.
+    * force_rho_hermitian_step = 4 (int): Determines every how many evolution time steps (<img src="https://render.githubusercontent.com/render/math?math=\tau">), to substitute <img src="https://render.githubusercontent.com/render/math?math=\rho \to (\rho %2b \rho^\dagger)/2">. This may reduce some errors, but is computationally expensive. Has default value of 4.
     * b_initial_rho_compression = True (bool): Whether a density matrix that is loaded from a previously saved state, should be re-gauged and compressed. Has no effect if the initial state is not loaded from a previously saved state. Has default value of True.
 * Observables and output:
     * 1q_indices = [] (list[int]): A list of integers that specify the qubits which single-qubit observables will be calculated for. In the case of empty list, single-qubit observables will be calculated for all qubits. Has default value of empty list.
@@ -61,17 +61,17 @@ All the model parameters are passed through the parameters' dict in class init f
 ## class attributes
 
 * LindbladMPOSolver.parameters: Returns the dict of model parameters
-* LindbladMPOSolver.s_input_file: Returns the path to the configuration file created for the c++ solver
+* LindbladMPOSolver.s_input_file: Returns the path to the configuration file created for the C++ solver
 * LindbladMPOSolver.s_output_path: Returns the path to the output files
 * LindbladMPOSolver.s_cygwin_path: Returns the path to the cygwin executable used by the solver
 * LindbladMPOSolver.s_solver_path: Returns the path to the compiled C++ solver executable file
 * LindbladMPOSolver.s_id_suffix: Returns the solver instance unique id
-* LindbladMPOSolver.result: Returns dict of dicts with the outputs of the solver at all the time steps which an observable was computed. The first dict will contain the one-qubit observable results, the second dict will contain the two-qubit observable results and the third dict will contain global results - the trace of the density matrix, the second R´enyi entropy (<img src="https://render.githubusercontent.com/render/math?math=-\ln{(\rm tr }\{\rho^2\})">) and the operator space entanglement entropy (OSEE) for a bipartition at the central bond.
+* LindbladMPOSolver.result: Returns dict of dicts with the outputs of the solver at all the time steps which an observable was computed. The first dict will contain the one-qubit observable results, the second dict will contain the two-qubit observable results and the third dict will contain global results - the trace of the density matrix, the second Rényi entropy (<img src="https://render.githubusercontent.com/render/math?math=-\ln{(\rm tr }\{\rho^2\})">) and the operator space entanglement entropy (OSEE) for a bipartition at the central bond.
 
 ## class methods
 
 * solve(): Executing the C++ solver and saving the results in "result" attribute
 * process_default_paths(s_cygwin_path (str), s_solver_path (str) -> (str, str): Returns the cygwin and solver paths according to the system platform. keeps them unchanged if given as input.
-* build(parameters (dict)): Write the model parameters dictionary to the configuration file for the c++ solver. also initializes the s_input_file, s_output_prefix and s_id_suffix attributes according to the given model parameters.
-* execute(s_cygwin_path (str), s_solver_path (str), s_input_file (str)) -> int: Executing the C++ solver and returning it's c++ exit code
+* build(parameters (dict)): Write the model parameters dictionary to the configuration file for the C++ solver. also initializes the s_input_file, s_output_prefix and s_id_suffix attributes according to the given model parameters.
+* execute(s_cygwin_path (str), s_solver_path (str), s_input_file (str)) -> int: Executing the C++ solver and returning it's C++ exit code
 * load_output(s_output_path (str)) -> dict: Read the solver output files and returns a dictionary with these results
