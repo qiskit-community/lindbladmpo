@@ -15,7 +15,7 @@ The parameters of the class are passed to it in it's initialization. it accepts 
 All the model parameters are passed through the parameters' dict in class init function. For convenience, they are split into groups:
 
 * basic parameters:
-    * <img src="https://render.githubusercontent.com/render/math?math=N"style="vertical-align:bottom"> (int): The number of qubits in the lattice. This solver requires <img src="https://render.githubusercontent.com/render/math?math=N >2" style="vertical-align:bottom">.
+    * <img src="https://render.githubusercontent.com/render/math?math=N" style="vertical-align:bottom"> (int): The number of qubits in the lattice. This solver requires <img src="https://render.githubusercontent.com/render/math?math=N >2" style="vertical-align:bottom">.
     * t_final (float): The final simulation time (<img src="https://render.githubusercontent.com/render/math?math=t_f" style="vertical-align:bottom">).
     * t_init = 0 (float): The initial simulation time (<img src="https://render.githubusercontent.com/render/math?math=t_0" style="vertical-align:bottom">). Must obey <img src="https://render.githubusercontent.com/render/math?math=t_0 \le t_f" style="vertical-align:bottom">. Has default value of 0.
     * <img src="https://render.githubusercontent.com/render/math?math=tau" style="vertical-align:bottom"> (float): The discrete time step <img src="https://render.githubusercontent.com/render/math?math=tau" style="vertical-align:bottom"> used in the time evolution.
