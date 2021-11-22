@@ -19,7 +19,7 @@ for more information see the links below.
 
 * [Installation guide](docs/INSTALL.md)
 * [Background and litterature on the method](docs/background.md)
-* [Simulator's model](docs/MODEL.md)
+* [Simulator model](docs/MODEL.md)
 * [Python interface](docs/API_DOCS.md)
 * [Code structure](docs/CODE_STRUCTURE.md)
 * [Tutorial: Solving the Lindblad dynamics of a qubit chain] (examples/qubit_chain_tutorial.ipynb)
