@@ -22,4 +22,4 @@ for more information see the links below.
 * [Simulator model](docs/MODEL.md)
 * [Python interface](docs/API_DOCS.md)
 * [Code structure](docs/CODE_STRUCTURE.md)
-* [Tutorial: Solving the Lindblad dynamics of a qubit chain] (examples/qubit_chain_tutorial.ipynb)
+* [Tutorial: Solving the Lindblad dynamics of a qubit chain] (../../examples/qubit_chain_tutorial.ipynb)
