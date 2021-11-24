@@ -1,18 +1,18 @@
 # LindbladMPOSolver class
 
-The LindbladMPOSolver class is the python interface of the solver. By calling the 'solve' function, a run configuration file is created and the C++ solver is initiated using the created file as an input.
+The LindbladMPOSolver class is the python interface of the solver. By calling the 'solve' function, an input configuration file is created and the C++ solver is initiated using the created file as an input.
 
 ## class parameters
 
-The parameters of the class are passed to it in it's initialization. it accepts 3 parameters:
+The parameters of the class are passed to it in its initialization. It accepts 3 parameters:
 
-* s_cygwin_path (str): The cygwin executable path for the C++ execution. relevant only when running of Windows. has a default value of "C:/cygwin64/bin/bash.exe".
-* s_solver_path (str): The path of the compiled C++ solver executable file. has a default value of '/../bin/lindbladmpo'.
-* parameters (dict): The simulation model parameters. for more information see below.
+* s_cygwin_path (str): The cygwin executable path for the C++ execution. Relevant only when running under Windows, the default value is "C:/cygwin64/bin/bash.exe".
+* s_solver_path (str): The path of the compiled C++ solver executable file. It has a default value '/../bin/lindbladmpo'.
+* parameters (dict): The simulation model parameters. For more information see below.
 
 ## model parameters
 
-All the model parameters are passed through the parameters' dict in class init function. For convenience, they are split into groups:
+All the model parameters are passed through the parameters dictionary in the class init function. For convenience, they are listed below by groups:
 
 * basic parameters:
     * <img src="https://render.githubusercontent.com/render/math?math=N" style="vertical-align:bottom"> (int): The number of qubits in the lattice. This solver requires <img src="https://render.githubusercontent.com/render/math?math=N >2" style="vertical-align:bottom">.
@@ -70,8 +70,8 @@ All the model parameters are passed through the parameters' dict in class init f
 
 ## class methods
 
-* solve(): Executing the C++ solver and saving the results in "result" attribute
+* solve(): Executing the C++ solver and saving the results in "result" attribute.
 * process_default_paths(s_cygwin_path (str), s_solver_path (str) -> (str, str): Returns the cygwin and solver paths according to the system platform. keeps them unchanged if given as input.
-* build(parameters (dict)): Write the model parameters dictionary to the configuration file for the C++ solver. also initializes the s_input_file, s_output_prefix and s_id_suffix attributes according to the given model parameters.
-* execute(s_cygwin_path (str), s_solver_path (str), s_input_file (str)) -> int: Executing the C++ solver and returning it's C++ exit code
-* load_output(s_output_path (str)) -> dict: Read the solver output files and returns a dictionary with these results
+* build(parameters (dict)): Write the model parameters dictionary to the input configuration file for the C++ solver. Also initializes the s_input_file, s_output_prefix and s_id_suffix attributes according to the given model parameters.
+* execute(s_cygwin_path (str), s_solver_path (str), s_input_file (str)) -> int: Executing the C++ solver and returning its C++ exit code.
+* load_output(s_output_path (str)) -> dict: Read the solver output files and returns a dictionary with the results.
