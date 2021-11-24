@@ -24,7 +24,7 @@ The simulator uses a fixed Hamiltonian with coefficients which can be defined by
 respect to the frequency of an drive of a uniform frequency applied to all qubits (which are not necessarily identical themselves, however, and may be driven at different amplitudes and phases), or not driven at all.
 The Hamiltonian is represented as the sum of on-site terms and an interaction part,
 
-<img src="https://render.githubusercontent.com/render/math?math=\frac{H}{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right] %2b T,">
+<img src="https://render.githubusercontent.com/render/math?math={H}/{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right] %2b T,">
 
 with the interaction being,
 
