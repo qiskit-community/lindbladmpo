@@ -9,7 +9,7 @@ The solver is implemented in C++ for maximizing performance using multi threaded
 
 where <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom"> is the density matrix of a quantum system, and <img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" style="vertical-align:bottom"> is the commutator of two operators.
 
-The supported Hamiltonian and the Lindbladian dissipators of the master equation have time-independent coefficients parametrized as follows;
+The supported Hamiltonian and dissipator terms of the master equation have time-independent coefficients parametrized as follows;
 
 <img src="https://render.githubusercontent.com/render/math?math={H}/{\hbar} = \sum_{i}\frac{1}{2}\left(h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right) %2b \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} %2b J_{ij}\sigma^y_i \sigma^y_{j} %2b J_{ij}^z \sigma^z_i \sigma^z_{j}\right)" align=middle>
 
@@ -17,7 +17,7 @@ The supported Hamiltonian and the Lindbladian dissipators of the master equation
 
 with all the parameters of the model easily specified, and various initial states and observables supported.
 
-For detailed information the following sections of the documentation can be consulted:
+For detailed background, information, and examples, the following sections of the documentation can be consulted:
 
 ## Table of Contents
 
