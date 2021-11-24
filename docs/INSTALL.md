@@ -60,7 +60,9 @@ In order to leave the ITensor library and download the lindbladmpo repo and buil
 
 The above script will work for the default locations. In order to override where ITensor has been built, use:
 
-    make LIBRARY_DIR="..."  - here insert the path for the itensor library, for example "/cygdrive/c/Users/Goran/itensor3"
+    make LIBRARY_DIR="..."
+
+where above, replace three dots with the path for the itensor library, for example "/cygdrive/c/Users/Goran/itensor3".
 
 In order to run a first test of the solver (with output to the console, and result files saved), type in the Linux terminal:
 
