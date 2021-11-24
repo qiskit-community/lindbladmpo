@@ -1,5 +1,5 @@
 
-# Background and litterature on the method
+# Background and literature on the method
 
 ## Basics of the Physics of the problem
 
@@ -59,4 +59,4 @@ The representation of the many-body density matrix of the system in terms of an 
 # iTensor Library
 
 The present code is based on the iTensor library, C++ version 3 https://www.itensor.org.
-See also the following papers: https://arxiv.org/abs/2007.14822 . The library allows to construct and manipulate MPS and MPO in a simple way and it allows to run DMRG calculations. It also allows to compute the time-evolution of a system where the state is encoded as an MPS and its Hamiltonian is encoded as an MPO.
+See also the following paper: https://arxiv.org/abs/2007.14822 . The library allows to construct and manipulate MPS and MPO in a simple way and it allows to run DMRG calculations. It also allows to compute the time-evolution of a system where the state is encoded as an MPS and its Hamiltonian is encoded as an MPO.
