@@ -1,7 +1,7 @@
 # Introduction
 
 This package contains a solver simulating the time-evolution of a noisy quantum system of coupled two-level qubits, modeled by a Lindblad master equation.
-The code uses matrix-product state (MPS) and matrix-product operator (MPO) structures to efficiently simulate an approximate solution to the evolution of a system containing many qubits.
+The code uses matrix-product state (MPS) and matrix-product operator (MPO) structures to efficiently simulate the evolution of a system containing many qubits.
 
 The solver is implemented in C++ for maximizing performance using multi threaded calculations, and wrapped by a Python layer with rich plotting features and an easy-to-use interface.
 
@@ -13,7 +13,7 @@ The supported Hamiltonian and the Lindbladian dissipators of the master equation
 
 with all the parameters of the model easily specified, and various initial states and observables supported.
 
-For detailed information browse the documentation using the links below.
+For detailed information the following sections of the documentation can be consulted:
 
 # Table of Contents
 
