@@ -15,7 +15,7 @@ with all the parameters of the model easily specified, and various initial state
 
 For detailed information the following sections of the documentation can be consulted:
 
-# Table of Contents
+## Table of Contents
 
 * [Installation guide](docs/INSTALL.md)
 * [Background and litterature on the method](docs/background.md)
