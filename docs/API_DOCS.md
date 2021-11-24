@@ -1,6 +1,6 @@
 # LindbladMPOSolver class
 
-The LindbladMPOSolver class is the python interface of the solver. By calling the `solve()` method, an input configuration file is created and the C++ solver is initiated using the created file as an input.
+The `LindbladMPOSolver` class is the python interface of the solver. By calling the `solve()` method, an input configuration file is created and the C++ solver is initiated using the created file as an input.
 
 ## class parameters
 
