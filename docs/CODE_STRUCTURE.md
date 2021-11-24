@@ -1,4 +1,4 @@
-# A few words about the code structure
+# The C++ code structure
 
 * The files `Pauli.cc` and `Pauli.h` contain the implementation of the vectorization for spin-1/2 systems, that is the representation of the many-body density matrix using an MPS. It is specific to 2-level systems (qubits), but not specific the special form of the Lindbadian of the specific model to be studied. It makes use of a few low-level routines of the iTensor library. Remark: The identity matrix plus the three Pauli matrices form a convenient basis of the the space of density matricxes of one qubit, hence the name of these two files.
 
