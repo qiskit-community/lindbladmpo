@@ -1,18 +1,15 @@
 # Lindblad dynamics
 
-The state of an open quantum system is defined by a density matrix <img src="https://render.githubusercontent.com/render/math?math=\rho">.
-In the case where the system is made of of qubits (two level systems), the Hilbert space has dimension 2^N (therefore the density matrix is 2^N by 2^N in size).
+The state of an open quantum system is defined by a density matrix <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom">.
+In the case where the system is made of qubits (two-level systems), the Hilbert space has dimension 2^N (and the density matrix is 2^N by 2^N in size).
 
-When the system is coupled to the environment (memory-less bath), it's state evolves over time.
-The notation of such evolution is <img src="https://render.githubusercontent.com/render/math?math=\mathcal{L}[\rho]" style="vertical-align:bottom">.
-This Liouvillian is a (linear) superoperator that maps the operator <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom"> to another operator - the time derivative of <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom">, and is often described using the master equation:
+The time-evolution of the system coupled to a Markovian environment (a memory-less bath) is often described using the Lindblad master equation,
 
-<img src="https://render.githubusercontent.com/render/math?math=\frac{\partial}{\partial t}\rho = \mathcal{L}[\rho]\equiv -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho]">
+<img src="https://render.githubusercontent.com/render/math?math=\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho]">
 
-where <img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" style="vertical-align:bottom"> describes the commutator of two operators.
+where <img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" style="vertical-align:bottom"> denotes the commutator of two operators.
 
-The first part of the equation, <img src="https://render.githubusercontent.com/render/math?math=\frac{i}{\hbar}[H,\rho]" style="vertical-align:bottom">, expresses the unitary evolution due to interactions and coherent driving terms,
-while <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}[\rho]" style="vertical-align:bottom">  (sometimes known as the dissipator, or Lindbladian) is a superoperator that accounts for incoherent dephasing and relaxation processes due to the environment.
+The first term in the equation above (<img src="https://render.githubusercontent.com/render/math?math=\frac{i}{\hbar}[H,\rho]" style="vertical-align:bottom">) generates the unitary evolution due to interactions and coherent terms in the Hamiltonian, while <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}[\rho]" style="vertical-align:bottom"> (sometimes known as the dissipator, or Lindbladian) is a superoperator that accounts for incoherent dephasing and relaxation processes due to the environment.
 
 # The simulator
 
