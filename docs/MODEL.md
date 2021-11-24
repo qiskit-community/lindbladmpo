@@ -22,11 +22,11 @@ The solver can model interacting qubits in a lattice with an arbitrary connectiv
 
 The simulator uses a fixed Hamiltonian with coefficients which can be defined by the user. The Hamiltonian is defined in the rotating frame with
 respect to the frequency of an drive of a uniform frequency applied to all qubits (which are not necessarily identical themselves, however, and may be driven at different amplitudes and phases), or not driven at all.
-The Hamiltonian is represented as the sum of on-site terms and an interaction part:
+The Hamiltonian is represented as the sum of on-site terms and an interaction part,
 
 <img src="https://render.githubusercontent.com/render/math?math=\frac{H}{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right] %2b T,">
 
-with the interaction being:
+with the interaction being,
 
 <img src="https://render.githubusercontent.com/render/math?math=T = \sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^%2b_i \sigma^-_{j} %2b {\rm h.c.} %2b \frac{1}{2} J_{ij}^z \sigma^z_i \sigma^z_{j}\right)=\\ \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} %2b J_{ij}\sigma^y_i \sigma^y_{j} %2b J_{ij}^z \sigma^z_i \sigma^z_{j}\right),">
 
@@ -44,12 +44,12 @@ The Lindbladian used in the simulator is also fixed with coefficients that can b
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D} = \sum_j \mathcal{D}_j," style="vertical-align:bottom">
 
-The first two terms represent exchange with a thermal bath:
+The first two terms model exchange with a thermal bath:
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}_0[\rho] = \sum_i g_{0,i}\left(\sigma_i^%2b \rho\sigma_i^- - \frac{1}{2} \{\sigma_i^- \sigma_i^%2b,\rho\}\right),">
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}_1[\rho]=\sum_i g_{1,i}\left( \sigma_i^-\rho \sigma_i^{%2b}-\frac{1}{2}\left\{\sigma_i^{%2b}\sigma_i^-,\rho\right\}\right),">
 
-and the last term represent pure dephasing in xy plane,
+and the last term models pure dephasing in xy plane,
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}_2[\rho] = \sum_i g_{2,i} \left(\sigma_i^z \rho\sigma_i^z - \rho\right).">
