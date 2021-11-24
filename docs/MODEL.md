@@ -9,7 +9,7 @@ The time-evolution of the system coupled to a Markovian environment (a memory-le
 
 where <img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" style="vertical-align:bottom"> denotes the commutator of two operators.
 
-The first term in the equation above (<img src="https://render.githubusercontent.com/render/math?math=\frac{i}{\hbar}[H,\rho]" style="vertical-align:bottom">) generates the unitary evolution due to interactions and coherent terms in the Hamiltonian, while <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}[\rho]" style="vertical-align:bottom"> (sometimes known as the dissipator, or Lindbladian) is a superoperator that accounts for incoherent dephasing and relaxation processes due to the environment.
+The first term in the equation above generates the unitary evolution due to interactions and coherent terms in the Hamiltonian, while <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}[\rho]" style="vertical-align:bottom"> (sometimes known as the dissipator, or Lindbladian) is a superoperator that accounts for incoherent dephasing and relaxation processes due to the environment.
 
 # The simulator
 
