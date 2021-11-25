@@ -8,7 +8,7 @@ The solver performs integration using fixed time steps, of the Lindblad master e
 
 <img src="https://render.githubusercontent.com/render/math?math=\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho]">
 
-where <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom"> is the density matrix of a quantum system, and <img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" align=middle vspace=-15> is the commutator of two operators.
+where <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom"> is the density matrix of a quantum system, and <img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" align=middle style="padding-bottom:50%"> is the commutator of two operators.
 
 The supported Hamiltonian and dissipator terms of the master equation have time-independent coefficients parametrized as follows;
 
