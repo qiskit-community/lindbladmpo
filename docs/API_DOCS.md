@@ -46,13 +46,15 @@ The default value for each parameter is indicated with an equality sign (only th
       <img src="https://render.githubusercontent.com/render/math?math=\sigma_i^a\left|\pm a_i\rangle = \pm \right|\pm a_i\rangle." style="vertical-align:bottom">
 
       A single such string is also allowed, which results in an identical initial state for all qubits.
-    * init_graph_state = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, to generate an initial graph state (starting with all qubits pointing along the +x axis). The qubit pairs will represent j and k in the graph state formula - <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle=%20\prod_{(j,k)\in%20V}{CZ}[j,k]%20\prod_i%20\right|%2b%20x_i\rangle" style="vertical-align:bottom">.
+    * init_graph_state = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, to generate an initial graph state (starting with all qubits pointing along the +x axis). The qubit pairs will represent j and k in the graph state formula;
+
+      <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle=%20\prod_{(j,k)\in%20V}{CZ}[j,k]%20\prod_i%20\right|%2b%20x_i\rangle" style="vertical-align:bottom">.
     * load_files_prefix = "" (str): The prefix of files as previously saved using the simulator, which the initial state has to be loaded from. An empty string indicates that the initial state is not loaded. See the parameter "b_save_final_state" for more details on the saved files.
 * Lattice specification:
-    * l_x = 0 (float): The length of the lattice along the x dimension (<img src="https://render.githubusercontent.com/render/math?math=l_x" style="vertical-align:bottom">). In case of value 0, the number of qubits <img src="https://render.githubusercontent.com/render/math?math=N" style="vertical-align:bottom"> is used, and parameter l_y must be 1.
-    * l_y = 1 (float): The length of the lattice along the y dimension (<img src="https://render.githubusercontent.com/render/math?math=l_y" style="vertical-align:bottom">).
-    * b_periodic_x = False (bool): Whether periodic boundary conditions are applied along the <img src="https://render.githubusercontent.com/render/math?math=x" style="vertical-align:bottom"> dimension. If True, then l_y must be 1. If False, open boundary conditions are used along the <img src="https://render.githubusercontent.com/render/math?math=x" style="vertical-align:bottom"> dimension.
-    * b_periodic_y = False (bool): Whether periodic boundary conditions are applied along the <img src="https://render.githubusercontent.com/render/math?math=y" style="vertical-align:bottom"> dimension. If False, open boundary conditions are used along the <img src="https://render.githubusercontent.com/render/math?math=y" style="vertical-align:bottom"> dimension.
+    * l_x = 0 (float): The length of the lattice along the x dimension. In case of value 0, the number of qubits <img src="https://render.githubusercontent.com/render/math?math=N" style="vertical-align:bottom"> is used, and parameter l_y must be 1.
+    * l_y = 1 (float): The length of the lattice along the y dimension.
+    * b_periodic_x = False (bool): Whether periodic boundary conditions are applied along the x dimension. If True, then l_y must be 1. If False, open boundary conditions are used along the x dimension.
+    * b_periodic_y = False (bool): Whether periodic boundary conditions are applied along the y dimension. If False, open boundary conditions are used along the y dimension.
 * Numerical simulation control:
     * trotter_order = 4 (int): Trotter approximation order, Possible values are 2, 3, 4.
     * max_dim_rho = 400 (int): Maximum bond dimension for density matrices.
