@@ -18,10 +18,12 @@ The solver is based on matrix product states (MPS) and matrix product operators 
 
 ## The Model
 
-The solver can model interacting qubits in a lattice with an arbitrary connectivity defined by the user.
+The solver can model interacting qubits in a lattice with an arbitrary connectivity[^1] defined by the user.
+
+[^1]: Note however that the computing ressources needed to accurately simulate the system can strongly depend on this connectivity.
 
 The simulator uses a fixed Hamiltonian with coefficients which can be defined by the user. The Hamiltonian is defined in the rotating frame with
-respect to the frequency of an drive of a uniform frequency applied to all qubits (which are not necessarily identical themselves, however, and may be driven at different amplitudes and phases), or not driven at all.
+respect to the frequency of a drive of a uniform frequency applied to all qubits (which are not necessarily identical themselves, however, and may be driven at different amplitudes and phases), or not driven at all.
 The Hamiltonian is represented as the sum of on-site terms and an interaction part,
 
 <img src="https://render.githubusercontent.com/render/math?math={H}/{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right] %2b T,">
