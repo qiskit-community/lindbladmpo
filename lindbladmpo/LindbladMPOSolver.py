@@ -302,7 +302,7 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def _read_data_line(s_output_type: str, words: list, result: Dict):
-		t = words[0]
+		t = float(words[0])
 		op = words[1]
 		val = float(words[-1])
 		if s_output_type == 'obs-1q':

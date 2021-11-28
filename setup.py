@@ -64,7 +64,7 @@ setup(
 	long_description=README,
 	long_description_content_type='text/markdown',
 	url="https://github.com/haggaila/lindbladmpo",
-	author="Gregoire Misguich, Haggai Landa, Gal Shmulovitz, Eldor Fadida",
+	author="Gregoire Misguich, Haggai Landa, Gal Shmulovitz, Eldor Fadida, Dekel Meirom",
 	# author_email="",
 	license="Apache 2.0",
 	classifiers=[

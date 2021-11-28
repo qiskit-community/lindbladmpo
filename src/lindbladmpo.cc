@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 			}
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
-		// Experimental application of control-Z gates on all pairs of sites
+		// Application of control-Z gates on all pairs of sites
 		if (b_graph_state) {
 			cout2 << "Application of control-Z gates on requested pairs of qubits.";
 //			for (int i=1;i<=N;i++)

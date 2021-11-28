@@ -76,7 +76,8 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     }
 
     if (J.size() > 1 && J.size() != num_bonds)
-        cout2 << "Error: the paramter J has " << J.size() << " values but 0, 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the paramter J has " << J.size() << " values but 0, 1 or " << num_bonds <<
+        	" value(s) were expected.\n", exit(1);
     if (J.size() <= 1)
     {
         double J_0 = .0;
@@ -86,7 +87,8 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     }
 
     if (J_z.size() > 1 && J_z.size() != num_bonds)
-        cout2 << "Error: the paramter J_z has " << J_z.size() << " values but 0, 1 or " << num_bonds << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the paramter J_z has " << J_z.size() << " values but 0, 1 or " << num_bonds <<
+        	" value(s) were expected.\n", exit(1);
     if (J_z.size() <= 1)
     {
         double J_z_0 = .0;
@@ -95,52 +97,55 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         J_z = vector<double>(num_bonds, J_z_0);
     }
 
-    
-        AutoMPO &auto_L = C.Lindbladian;
+	AutoMPO &auto_L = C.Lindbladian;
 
-        //Note about the Lindblad equation: since we evolve rho (and not a wave function), each term in H
-        //acts once with a "+" on the right of rho, and once with a "-" to the left of rho (prefix "_" in the operator name)
+	// Note about the Lindblad equation: since we evolve rho (and not a wave function), each term in
+	// H acts once with a "+" on the right of rho, and once with a "-" to the left of rho
+	// (indicated with a prefix "_" in the operator name)
 
-        for (unsigned int n = 0; n < num_bonds; n++)
-        {
-            int i = L.I[n], j = L.J[n];
-            auto_L += -J[n], "S+", i, "S-", j;
-            auto_L += -J[n], "S-", i, "S+", j;
-            auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
+	for (unsigned int n = 0; n < num_bonds; n++)
+	{
+		int i = L.I[n], j = L.J[n];
+		auto_L += -J[n], "S+", i, "S-", j;
+		auto_L += -J[n], "S-", i, "S+", j;
+		auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
 
-            auto_L += J[n], "_S+", i, "_S-", j;
-            auto_L += J[n], "_S-", i, "_S+", j;
-            auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
-        }
+		auto_L += J[n], "_S+", i, "_S-", j;
+		auto_L += J[n], "_S-", i, "_S+", j;
+		auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
+	}
 
-        //Magnetic field terms:
-        for (int j = 1; j <= int(N); ++j)
-        {
-            if (h_x[j - 1] != 0.)
-            {
-                auto_L += -.5 * h_x[j - 1], "Sx", j;
-                auto_L += .5 * h_x[j - 1], "_Sx", j;
-            }
-            if (h_y[j - 1] != 0.)
-            {
-                auto_L += -.5 * h_y[j - 1], "Sy", j;
-                auto_L += .5 * h_y[j - 1], "_Sy", j;
-            }
-            if (h_z[j - 1] != 0.)
-            {
-                auto_L += -.5 * h_z[j - 1], "Sz", j;
-                auto_L += .5 * h_z[j - 1], "_Sz", j;
-            }
-        }
+	//Magnetic field terms:
+	for (int j = 1; j <= int(N); ++j)
+	{
+		if (h_x[j - 1] != 0.)
+		{
+			auto_L += -.5 * h_x[j - 1], "Sx", j;
+			auto_L += .5 * h_x[j - 1], "_Sx", j;
+		}
+		if (h_y[j - 1] != 0.)
+		{
+			auto_L += -.5 * h_y[j - 1], "Sy", j;
+			auto_L += .5 * h_y[j - 1], "_Sy", j;
+		}
+		if (h_z[j - 1] != 0.)
+		{
+			auto_L += -.5 * h_z[j - 1], "Sz", j;
+			auto_L += .5 * h_z[j - 1], "_Sz", j;
+		}
+	}
     // -----------------------------------------------------------
     // Dissipative terms
 
     if (g_0_len != 1 && g_0_len != N)
-        cout2 << "Error: the parameter g_0 has " << g_0_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter g_0 has " << g_0_len << " value(s) but 1 or " << N <<
+        	" value(s) were expected.\n", exit(1);
     if (g_1_len != 1 && g_1_len != N)
-        cout2 << "Error: the parameter g_1 has " << g_1_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter g_1 has " << g_1_len << " value(s) but 1 or " << N <<
+        	" value(s) were expected.\n", exit(1);
     if (g_2_len != 1 && g_2_len != N)
-        cout2 << "Error: the parameter g_2 has " << g_2_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
+        cout2 << "Error: the parameter g_2 has " << g_2_len << " value(s) but 1 or " << N <<
+        	" value(s) were expected.\n", exit(1);
     if (g_0_len == 1)
         g_0 = vector<double>(N, g_0[0]);
     if (g_1_len == 1)
