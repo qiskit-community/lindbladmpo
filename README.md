@@ -23,7 +23,7 @@ For detailed background, information, and examples, the following sections of th
 
 ## Table of Contents
 
-* [Installation guide](docs/INSTALL.md)
+* [Installation guide](INSTALL.md)
 * [Background and litterature on the method](docs/background.md)
 * [Simulator model](docs/MODEL.md)
 * [Python interface](docs/API_DOCS.md)
