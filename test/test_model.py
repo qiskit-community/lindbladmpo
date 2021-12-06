@@ -17,48 +17,64 @@ s_solver_path = None
 
 class LindbladMPOSolverModel(unittest.TestCase):
 	def test_All_zero(self):
-		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 0,
-						 'output_files_prefix': s_output_path}
+		solver_params = {'tau': 1, 't_final': 1, 'N': 2, 'g_1': 0,
+						 'output_files_prefix': s_output_path, '1q_components': ['X','Y','Z']}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
 		expected_Z = 1
-		self.assertEqual(solver.result['1q'][(1, 'X', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Y', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Z', 1)], expected_Z)
+		self.assertEqual(solver.result['obs-1q'][('x', (0,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('y', (0,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('z', (0,))][1][-1], expected_Z)
+		# second qubit should be the same
+		self.assertEqual(solver.result['obs-1q'][('x', (1,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('y', (1,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('z', (1,))][1][-1], expected_Z)
 
 	def test_hz_not_zero(self):
-		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 0, 'l_x': 0, 'h_z': 5,
-						 'output_files_prefix': s_output_path}
+		solver_params = {'tau': 1, 't_final': 1, 'N': 2, 'g_1': 0, 'l_x': 0, 'h_z': 5,
+						 'output_files_prefix': s_output_path, '1q_components': ['X','Y','Z']}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
 		expected_Z = 1
-		self.assertEqual(solver.result['1q'][(1, 'X', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Y', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Z', 1)], expected_Z)
+		self.assertEqual(solver.result['obs-1q'][('x', (0,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('y', (0,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('z', (0,))][1][-1], expected_Z)
+		# second qubit should be the same
+		self.assertEqual(solver.result['obs-1q'][('x', (1,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('y', (1,))][1][-1], expected_XY)
+		self.assertEqual(solver.result['obs-1q'][('z', (1,))][1][-1], expected_Z)
 
 	def test_steady_state(self):
-		solver_params = {'tau': 1, 't_final': 1, 'N': 1, 'g_1': 5, 'l_x': 0, 'h_z': 5,
-						 'output_files_prefix': s_output_path}
+		solver_params = {'tau': 1, 't_final': 10, 'N': 2, 'g_1': 5, 'l_x': 0, 'h_z': 5,
+						 'output_files_prefix': s_output_path, '1q_components': ['X','Y','Z']}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
-		expected_Z = 1
-		self.assertEqual(solver.result['1q'][(1, 'X', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Y', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Z', 1)], expected_Z)
+		expected_Z = -1
+		self.assertAlmostEqual(solver.result['obs-1q'][('x', (0,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('y', (0,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('z', (0,))][1][-1], expected_Z)
+		# second qubit should be the same
+		self.assertAlmostEqual(solver.result['obs-1q'][('x', (1,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('y', (1,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('z', (1,))][1][-1], expected_Z)
 
 	def test_steady_state_2(self):
-		solver_params = {'tau': 1, 't_final': 10, 'N': 1, 'g_1': 5, 'g_0': 1, 'l_x': 0, 'h_z': 5,
-						 'output_files_prefix': s_output_path}
+		solver_params = {'tau': 1, 't_final': 10, 'N': 2, 'g_1': 5, 'g_0': 1, 'l_x': 0, 'h_z': 5,
+						 'output_files_prefix': s_output_path, '1q_components': ['X','Y','Z']}
 		solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
 		solver.solve()
 		expected_XY = 0
-		expected_Z = 4/6
-		self.assertEqual(solver.result['1q'][(1, 'X', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Y', 1)], expected_XY)
-		self.assertEqual(solver.result['1q'][(1, 'Z', 1)], expected_Z)
+		expected_Z = -4/6
+		self.assertAlmostEqual(solver.result['obs-1q'][('x', (0,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('y', (0,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('z', (0,))][1][-1], expected_Z)
+		# second qubit should be the same
+		self.assertAlmostEqual(solver.result['obs-1q'][('x', (1,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('y', (1,))][1][-1], expected_XY)
+		self.assertAlmostEqual(solver.result['obs-1q'][('z', (1,))][1][-1], expected_Z)
 
 
 if __name__ == '__main__':

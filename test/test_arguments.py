@@ -740,3 +740,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 			self.assertTrue(True)
 		except:
 			self.assertTrue(False, "Test failed, exception was not expected")
+
+if __name__ == '__main__':
+	unittest.main()
