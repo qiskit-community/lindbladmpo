@@ -16,6 +16,10 @@ DEFAULT_TAU = 0.1
 DEFAULT_T_FINAL = 20
 DEFAULT_N = 10
 
+s_output_path = "./"
+s_cygwin_path = None
+s_solver_path = None
+
 
 # The following checks are named as follows:
 # test_arg_<parameter being checked>_<Fail/Pass test><number of the test(if there are multiple)>
@@ -29,217 +33,163 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 	def test_arg_N_F1(self):
 		parameters = {'N': "5", 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_N_F2(self):
 		parameters = {'N': -1, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_N_P(self):
 		parameters = {'N': 20, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_t_final_F1(self):
 		parameters = {'t_final': "20", 'tau': DEFAULT_TAU, 'N': DEFAULT_N}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_t_final_F2(self):
 		parameters = {'t_final': -20, 'tau': DEFAULT_TAU, 'N': DEFAULT_N}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_t_final_P(self):
 		parameters = {'t_final': 20, 'tau': DEFAULT_TAU, 'N': DEFAULT_N}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_t_init_P(self):
 		parameters = {'t_init': 10, 't_final': 20, 'tau': DEFAULT_TAU, 'N': DEFAULT_N}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_tau_F1(self):
 		parameters = {'tau': "20", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_tau_F2(self):
 		parameters = {'tau': -20, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_tau_P(self):
 		parameters = {'tau': 20, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_l_x_F1(self):
 		parameters = {'l_x': 3.3, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_l_x_F2(self):
 		parameters = {'l_x': -4, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_l_x_P(self):
 		parameters = {'l_x': 4, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_l_y_F1(self):
 		parameters = {'l_y': 3.3, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_l_y_F2(self):
 		parameters = {'l_y': -4, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_l_y_P(self):
 		parameters = {'l_y': 4, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_output_step_F1(self):
 		parameters = {'output_step': 1.1, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_output_step_P(self):
 		parameters = {'output_step': 1, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_h_x_F1(self):
 		parameters = {'N': 5, 'h_x': "11", 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_F2(self):
 		parameters = {'N': 5, 'h_x': (1, 1), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_F3(self):
 		parameters = {'N': 5, 'h_x': np.zeros([5, 5]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_F4(self):
 		parameters = {'N': 5, 'h_x': [1, 2, 3, 4], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_F5(self):
 		parameters = {'N': 5, 'h_x': [1, 2, 3, 4, '5'], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_F6(self):
 		parameters = {'N': 5, 'h_x': np.array([1, 2, 3, 4, 5, 6]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_F7(self):
 		parameters = {'N': 5, 'h_x': np.array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_h_x_P1(self):
 		parameters = {'N': 5, 'h_x': [1, 2, 3, 4, 5], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_h_x_P2(self):
 		parameters = {'N': 5, 'h_x': np.array([1, 2, 3, 4, 5]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_J_F1(self):
@@ -249,9 +199,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 									  [4.55, -4.1, 61, -33, 10],
 									  [4.55, -1.1, 11, -33, 10]], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_J_F2(self):
@@ -260,9 +208,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 									  [4.55, -4.1, 61, -33, 10],
 									  [4.55, -1.1, 11, -33, 10]], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_J_F3(self):
@@ -272,26 +218,20 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 									  [4.55, -4.1, 61, -33, 10],
 									  [4.55, -1.1, 11, -33, 10]], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_J_F4(self):
 		parameters = {'N': 5, 'J_z': np.array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_J_F5(self):
 		parameters = {'N': 5, 'J_z': np.array([[1, 2.0], [0, 0], (1 + 1, 3.)]), 't_final': DEFAULT_T_FINAL,
 					  'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_J_F6(self):
@@ -301,9 +241,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 											   [1, 2, 3, 4, 5],
 											   [1, 2, 3, 4, 5]]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_J_P_1(self):
@@ -313,17 +251,13 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 											   [1, 2, 3, 4, 5],
 											   [1, 2, 3, 4, 5]]), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_J_P_2(self):
 		parameters = {'N': 5, 'J_z': -55, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_J_P_3(self):
@@ -333,235 +267,177 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 									  [4.55, -4.1, 61, -33, 10],
 									  [4.55, -1.1, 11, -33, 10]], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_J_P_4(self):
 		parameters = {'N': 5, 'J_z': np.array(-55), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_J_P_5(self):
 		parameters = {'N': 5, 'J_z': np.zeros((5, 5)), 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_init_Pauli_state_F1(self):
 		parameters = {'init_pauli_state': "-a", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_init_Pauli_state_F2(self):
 		parameters = {'init_pauli_state': -22, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_init_Pauli_state_P(self):
 		parameters = {'init_pauli_state': "-x", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_b_periodic_x_F1(self):
 		parameters = {'b_periodic_x': -22, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_b_periodic_x_P(self):
 		parameters = {'b_periodic_x': False, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_trotter_order_F1(self):
 		parameters = {'trotter_order': 5, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_trotter_order_P(self):
 		parameters = {'trotter_order': 3, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_min_dim_rho_F1(self):
 		parameters = {'min_dim_rho': 5.1, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_min_dim_rho_P(self):
 		parameters = {'min_dim_rho': 1, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_metadata_F1(self):
 		parameters = {'metadata': "CR/LF \n", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_metadata_F2(self):
 		parameters = {'metadata': 0, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_cut_off_rho_F1(self):
 		parameters = {'cut_off_rho': [1, 1], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_cut_off_rho_P(self):
 		parameters = {'cut_off_rho': 1.1e-199, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_1q_components_F1(self):
 		parameters = {'1q_components': [1, 1], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_1q_components_P(self):
 		parameters = {'1q_components': ["x", "y"], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_1q_indices_F1(self):
 		parameters = {'1q_indices': [1, 1], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_1q_indices_F2(self):
 		parameters = {'N': 5, '1q_indices': [2, 5, 1], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_1q_indices_P(self):
 		parameters = {'N': 5, '1q_indices': [2, 4, 1], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_2q_components_F1(self):
 		parameters = {'2q_components': ["xx", "xx"], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_2q_components_F2(self):
 		parameters = {'2q_components': "xy", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_2q_components_P1(self):
 		parameters = {'2q_components': ["XX", "XY", "XZ", "YY", "YZ", "ZZ"], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL,
 					  'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_2q_components_P2(self):
 		parameters = {'2q_components': ["XX", "YY", "YZ", "ZZ"], 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_2q_indices_F1(self):
 		parameters = {'N': 5, '2q_indices': [(1, 2), (3, 1), (2, 5), (3, 4)], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_2q_indices_F2(self):
 		parameters = {'N': 2, '2q_indices': [(1, 0), (2, 1), (2, 1), (0, 1), (1, 0), (2, 1), (2, 1), (0, 1)],
 					  't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertNotEqual(expected, out)
 
 	def test_arg_2q_indices_P1(self):
 		parameters = {'N': 5, '2q_indices': [(1, 2), (3, 1), (2, 4), (3, 4)], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_2q_indices_P2(self):
 		parameters = {'N': 5, '2q_indices': [(1, 2), (3, 4)], 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
 	def test_arg_1(self):
@@ -603,16 +479,14 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['cut_off_rho'] = 1e-11
 		parameters['b_force_rho_trace'] = False
 		parameters['force_rho_hermitian_step'] = 1
-		parameters['output_files_prefix'] = "./"
+		parameters['output_files_prefix'] = s_output_path
 		parameters['metadata'] = "We agree to disagree."
 		parameters['1q_components'] = ["x", "y", "z"]
 		parameters['1q_indices'] = [1, 3, 4]
 		parameters['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
 		parameters['2q_indices'] = [(1, 2), (3, 1), (2, 4), (3, 4)]
 
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		if out == "":
 			self.assertTrue(True)       # print("Check 1 Passed")
 		else:
@@ -655,15 +529,13 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_force_rho_trace'] = "False"  # this should fail
 		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 0.6  # this should fail
-		parameters['output_files_prefix'] = "./"
+		parameters['output_files_prefix'] = s_output_path
 		parameters['1q_components'] = ["x", "y", "j"]  # this should fail
 		parameters['1q_indices'] = [1, 3, 5]
 		parameters['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]  # this should fail
 		parameters['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]  # this should fail
 
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		if out.count("Error") == 13:
 			self.assertTrue(True)
 		else:
@@ -706,15 +578,13 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_force_rho_trace'] = "False"
 		parameters['force_rho_hermitian_step'] = "True"
 		parameters['output_step'] = 0.6
-		parameters['output_files_prefix'] = "./"
+		parameters['output_files_prefix'] = s_output_path
 		parameters['1q_components'] = ["x", "y", "j"]
 		parameters['1q_indices'] = [1, 3, 1, 5, 1]
 		parameters['2q_components'] = ["XX", "XY", "A", "YY", "YZ", "ZZ"]
 		parameters['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]
 
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		if out.count("Error") == 25:
 			self.assertTrue(True)
 		else:
@@ -759,15 +629,13 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_force_rho_trace'] = False
 		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 1
-		parameters['output_files_prefix'] = "./"
+		parameters['output_files_prefix'] = s_output_path
 		parameters['1q_components'] = ["x", "y", "z"]
 		parameters['1q_indices'] = [1, 3, 2]
 		parameters['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
 		parameters['2q_indices'] = [(1, 2), (3, 2), (2, 4)]
 
-		solver = LindbladMPOSolver()
-		solver.parameters = parameters
-		out = solver._verify_parameters()
+		out = LindbladMPOSolver.verify_parameters(parameters)
 		if out == "":
 			self.assertTrue(True)
 		else:
@@ -811,13 +679,14 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_force_rho_trace'] = False
 		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 1
-		parameters['output_files_prefix'] = "./"
+		parameters['output_files_prefix'] = s_output_path
 		parameters['1q_components'] = ["x", "y", "z"]
 		parameters['1q_indices'] = [1, 3, 99]
 		parameters['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
 		parameters['2q_indices'] = [(1, 2), (3, 1), (2, 4), (3, 4)]
 		try:
-			solver = LindbladMPOSolver(parameters)
+			solver = LindbladMPOSolver(parameters, s_cygwin_path, s_solver_path)
+			solver.build()
 			self.assertTrue(False, "Test failed, expected to get an exception\n")
 		except:
 			self.assertTrue(True)
@@ -860,13 +729,14 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_force_rho_trace'] = False
 		parameters['force_rho_hermitian_step'] = 1
 		parameters['output_step'] = 1
-		parameters['output_files_prefix'] = "./"
+		parameters['output_files_prefix'] = s_output_path
 		parameters['1q_components'] = ["x", "y", "z"]
 		parameters['1q_indices'] = [1, 2, 4]
 		parameters['2q_components'] = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
 		parameters['2q_indices'] = [(1, 2), (3, 1), (2, 4), (3, 4)]
 		try:
-			solver = LindbladMPOSolver(parameters)
+			solver = LindbladMPOSolver(parameters, s_cygwin_path, s_solver_path)
+			solver.build()
 			self.assertTrue(True)
 		except:
 			self.assertTrue(False, "Test failed, exception was not expected")

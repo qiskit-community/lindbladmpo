@@ -25,11 +25,10 @@ class LindbladMPOSolver:
 
 	def __init__(self, parameters: Optional[dict] = None,
 				 s_cygwin_path: Optional[str] = None, s_solver_path: Optional[str] = None):
-		"""Initialize the instance, and possibly build the input file from the parameters.
+		"""Initialize the instance.
 
 		Args:
-			parameters: The model parameters. If not None, the member build() function is
-				invoked to build the input file.
+			parameters: The model parameters.
 			s_cygwin_path: On Windows only, indicates the cygwin executable path. A default
 				location will be assigned if this argument is not pass.
 			s_solver_path: Indicates the solver executable path. A default location will be
@@ -43,17 +42,15 @@ class LindbladMPOSolver:
 		self.s_solver_path = s_solver_path
 		self.s_id_suffix = ''
 		self.result = {}
-		if parameters is not None:
-			self.build()
 
 	def solve(self):
+		"""Solves the simulation and loads the result dictionaries."""
 		if self.s_input_file == '':
-			raise Exception("The solver parameters must be verified and the input file created, "
-							"by invoking build().")
-		exit_code = self.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
+			self.build()
+		exit_code = LindbladMPOSolver.execute(self.s_cygwin_path, self.s_solver_path, self.s_input_file)
 		if exit_code != 0:
 			raise Exception("There was an error executing the solver.")
-		self.result = self.load_output(self.s_output_path)
+		self.result = LindbladMPOSolver.load_output(self.s_output_path)
 
 	@staticmethod
 	def process_default_paths(s_cygwin_path: Optional[str] = None,
@@ -106,7 +103,7 @@ class LindbladMPOSolver:
 		if parameters is not None:
 			self.parameters = parameters
 		parameters = self.parameters
-		check_params = self._verify_parameters()
+		check_params = self._virtual_verify_parameters()
 		# check if there is a problem with the input, if "" returned there is no problem
 		if check_params != "":
 			raise Exception(check_params)
@@ -127,7 +124,7 @@ class LindbladMPOSolver:
 		s_output_path += s_id_suffix
 		s_input_file = s_output_path + ".input.txt"
 
-		AB_indices = False
+		b_bond_indices = False
 		first_bond_indices = []
 		second_bond_indices = []
 		interactions = []
@@ -139,7 +136,7 @@ class LindbladMPOSolver:
 				interactions.append('J_z')
 		if len(interactions) == 2:
 			if parameters['J'].shape == parameters['J_z'].shape:
-				AB_indices = True
+				b_bond_indices = True
 				for i in range(parameters['J'].shape[0]):
 					for j in range(parameters['J'].shape[1]):
 						if parameters['J'][i, j] != 0 or parameters['J_z'][i, j] != 0:
@@ -148,7 +145,7 @@ class LindbladMPOSolver:
 			else:
 				raise Exception("J and J_z are not of the same size.")
 		elif len(interactions) == 1:
-			AB_indices = True
+			b_bond_indices = True
 			for i in range(parameters[interactions[0]].shape[0]):
 				for j in range(parameters[interactions[0]].shape[1]):
 					if parameters[interactions[0]][i, j] != 0:
@@ -215,7 +212,7 @@ class LindbladMPOSolver:
 				file.write("\n")
 			else:
 				file.write(key + " = " + str(parameters[key]).strip("[]") + "\n")
-		if AB_indices:
+		if b_bond_indices:
 			file.write("first_bond_indices = " +
 					   str(first_bond_indices).strip("[]").replace(' ', '') + "\n")
 			file.write("second_bond_indices = " +
@@ -227,7 +224,8 @@ class LindbladMPOSolver:
 
 	@staticmethod
 	def execute(s_cygwin_path = None, s_solver_path = None, s_input_file = "") -> int:
-		""" Execute the C++ solver
+		""" Execute the simulation solver.
+
 		Args:
 			s_cygwin_path : the path of the cygwin bash terminal execution
 			s_solver_path : the path of the simulator executable
@@ -252,7 +250,7 @@ class LindbladMPOSolver:
 
 		process = subprocess.Popen(call_string, shell = True)
 		exit_code = process.wait()
-		print(f"Solver process terminated with exit code {exit_code}")
+		print(f"Solver process terminated with exit code {exit_code}.\n")
 		return exit_code
 
 	@staticmethod
@@ -348,8 +346,8 @@ class LindbladMPOSolver:
 				return parameters["N"]
 		return -1
 
-	def _verify_parameters(self, ignore_params: Optional[list] = None) -> str:
-		"""Returns a detailed Error message if parameters are not in the correct format.
+	def _virtual_verify_parameters(self, ignore_params: Optional[list] = None) -> str:
+		"""An overridable function that verifies the parameters by calling verify_parameters().
 
 		Args:
 			ignore_params: A list with parameter names that this solver does not recognize, but
@@ -359,10 +357,28 @@ class LindbladMPOSolver:
 			A detailed error message if parameters arguments are not in the correct format (which
 				is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
 		"""
-		parameters = self.parameters
+		return LindbladMPOSolver.verify_parameters(self.parameters, ignore_params)
+
+	@staticmethod
+	def verify_parameters(parameters: dict, ignore_params: Optional[list] = None) -> str:
+		"""Returns a detailed Error message if parameters are not in the correct format.
+
+		Args:
+			parameters: A dictionary of solver parameters.
+			ignore_params: A list with parameter names that this solver does not recognize, but
+				should be ignored in the verification (so that an error message for unknown parameters
+				is not issued). This parameter is mostly useful for derived classes.
+		Returns:
+			A detailed error message if parameters arguments are not in the correct format (which
+				is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
+		"""
 		check_msg = ""
+		if parameters is None:
+			check_msg += "Error 100: The `parameters` dictionary must be assigned\n"
+			return check_msg
 		if ("N" not in parameters) or ("t_final" not in parameters) or ("tau" not in parameters):
-			check_msg += "Error 110: N, t_final and tau must be defined as they don't have default values\n"
+			check_msg += "Error 110: N, t_final and tau must be defined as they do not have default " \
+						 "values\n"
 			return check_msg
 		for key in dict.keys(parameters):
 			if isinstance(parameters[key], str) and "" == parameters[key]:  # ignore empty entrances/space holders <"">
