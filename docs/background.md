@@ -3,7 +3,7 @@
 
 ## Basics of the Physics of the problem
 
-This code simulates the time-evolution of a quantum system made of interacting/coupled two-level systems (qubits).
+This code simulates the time evolution of a quantum system of interacting two-level systems (qubits).
 
 The dynamics is determined by: (1) A Hamiltonian, which corresponds to the unitary part of the time-evolution, and (2) Dissipative terms, which take into account the fact that the system is coupled to an environment.
 The two types of terms above enter in a so-called *Lindblad equation* that determines the evolution of the density matrix of the system.
