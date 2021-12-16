@@ -30,7 +30,7 @@ LINDBLADMPO_TEX_LABELS =\
 	Note that key entries here are lower-case."""
 
 
-LINDBLADMPO_LINE_STYLES = ['-', '--', '-.', ':']
+LINDBLADMPO_LINE_STYLES = ['-', '--', ':', '-.']
 """Line styles for curves plotted using matplotlib"""
 
 
@@ -55,7 +55,7 @@ def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
 	tau = parameters['tau']
 	t_final = parameters['t_final']
 	t_init = parameters.get('t_init', 0.)
-	# output_step = solver.parameters.get('output_step', 1)
+	# output_step = parameters.get('output_step', 1)
 	# TODO handle output_step
 	n_t_steps = int((t_final - t_init) / (tau * 1)) + 1
 	t_tick_indices = np.arange(0, n_t_steps, int(n_t_steps / n_t_ticks))
@@ -209,38 +209,39 @@ def plot_curves(obs_data_list: List[Tuple[List]], tex_labels: List[str], s_title
 		_, ax = plt.subplots(figsize = (14, 9))
 	plt.rcParams.update({'font.size': fontsize})
 	for i_curve, obs_data in enumerate(obs_data_list):
-		plt.plot(obs_data[0], obs_data[1], label = tex_labels[i_curve],
+		ax.plot(obs_data[0], obs_data[1], label = tex_labels[i_curve],
 				 linestyle = LINDBLADMPO_LINE_STYLES[i_curve % 4], linewidth = 3)
-	plt.legend(fontsize = fontsize)
+	ax.legend(fontsize = fontsize)
 	ax.set_xlabel('$t$', fontsize = fontsize)
 	if s_title != '':
-		plt.title(s_title)
+		ax.set_title(s_title)
 	return ax
 
 
-def prepare_1q_space_time_data(solver: LindbladMPOSolver, s_obs_name: str,
-							   qubits: Optional[Union[List[int], np.ndarray]] = None)\
+def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
+							   qubits: Optional[Union[List[int], np.ndarray]] = None,
+							   n_t_ticks = 10, t_ticks_round = 3)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
-	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(solver.parameters)
+	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round)
 	if qubits is None:
-		N = solver.parameters['N']
+		N = parameters['N']
 		qubits = np.arange(N)
 		# Generate a default full 1Q matrix
 	n_qubits = len(qubits)
 	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	for i_q, qubit in enumerate(qubits):
-		obs_data, s_tex_label = prepare_curve_data(solver.result, 'obs-1q', s_obs_name, (qubit,))
+		obs_data, s_tex_label = prepare_curve_data(result, 'obs-1q', s_obs_name, (qubit,))
 		# TODO add t_eval verification against obs_data[1]
 		data[i_q, :] = obs_data[1]
 	return data, t_tick_indices, t_tick_labels, qubits
 
 
-def prepare_2q_matrix_data(solver: LindbladMPOSolver, s_obs_name: str, t: float)\
+def prepare_2q_matrix_data(parameters: dict, result: dict, s_obs_name: str, t: float)\
 		-> (np.ndarray, np.ndarray):
-	N = solver.parameters['N']
+	N = parameters['N']
 	qubits = np.arange(N)
 	n_qubits = len(qubits)
-	data, s_tex_label = prepare_2q_correlation_matrix(solver.result, s_obs_name, t, n_qubits)
+	data, s_tex_label = prepare_2q_correlation_matrix(result, s_obs_name, t, n_qubits)
 	return data, qubits
 
 
@@ -291,33 +292,34 @@ def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 	_save_fig(b_save_figures, s_file_prefix, s_file_label)
 
 
-def plot_full_1q_space_time(solver: LindbladMPOSolver, s_obs_name: str,
+def plot_full_1q_space_time(parameters: dict, result: dict, s_obs_name: str,
 							ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
-	data, t_tick_indices, t_tick_labels, qubits = prepare_1q_space_time_data(solver, s_obs_name)
+	data, t_tick_indices, t_tick_labels, qubits =\
+		prepare_1q_space_time_data(parameters, result, s_obs_name)
 	plot_1q_space_time(data, s_obs_name, qubits, t_tick_indices, t_tick_labels,
 					   ax, fontsize, b_save_figures, s_file_prefix)
 
 
-def plot_full_2q_correlation_matrix(solver: LindbladMPOSolver, s_obs_name: str, t: float,
+def plot_full_2q_correlation_matrix(parameters: dict, result: dict, s_obs_name: str, t: float,
 									ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
-	data, qubits = prepare_2q_matrix_data(solver, s_obs_name, t)
+	data, qubits = prepare_2q_matrix_data(parameters, result, s_obs_name, t)
 	plot_2q_correlation_matrix(data, s_obs_name, t, qubits,
 							   ax, fontsize, b_save_figures, s_file_prefix)
 
 
-def plot_1q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
+def plot_1q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 					   qubits: Optional[List[int]] = None,
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
 	for qubit in qubits:
-		obs_data, s_tex_label = prepare_curve_data(solver.result, 'obs-1q', s_obs_name, (qubit,))
+		obs_data, s_tex_label = prepare_curve_data(result, 'obs-1q', s_obs_name, (qubit,))
 		obs_data_list.append(obs_data)
 		tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
 	s_title = f'$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
 	ax.set_xticks(t_tick_labels)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
@@ -325,20 +327,20 @@ def plot_1q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	_save_fig(b_save_figures, s_file_prefix, s_file_label)
 
 
-def plot_2q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
+def plot_2q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 					   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
 	for q_pair in qubit_pairs:
-		obs_data, s_tex_label = prepare_curve_data(solver.result, 'obs-2q', s_obs_name, q_pair)
+		obs_data, s_tex_label = prepare_curve_data(result, 'obs-2q', s_obs_name, q_pair)
 		if obs_data is not None:
 			obs_data_list.append(obs_data)
 			tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
 	s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
 	ax.set_xticks(t_tick_labels)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
@@ -346,20 +348,20 @@ def plot_2q_obs_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	_save_fig(b_save_figures, s_file_prefix, s_file_label)
 
 
-def plot_2q_correlation_curves(solver: LindbladMPOSolver, s_obs_name: str,
+def plot_2q_correlation_curves(parameters: dict, result: dict, s_obs_name: str,
 							   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
 							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
 	for q_pair in qubit_pairs:
-		obs_data, s_tex_label = prepare_2q_correlation_data(solver.result, s_obs_name, q_pair)
+		obs_data, s_tex_label = prepare_2q_correlation_data(result, s_obs_name, q_pair)
 		if obs_data is not None:
 			obs_data_list.append(obs_data)
 			tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle_{{c}}$')
 	s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle_{{c}}$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
 	ax.set_xticks(t_tick_labels)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)
@@ -367,13 +369,13 @@ def plot_2q_correlation_curves(solver: LindbladMPOSolver, s_obs_name: str,
 	_save_fig(b_save_figures, s_file_prefix, s_file_label)
 
 
-def plot_global_obs_curve(solver: LindbladMPOSolver, s_obs_name: str,
+def plot_global_obs_curve(parameters: dict, result: dict, s_obs_name: str,
 						  ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	s_obs_name = s_obs_name.lower()
-	obs_data, s_tex_label = prepare_curve_data(solver.result, 'global', s_obs_name, ())
+	obs_data, s_tex_label = prepare_curve_data(result, 'global', s_obs_name, ())
 	s_title = f'${s_tex_label}(t)$'
 	ax = plot_curves([obs_data], [s_title], s_title, ax, fontsize)
-	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(solver.parameters)
+	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
 	ax.set_xticks(t_tick_labels)
 	ax.set_xticklabels(t_tick_labels, fontsize = fontsize)

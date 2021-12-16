@@ -46,6 +46,6 @@ solver = LindbladMPOSolver(solver_params)
 # Execute simulator
 solver.solve()
 # Plot one figure. By default it will be saved to a file.
-plot_full_1q_space_time(solver, 'x', fontsize = fontsize, b_save_figures = b_save_figures,
-						s_file_prefix = s_output_path + s_file_prefix)
+plot_full_1q_space_time(solver.parameters, solver.result, 'x', fontsize = fontsize,
+						b_save_figures = b_save_figures, s_file_prefix = s_output_path + s_file_prefix)
 plt.show()
