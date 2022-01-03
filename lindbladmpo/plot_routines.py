@@ -10,7 +10,7 @@
 Routines for basic plotting of simulation results, with both general and more specialized functions.
 """
 
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Tuple, List, Union, Any, Sequence
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
@@ -190,8 +190,8 @@ def prepare_2q_correlation_matrix(result: dict, s_obs_name: str, t: float, n_qub
 	return obs_data, s_tex_label
 
 
-def plot_curves(obs_data_list: List[Tuple[List]], tex_labels: List[str], s_title = '',
-				ax = None, fontsize = 16):
+def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: List[str], s_title = '',
+				ax = None, fontsize = 16, line_styles: Optional[Sequence] = None, linewidth = 3):
 	"""
 	Plot multiple curves of simulation observables.
 
@@ -201,6 +201,9 @@ def plot_curves(obs_data_list: List[Tuple[List]], tex_labels: List[str], s_title
 		s_title: An optional plot title.
 		ax: An optional axis object. If None, a new figure is created.
 		fontsize: The fontsize to use in the figure.
+		linewidth: The plot line widths.
+		line_styles: A list with line styles iterated (periodically) for the curves. If None,
+			the default file-level member LINDBLADMPO_LINE_STYLES is used.
 
 	Returns:
 		An axis object (either the one passed as an argument, or a newly created one).
@@ -208,10 +211,15 @@ def plot_curves(obs_data_list: List[Tuple[List]], tex_labels: List[str], s_title
 	if ax is None:
 		_, ax = plt.subplots(figsize = (14, 9))
 	plt.rcParams.update({'font.size': fontsize})
+	if line_styles is None:
+		line_styles = LINDBLADMPO_LINE_STYLES
+	n_styles = len(line_styles)
 	for i_curve, obs_data in enumerate(obs_data_list):
-		ax.plot(obs_data[0], obs_data[1], label = tex_labels[i_curve],
-				 linestyle = LINDBLADMPO_LINE_STYLES[i_curve % 4], linewidth = 3)
-	ax.legend(fontsize = fontsize)
+		s_label = tex_labels[i_curve] if tex_labels is not None else None
+		ax.plot(obs_data[0], obs_data[1], label = s_label,
+				 linestyle = line_styles[i_curve % n_styles], linewidth = linewidth)
+	if tex_labels is not None:
+		ax.legend(fontsize = fontsize)
 	ax.set_xlabel('$t$', fontsize = fontsize)
 	if s_title != '':
 		ax.set_title(s_title)
@@ -236,9 +244,11 @@ def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 	return data, t_tick_indices, t_tick_labels, qubits
 
 
-def prepare_2q_matrix_data(parameters: dict, result: dict, s_obs_name: str, t: float)\
+def prepare_2q_matrix_data(parameters: dict, result: dict, s_obs_name: str, t: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray):
 	N = parameters['N']
+	if t is None:
+		t = parameters['t_final']
 	qubits = np.arange(N)
 	n_qubits = len(qubits)
 	data, s_tex_label = prepare_2q_correlation_matrix(result, s_obs_name, t, n_qubits)
@@ -300,8 +310,11 @@ def plot_full_1q_space_time(parameters: dict, result: dict, s_obs_name: str,
 					   ax, fontsize, b_save_figures, s_file_prefix)
 
 
-def plot_full_2q_correlation_matrix(parameters: dict, result: dict, s_obs_name: str, t: float,
-									ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+def plot_full_2q_correlation_matrix(parameters: dict, result: dict, s_obs_name: str,
+									t: Optional[float] = None, ax = None,
+									fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+	if t is None:
+		t = parameters['t_final']
 	data, qubits = prepare_2q_matrix_data(parameters, result, s_obs_name, t)
 	plot_2q_correlation_matrix(data, s_obs_name, t, qubits,
 							   ax, fontsize, b_save_figures, s_file_prefix)
