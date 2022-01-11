@@ -239,8 +239,34 @@ def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	for i_q, qubit in enumerate(qubits):
 		obs_data, s_tex_label = prepare_curve_data(result, 'obs-1q', s_obs_name, (qubit,))
+		if obs_data is not None:
 		# TODO add t_eval verification against obs_data[1]
-		data[i_q, :] = obs_data[1]
+			data[i_q, :] = obs_data[1]
+	return data, t_tick_indices, t_tick_labels, qubits
+
+
+def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
+							   qubit_0: Optional[int] = None, qubit_1: Optional[int] = None,
+							   n_t_ticks = 10, t_ticks_round = 3)\
+		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round)
+	N = parameters['N']
+	qubits = np.arange(N)
+	b_q0 = qubit_0 is not None
+	b_q1 = qubit_1 is not None
+	if b_q0 and b_q1 or (not b_q0 and not b_q1):
+		raise Exception("Exactly one of the arguments qubit_0 and qubit_1 must be None.")
+	n_qubits = len(qubits)
+	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
+	for i_q, qubit in enumerate(qubits):
+		if not b_q0:
+			qubits_pair = (qubit, qubit_1)
+		else:  # else can be used according to the verification above
+			qubits_pair = (qubit_0, qubit)
+		obs_data, s_tex_label = prepare_curve_data(result, 'obs-2q', s_obs_name, qubits_pair)
+		if obs_data is not None:
+		# TODO add t_eval verification against obs_data[1]
+			data[i_q, :] = obs_data[1]
 	return data, t_tick_indices, t_tick_labels, qubits
 
 
@@ -282,19 +308,25 @@ def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	s_obs_name = s_obs_name.lower()
 	if ax is None:
-		_, ax = plt.subplots(figsize = (14, 9))
+		_, ax = plt.subplots(figsize = (10, 9))
 	plt.rcParams.update({'font.size': fontsize})
-	im = ax.imshow(data, interpolation = 'none', aspect = 'auto')
+	im = ax.imshow(data, interpolation = 'none', aspect = 'equal')
 	divider = make_axes_locatable(ax)
-	cax = divider.append_axes('right', size = '5%', pad = 0.05)
+	cax = divider.append_axes('right', size = '3.5%', pad = 0.15)
 	plt.colorbar(im, cax = cax)
 	# plt.colorbar(im)
-	ax.set_xlabel('$i$', fontsize = fontsize)
-	ax.set_xticks(qubits)
-	ax.set_xticklabels(qubits, fontsize = fontsize)
-	ax.set_yticks(qubits)
-	ax.set_yticklabels(qubits, fontsize = fontsize)
-	ax.set_ylabel('$j$', fontsize = fontsize)
+	n_qubits = len(qubits)
+	if n_qubits < 20:
+		qubit_ticks = qubits
+	else:
+		step = 1 + (n_qubits // 20)
+		qubit_ticks = qubits[0:n_qubits:step]
+	ax.set_xticks(qubit_ticks)
+	ax.set_xticklabels(qubit_ticks, fontsize = fontsize)
+	ax.set_yticks(qubit_ticks)
+	ax.set_yticklabels(qubit_ticks, fontsize = fontsize)
+	ax.set_xlabel('$j$', fontsize = fontsize)
+	ax.set_ylabel('$i$', fontsize = fontsize)
 	s_tex_label = f"\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}}"
 	s_title = f'$\\langle{s_tex_label}(t={t})\\rangle_{{c}}$'
 	ax.set_title(s_title)

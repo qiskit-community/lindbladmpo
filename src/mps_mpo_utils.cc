@@ -29,7 +29,7 @@ double Entropy(MPS psi, int i,int local_space_dim) //returns the von Neumann ent
   const int N=length(psi);
   int maxb;
   if (local_space_dim>0) {
-      maxb =min(bond_dim, int(pow(local_space_dim,min(i,N-i))));
+      maxb = long(min(double(bond_dim), pow(local_space_dim,min(i,N-i))));
   } else {
       maxb=bond_dim;
   }
