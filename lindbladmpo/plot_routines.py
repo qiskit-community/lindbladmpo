@@ -34,7 +34,8 @@ LINDBLADMPO_LINE_STYLES = ['-', '--', ':', '-.']
 """Line styles for curves plotted using matplotlib"""
 
 
-def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
+def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3,
+					  t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, int):
 	"""
 	Prepare the time variables used in plotting the results from one simulation.
@@ -43,6 +44,8 @@ def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
 		parameters: A dictionary from which the basic time parameters are taken.
 		n_t_ticks: The number of labeled major tick marks to generate for the time axis.
 		t_ticks_round: The number of digits to round time axis tick labels to.
+		t_init: An optional initial time - if None, it is taken from the parameters dict.
+		t_final: An optional final time - if None, it is taken from the parameters dict.
 
 	Returns:
 		A tuple with the following four entries:
@@ -53,16 +56,22 @@ def prepare_time_data(parameters: dict, n_t_ticks = 10, t_ticks_round = 3)\
 			n_t_steps: The number of time steps
 	"""
 	tau = parameters['tau']
-	t_final = parameters['t_final']
-	t_init = parameters.get('t_init', 0.)
+	if t_final is None:
+		t_final = parameters['t_final']
+	if t_init is None:
+		t_init = parameters.get('t_init', 0.)
 	# output_step = parameters.get('output_step', 1)
 	# TODO handle output_step
 	n_t_steps = int((t_final - t_init) / (tau * 1)) + 1
 	t_tick_indices = np.arange(0, n_t_steps, int(n_t_steps / n_t_ticks))
+	# TODO: Fix division by zero when n_t_ticks < n_t_steps above
 	t_eval = np.arange(t_init, t_final, tau)
 	if t_final not in t_eval:
 		t_eval = np.concatenate((t_eval, [t_final]))
-	t_tick_labels = np.round(t_init + t_tick_indices * tau, t_ticks_round)
+	if t_ticks_round == 0:
+		t_tick_labels = np.asarray(t_init + t_tick_indices * tau, dtype = int)
+	else:
+		t_tick_labels = np.round(t_init + t_tick_indices * tau, t_ticks_round)
 	return t_eval, t_tick_indices, t_tick_labels, n_t_steps
 
 
@@ -190,7 +199,8 @@ def prepare_2q_correlation_matrix(result: dict, s_obs_name: str, t: float, n_qub
 	return obs_data, s_tex_label
 
 
-def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: List[str], s_title = '',
+def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: Optional[List[str]] = None,
+				s_title = '',
 				ax = None, fontsize = 16, line_styles: Optional[Sequence] = None, linewidth = 3):
 	"""
 	Plot multiple curves of simulation observables.
@@ -228,9 +238,11 @@ def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: List[str], s_t
 
 def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 							   qubits: Optional[Union[List[int], np.ndarray]] = None,
-							   n_t_ticks = 10, t_ticks_round = 3)\
+							   n_t_ticks = 10, t_ticks_round = 3,
+							   t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
-	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round)
+	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round,
+																	t_init, t_final)
 	if qubits is None:
 		N = parameters['N']
 		qubits = np.arange(N)
@@ -241,15 +253,17 @@ def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 		obs_data, s_tex_label = prepare_curve_data(result, 'obs-1q', s_obs_name, (qubit,))
 		if obs_data is not None:
 		# TODO add t_eval verification against obs_data[1]
-			data[i_q, :] = obs_data[1]
+			data[i_q, :] = obs_data[1][0:n_t_steps]
 	return data, t_tick_indices, t_tick_labels, qubits
 
 
 def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 							   qubit_0: Optional[int] = None, qubit_1: Optional[int] = None,
-							   n_t_ticks = 10, t_ticks_round = 3)\
+							   n_t_ticks = 10, t_ticks_round = 3,
+							   t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
-	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round)
+	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round,
+																	t_init, t_final)
 	N = parameters['N']
 	qubits = np.arange(N)
 	b_q0 = qubit_0 is not None
@@ -266,7 +280,7 @@ def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 		obs_data, s_tex_label = prepare_curve_data(result, 'obs-2q', s_obs_name, qubits_pair)
 		if obs_data is not None:
 		# TODO add t_eval verification against obs_data[1]
-			data[i_q, :] = obs_data[1]
+			data[i_q, :] = obs_data[1][0:n_t_steps]
 	return data, t_tick_indices, t_tick_labels, qubits
 
 
@@ -305,7 +319,8 @@ def plot_1q_space_time(data, s_obs_name: str, qubits, t_tick_indices, t_tick_lab
 
 
 def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
-							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
+							   s_title = None):
 	s_obs_name = s_obs_name.lower()
 	if ax is None:
 		_, ax = plt.subplots(figsize = (10, 9))
@@ -316,10 +331,10 @@ def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 	plt.colorbar(im, cax = cax)
 	# plt.colorbar(im)
 	n_qubits = len(qubits)
-	if n_qubits < 20:
+	if n_qubits <= 10:
 		qubit_ticks = qubits
 	else:
-		step = 1 + (n_qubits // 20)
+		step = 1 + (n_qubits // 10)
 		qubit_ticks = qubits[0:n_qubits:step]
 	ax.set_xticks(qubit_ticks)
 	ax.set_xticklabels(qubit_ticks, fontsize = fontsize)
@@ -328,7 +343,8 @@ def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 	ax.set_xlabel('$j$', fontsize = fontsize)
 	ax.set_ylabel('$i$', fontsize = fontsize)
 	s_tex_label = f"\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}}"
-	s_title = f'$\\langle{s_tex_label}(t={t})\\rangle_{{c}}$'
+	if s_title is None:
+		s_title = f'$\\langle{s_tex_label}(t={t})\\rangle_{{c}}$'
 	ax.set_title(s_title)
 	s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}.c.t={t}"
 	_save_fig(b_save_figures, s_file_prefix, s_file_label)
@@ -344,17 +360,19 @@ def plot_full_1q_space_time(parameters: dict, result: dict, s_obs_name: str,
 
 def plot_full_2q_correlation_matrix(parameters: dict, result: dict, s_obs_name: str,
 									t: Optional[float] = None, ax = None,
-									fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+									fontsize = 16, b_save_figures = True, s_file_prefix = '',
+									s_title = None):
 	if t is None:
 		t = parameters['t_final']
 	data, qubits = prepare_2q_matrix_data(parameters, result, s_obs_name, t)
 	plot_2q_correlation_matrix(data, s_obs_name, t, qubits,
-							   ax, fontsize, b_save_figures, s_file_prefix)
+							   ax, fontsize, b_save_figures, s_file_prefix, s_title)
 
 
 def plot_1q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 					   qubits: Optional[List[int]] = None,
-					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
+					   s_title = None):
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
@@ -362,7 +380,8 @@ def plot_1q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 		obs_data, s_tex_label = prepare_curve_data(result, 'obs-1q', s_obs_name, (qubit,))
 		obs_data_list.append(obs_data)
 		tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
-	s_title = f'$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$'
+	if s_title is None:
+		s_title = f'$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
 	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
@@ -374,7 +393,8 @@ def plot_1q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 
 def plot_2q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 					   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
-					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
+					   s_title = None):
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
@@ -383,7 +403,8 @@ def plot_2q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 		if obs_data is not None:
 			obs_data_list.append(obs_data)
 			tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle$')
-	s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$'
+	if s_title is None:
+		s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
 	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
@@ -395,7 +416,8 @@ def plot_2q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 
 def plot_2q_correlation_curves(parameters: dict, result: dict, s_obs_name: str,
 							   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
-							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
+							   s_title = None):
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
@@ -404,7 +426,8 @@ def plot_2q_correlation_curves(parameters: dict, result: dict, s_obs_name: str,
 		if obs_data is not None:
 			obs_data_list.append(obs_data)
 			tex_labels.append(f'$\\langle{s_tex_label}(t)\\rangle_{{c}}$')
-	s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle_{{c}}$'
+	if s_title is None:
+		s_title = f'$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle_{{c}}$'
 	ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
 	_, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
 	# ax.set_xticks(t_tick_indices)
