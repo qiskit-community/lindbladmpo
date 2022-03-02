@@ -78,7 +78,28 @@ The default value for each parameter is indicated with an equality sign (only th
 * LindbladMPOSolver.s_cygwin_path: Returns the path to the cygwin executable used by the solver.
 * LindbladMPOSolver.s_solver_path: Returns the path to the compiled C++ solver executable file.
 * LindbladMPOSolver.s_id_suffix: Returns the solver instance unique id.
-* LindbladMPOSolver.result: Returns dict of dicts with the outputs of the solver at all the time steps which an observable was computed. The first dict will contain the one-qubit observable results, the second dict will contain the two-qubit observable results and the third dict will contain global quantities - the trace of the density matrix, the second Rényi entropy (<img src="https://render.githubusercontent.com/render/math?math=-\ln{(\rm tr }\{\rho^2\})" style="vertical-align:bottom">) and the operator space entanglement entropy (OSEE) for a bipartition at the central bond.
+* LindbladMPOSolver.result: Returns the dictionary of results, described below.
+
+## The result dictionary
+
+ The result dictionary stores the outputs of the solver at all requested time steps, in three dictionaries whose keys are detailed in the following.
+The stored data has a consistent format as detailed below.
+* `obs-1q`. A dictionary for the one-qubit observables with the keys being
+  a tuple with the format `(Pauli: str, qubit: tuple(int,))`. 
+  The first key entry is the Pauli operator string (`x`, `y`, `z`),
+  and the second key entry is a one-element tuple with the qubit number.
+ Each value is a tuple, the first entry being a list with the times, and the second entry being the list of values of the observables at the indicated times.
+
+* `obs-2q`. A dictionary for the two-qubit observables with the keys being a tuple with the format:
+`(Pauli: str, qubit: tuple(int, int))`.
+The first key entry is the Pauli operator string (`xx`, `xy`, etc.), and the second key entry is a two-element tuple with the two qubit numbers.
+ Each value is a tuple, the first entry being a list with the times, and the second entry being the list of values of the observables at the indicated times.
+
+* `global`. A dictionary for the global calculated quantities with the keys being a tuple with the format:
+`(quantity: str, tuple())`.
+The first key entry is the quantity string (`S_2`, `OSEE_center`, etc.), and the second key entry is an empty tuple.
+ Each value is a tuple, the first entry being a list with the times, and the second entry being the list of values of the observables at the indicated times.
+
 
 ## Class methods
 
