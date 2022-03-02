@@ -211,9 +211,9 @@ def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: Optional[List[
 		s_title: An optional plot title.
 		ax: An optional axis object. If None, a new figure is created.
 		fontsize: The fontsize to use in the figure.
-		linewidth: The plot line widths.
 		line_styles: A list with line styles iterated (periodically) for the curves. If None,
 			the default file-level member LINDBLADMPO_LINE_STYLES is used.
+		linewidth: The plot line widths.
 
 	Returns:
 		An axis object (either the one passed as an argument, or a newly created one).
