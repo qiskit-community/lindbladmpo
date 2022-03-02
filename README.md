@@ -24,7 +24,7 @@ For a detailed background, information, and examples, the following sections of 
 ## Table of Contents
 
 * [Installation guide](INSTALL.md) (The C++ binaries must be **built locally**)
-* [Tutorial: Solving the Lindblad dynamics of a qubit chain](examples/qubit_chain_tutorial.ipynb) (go here for a **quick start**)
+* [Tutorial: Solving the Lindblad dynamics of a qubit ring](examples/qubit_chain_tutorial.ipynb) (go here for a **quick start**)
 * [Background and literature on the method](docs/background.md)
 * [Simulator model](docs/dynamical_model.md)
 * [Python interface](docs/API_DOCS.md) (**full documentation** of the Python input, output, and call interface)
