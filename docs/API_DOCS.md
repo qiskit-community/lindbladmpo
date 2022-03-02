@@ -4,7 +4,7 @@ The `LindbladMPOSolver` class is the Python interface of the solver. By calling 
 
 ## Class parameters
 
-The parameters of the class are passed to it in its initialization. It accepts 3 parameters:
+The parameters of the class are passed in its initialization (as parameters of the constructor). It accepts 3 parameters:
 
 * s_cygwin_path (str): The cygwin executable path for the C++ execution. Relevant only when running under Windows, the default value is "C:/cygwin64/bin/bash.exe".
 * s_solver_path (str): The path of the compiled C++ solver executable file. It has a default value '/../bin/lindbladmpo'.
@@ -82,8 +82,8 @@ The default value for each parameter is indicated with an equality sign (only th
 
 ## Class methods
 
-* solve(): Executing the C++ solver and saving the results in "result" attribute.
-* process_default_paths(s_cygwin_path (str), s_solver_path (str) -> (str, str): Returns the cygwin and solver paths according to the system platform. keeps them unchanged if given as input.
-* build(parameters (dict)): Write the model parameters dictionary to the input configuration file for the C++ solver. Also initializes the s_input_file, s_output_prefix and s_id_suffix attributes according to the given model parameters.
-* execute(s_cygwin_path (str), s_solver_path (str), s_input_file (str)) -> int: Executing the C++ solver and returning its C++ exit code.
-* load_output(s_output_path (str)) -> dict: Read the solver output files and returns a dictionary with the results.
+* solve(): Execute the C++ solver and saving the results in "result" attribute.
+* process_default_paths(s_cygwin_path: str, s_solver_path: str) -> (str, str). Return the cygwin and solver paths according to the system platform. keeps them unchanged if given as input.
+* build(parameters: dict). Write the model parameters dictionary to the input configuration file for the C++ solver. Also initializes the s_input_file, s_output_prefix and s_id_suffix attributes according to the given model parameters.
+* execute(s_cygwin_path: str, s_solver_path: str, s_input_file: str) -> int. Execute the solver and return its exit code.
+* load_output(s_output_path: str) -> dict. Read the solver output files and return a dictionary with the results.

@@ -24,8 +24,9 @@ For detailed background, information, and examples, the following sections of th
 ## Table of Contents
 
 * [Installation guide](INSTALL.md)
-* [Background and litterature on the method](docs/background.md)
-* [Simulator model](docs/MODEL.md)
-* [Python interface](docs/API_DOCS.md)
-* [C++ Code structure](docs/CODE_STRUCTURE.md)
-* [Tutorial: Solving the Lindblad dynamics of a qubit chain](examples/qubit_chain_tutorial.ipynb)
+* [Tutorial: Solving the Lindblad dynamics of a qubit chain](examples/qubit_chain_tutorial.ipynb) (go here for a **quick start**)
+* [Background and literature on the method](docs/background.md)
+* [Simulator model](docs/dynamical_model.md)
+* [Python interface](docs/API_DOCS.md) (full documentation of the Python input, output, and call interface)
+* [C++ code structure](docs/cpp_code_structure.md)
+* [C++ solver interface](docs/cpp_solver_interface.md) (only relevant for an advanced, low-level usage)
