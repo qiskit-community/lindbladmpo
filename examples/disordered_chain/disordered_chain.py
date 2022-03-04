@@ -29,7 +29,8 @@ fontsize = 22  # Font size in the figures
 
 # Primary model parameters - vary the values of those and compare the results.
 n_qubits = 21
-# Number of qubits to simulate. Use an odd number, as the middle qubit has an x-aligned term below.
+# Number of qubits to simulate. Explore different numbers of qubits (with tens and even hundreds).
+# Use an odd number to make the setup reflection-symmetric, as the middle qubit has an x term below.
 h_z_amp = 10.
 # Qubit frequencies will be random (uniformly distributed) in the interval 2 * pi * [-h_z_amp, h_z_amp].
 # For h_z_amp the qubits ar resonant, and there is no localization of the driven qubit's excitations.
