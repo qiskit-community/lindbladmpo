@@ -13,8 +13,8 @@ b_save_to_db = True
 fontsize = 22
 
 # Simulation parameters to vary - all of these are the metadata (database) entries
-N = 9
-topology = 'chain.E'  # Options: 'chain.M', 'chain.E', 'plaquette', 'ring'
+N = 8
+topology = 'plaquette'  # Options: 'chain.M', 'chain.E', 'plaquette', 'ring'
 solver = 'scipy'  # Options: 'mpo', 'scipy'
 if topology == 'plaquette' or topology == 'ring':
 	mpo_mapping = 'A'  # Options: 'A', 'B'. The 'B' mapping is only implemented for select qubit numbers.

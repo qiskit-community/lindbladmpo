@@ -252,7 +252,6 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 				file_gl.flush()
 
 			self.result = self.load_output(self.s_output_path)
-			# TODO: verify that if solve or the verification raise an exception, it is properly thrown.
 		except Exception as e:
 			self._print(str(e))
 			raise e

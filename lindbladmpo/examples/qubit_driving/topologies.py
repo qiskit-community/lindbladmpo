@@ -195,9 +195,9 @@ def plot_topology(N: int, topology: str, s_coupling_map: str, b_save_figures: bo
 		s_alternating = ''
 
 	if topology == 'plaquette' or topology == 'ring':
-		figsize = (5, 8)
+		figsize = (4, 7)
 	else:
-		figsize = (9, 3)
+		figsize = (8, 2)
 	q_coord = []
 	if b_transpose_plot:
 		figsize = (figsize[1], figsize[0])

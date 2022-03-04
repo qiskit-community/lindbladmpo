@@ -261,8 +261,6 @@ class LindbladMPOSolver:
 				endings according to each output type will be appended.
 		Returns:
 			result : A dictionary with three dictionaries storing the different output types.
-				The contained dictionaries have the format:
-				TODO fix: key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
 		"""
 		result = {}
 		s_output_type = 'obs-1q'
@@ -282,8 +280,7 @@ class LindbladMPOSolver:
 			s_output_type : A string defining the observable type, one of the 1-qubit, 2-qubits,
 				or global observables.
 		Returns:
-			result : A dictionary with the result, in the format
-				TODO fix: key (tuple) = (qubit (int), operator (string), time (float)) : expectation value (float)
+			result : A dictionary with the result.
 		"""
 		full_filename = s_output_path + f".{s_output_type}.dat"
 		print("Loading output data file: " + full_filename)
@@ -715,11 +712,9 @@ class LindbladMPOSolver:
 			if (LindbladMPOSolver._is_float(parameters["tau"])) and\
 					(LindbladMPOSolver._is_float(parameters["t_final"])):
 				if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
-					if parameters["tau"] > parameters["t_final"]:
+					if parameters["tau"] > parameters["t_final"] - parameters["t_init"]:
 						check_msg += "Error 640: t_final (total time) is smaller than tau (time step " \
 									 "for time evolution)\n "
-						# TODO validate total time as t_final - t_init
-						# TODO validate force_rho_hermitian_step
 					elif "output_step" in parameters:
 						if LindbladMPOSolver._is_int(parameters["output_step"]):
 							if parameters["output_step"] > 0:

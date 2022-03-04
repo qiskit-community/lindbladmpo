@@ -219,7 +219,7 @@ def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: Optional[List[
 		An axis object (either the one passed as an argument, or a newly created one).
 	"""
 	if ax is None:
-		_, ax = plt.subplots(figsize = (14, 9))
+		_, ax = plt.subplots(figsize = (12, 7))
 	plt.rcParams.update({'font.size': fontsize})
 	if line_styles is None:
 		line_styles = LINDBLADMPO_LINE_STYLES
@@ -264,18 +264,17 @@ def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 			qubits: The qubits used in the data.
 	"""
 
-	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round,
+	t_eval, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round,
 																	t_init, t_final)
 	if qubits is None:
+		# Generate a default full 1Q matrix
 		N = parameters['N']
 		qubits = np.arange(N)
-		# Generate a default full 1Q matrix
 	n_qubits = len(qubits)
 	data = np.full(shape = (n_qubits, n_t_steps), dtype = float, fill_value = np.nan)
 	for i_q, qubit in enumerate(qubits):
 		obs_data, s_tex_label = prepare_curve_data(result, 'obs-1q', s_obs_name, (qubit,))
 		if obs_data is not None:
-		# TODO add t_eval verification against obs_data[1]
 			data[i_q, :] = obs_data[1][0:n_t_steps]
 	return data, t_tick_indices, t_tick_labels, qubits
 
@@ -327,7 +326,6 @@ def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 			qubits_pair = (qubit_0, qubit)
 		obs_data, s_tex_label = prepare_curve_data(result, 'obs-2q', s_obs_name, qubits_pair)
 		if obs_data is not None:
-		# TODO add t_eval verification against obs_data[1]
 			data[i_q, :] = obs_data[1][0:n_t_steps]
 	return data, t_tick_indices, t_tick_labels, qubits
 
@@ -347,7 +345,7 @@ def plot_1q_space_time(data, s_obs_name: str, qubits, t_tick_indices, t_tick_lab
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
 	s_obs_name = s_obs_name.lower()
 	if ax is None:
-		_, ax = plt.subplots(figsize = (14, 9))
+		_, ax = plt.subplots(figsize = (12, 7))
 	plt.rcParams.update({'font.size': fontsize})
 	im = ax.imshow(data, interpolation = 'none', aspect = 'auto')
 	divider = make_axes_locatable(ax)
@@ -371,7 +369,7 @@ def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 							   s_title = None):
 	s_obs_name = s_obs_name.lower()
 	if ax is None:
-		_, ax = plt.subplots(figsize = (10, 9))
+		_, ax = plt.subplots(figsize = (9, 8))
 	plt.rcParams.update({'font.size': fontsize})
 	im = ax.imshow(data, interpolation = 'none', aspect = 'equal')
 	divider = make_axes_locatable(ax)
