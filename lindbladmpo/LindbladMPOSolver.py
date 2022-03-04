@@ -367,10 +367,10 @@ class LindbladMPOSolver:
 			parameters: A dictionary of solver parameters.
 			ignore_params: A list with parameter names that this solver does not recognize, but
 				should be ignored in the verification (so that an error message for unknown parameters
-				is not issued). This parameter is mostly useful for derived classes.
+				is not issued). This parameter is mostly useful for derived subclasses.
 		Returns:
-			A detailed error message if parameters arguments are not in the correct format (which
-				is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
+			A detailed error message if parameters are not in the correct format.
+			Otherwise, returns "" (checks passed).
 		"""
 		check_msg = ""
 		if parameters is None:
@@ -392,7 +392,6 @@ class LindbladMPOSolver:
 				if parameters[key] <= 0:
 					check_msg += "Error 130: " + key + " should be bigger/equal to 1 (integer)\n"
 					continue
-
 			elif key == "t_init" or key == "t_final" or key == "tau":
 				if not LindbladMPOSolver._is_float(parameters[key]):
 					check_msg += "Error 140: " + key + " is not a float\n"
@@ -403,7 +402,6 @@ class LindbladMPOSolver:
 				if key == "t_init" and parameters[key] > parameters["t_final"]:
 					check_msg += "Error 151: " + key + " must be equal or smaller than t_final\n"
 					continue
-
 			elif (key == "l_x") or (key == "l_y"):
 				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 160: " + key + " should be an integer\n"
@@ -411,7 +409,6 @@ class LindbladMPOSolver:
 				if parameters[key] < 0:
 					check_msg += "Error 170: " + key + " should be equal or larger than 1 (integer)\n"
 					continue
-
 			elif key == "output_step" or key == "force_rho_hermitian_step":
 				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 180: " + key + " should be an integer\n"
@@ -419,7 +416,6 @@ class LindbladMPOSolver:
 				if parameters[key] < 0:
 					check_msg += "Error 190: " + key + " should be bigger/equal to 0 (integer)\n"
 					continue
-
 			elif (key == "h_x") or (key == "h_y") or (key == "h_z") or \
 					(key == "g_0") or (key == "g_1") or (key == "g_2"):
 				if LindbladMPOSolver._is_float(parameters[key]):
@@ -432,12 +428,12 @@ class LindbladMPOSolver:
 					continue
 				if isinstance(parameters[key], list):
 					if len(parameters[key]) != number_of_qubits:
-						check_msg += "Error 210: " + key + " is not a float / N-legnth list / " \
+						check_msg += "Error 210: " + key + " is not a float / N-length list / " \
 														   "numpy array (of floats)\n"
 						continue
 					for element in parameters[key]:
 						if not LindbladMPOSolver._is_float(element):
-							check_msg += "Error 220: " + key + "is not a float / N-legnth list " \
+							check_msg += "Error 220: " + key + "is not a float / N-length list " \
 															   "/ numpy array (of floats)\n "
 							flag_continue = True
 							break
@@ -446,21 +442,20 @@ class LindbladMPOSolver:
 				elif isinstance(parameters[key], np.ndarray):
 					if (str((parameters[key]).dtype).find("int") == -1) and (
 							str((parameters[key]).dtype).find("float") == -1):
-						check_msg += "Error 230: " + key + " is not a float / N-legnth list / " \
+						check_msg += "Error 230: " + key + " is not a float / N-length list / " \
 														   "numpy array (of floats)\n"
 						continue
 					if parameters[key].size == 1:
 						continue
 					if (parameters[key].shape[0] != number_of_qubits) or\
 							(parameters[key].shape[0] != parameters[key].size):
-						check_msg += "Error 240: " + key + " is not a float / N-legnth list / " \
+						check_msg += "Error 240: " + key + " is not a float / N-length list / " \
 														   "numpy array (of floats)\n"
 						continue
 				else:
-					check_msg += "Error 250: " + key + " is not a float / N-legnth list / numpy " \
+					check_msg += "Error 250: " + key + " is not a float / N-length list / numpy " \
 													   "array (of floats)\n"
 					continue
-
 			elif (key == "J_z") or (key == "J"):
 				if LindbladMPOSolver._is_float(parameters[key]):
 					continue
@@ -473,27 +468,28 @@ class LindbladMPOSolver:
 				if isinstance(parameters[key], list):
 					if len(parameters[key]) != number_of_qubits:
 						check_msg += "Error 270: " + key +\
-									 " should be a constant, or a square matrix (nested list/np.array)" \
-									 " of N^2 floats\n "
+									 " should be a constant, or a square matrix" \
+									 " (nested lists/np.array) of N^2 floats\n "
 						continue
 					for lst in parameters[key]:
 						if not isinstance(lst, list):
 							check_msg += "Error 280: " + key + "should be a constant, or a square " \
-															   "matrix (nested list/np.array) of " \
+															   "matrix (nested lists/np.array) of " \
 															   "floats with a size N^2\n "
 							flag_continue = True
 							break
 						if len(lst) != number_of_qubits:
 							check_msg += "Error 290: " + key +\
-										 "should be a constant, or a square matrix (nested list/" \
-										 "np.array) with N^2 floats\n"
+										 "should be a constant, or a square matrix (nested " \
+										 "lists/np.array) with N^2 floats\n"
 							flag_continue = True
 							break
 						for val in lst:
 							if not LindbladMPOSolver._is_float(val):
-								check_msg += "Error 300: " + key + "should be a constant, or a square matrix (nested " \
-																   "list/np.array) in the size of number_of_qubits^2 " \
-																   "of floats\n"
+								check_msg += "Error 300: " + key +\
+											 "should be a constant, or a square matrix (nested " \
+											 "lists/np.array) in the size of number_of_qubits^2 " \
+											 "of floats\n"
 								flag_continue = True
 								break
 						if flag_continue:
@@ -503,27 +499,30 @@ class LindbladMPOSolver:
 				elif isinstance(parameters[key], np.ndarray):
 					if (str((parameters[key]).dtype).find("int") == -1) and (
 							str((parameters[key]).dtype).find("float") == -1):
-						check_msg += "Error 310: " + key + "should be a constant, or a square matrix (nested " \
-														   "list/np.array) in the size of number_of_qubits^2 of " \
-														   "floats\n"
+						check_msg += "Error 310: " + key +\
+									 "should be a constant, or a square matrix (nested " \
+									 "lists/np.array) in the size of number_of_qubits^2 of " \
+									 "floats\n"
 						continue
 					if parameters[key].size == 1:
 						continue
 					if parameters[key].shape[0] != number_of_qubits:
-						check_msg += "Error 320: " + key + "should be a constant, or a square matrix (nested " \
-														   "list/np.array) in the size of number_of_qubits^2 of " \
-														   "floats\n"
+						check_msg += "Error 320: " + key +\
+									 "should be a constant, or a square matrix (nested " \
+									 "lists/np.array) in the size of number_of_qubits^2 of " \
+									 "floats\n"
 						continue
 					if parameters[key].shape[0] ** 2 != parameters[key].size:
-						check_msg += "Error 330: " + key + "should be a constant, or a square matrix (nested " \
-														   "list/np.array) in the size of number_of_qubits^2 of " \
-														   "floats\n"
+						check_msg += "Error 330: " + key +\
+									 "should be a constant, or a square matrix (nested " \
+									 "lists/np.array) in the size of number_of_qubits^2 of " \
+									 "floats\n"
 						continue
 				else:
-					check_msg += "Error 340: " + key + " should be a constant, or a square matrix (nested " \
-													   "list/np.array) in the size of number_of_qubits^2 of floats\n"
+					check_msg += "Error 340: " + key +\
+								 " should be a constant, or a square matrix (nested " \
+								 "list/np.array) in the size of number_of_qubits^2 of floats\n"
 					continue
-
 			elif key == "init_pauli_state":
 				if not isinstance(parameters[key], str) and not isinstance(parameters[key], list):
 					check_msg += "Error 350: " + key + " must not be a string or a list of strings\n"
@@ -537,14 +536,12 @@ class LindbladMPOSolver:
 					if s_init.lower() not in allowed_init:
 						check_msg += "Error 370: " + key + " can only be one of: +x,-x,+y,-y,+z, z\n"
 						continue
-
 			elif ((key == "b_periodic_x") or (key == "b_periodic_y") or (key == "b_force_rho_trace") or
 				  (key == "b_unique_id") or (key == "b_save_final_state") or
 				  (key == "b_initial_rho_compression")):
 				if not isinstance(parameters[key], bool):
 					check_msg += "Error 390: " + key + " should be a boolean True or False\n"
 					continue
-
 			elif key == "trotter_order":
 				if not LindbladMPOSolver._is_int(parameters[key]):
 					check_msg += "Error 400: " + key + " should be 2, 3 or 4\n"
@@ -552,17 +549,14 @@ class LindbladMPOSolver:
 				if (parameters[key] != 2) and (parameters[key] != 3) and (parameters[key] != 4):
 					check_msg += "Error 401: " + key + " should be 2, 3 or 4\n"
 					continue
-
 			elif (key == "min_dim_rho") or (key == "max_dim_rho"):  # int
 				if not LindbladMPOSolver._is_int(parameters[key]) or parameters[key] < 0:
 					check_msg += "Error 410: " + key + " must be a non-negative integer\n"
 					continue
-
 			elif (key == "cut_off") or (key == "cut_off_rho"):
 				if not LindbladMPOSolver._is_float(parameters[key]):
 					check_msg += "Error 420: " + key + " is not a float\n"
 					continue
-
 			elif key == "metadata":
 				if not isinstance(parameters[key], str):
 					check_msg += "Error 422: " + key + " is not a string\n"
@@ -571,12 +565,10 @@ class LindbladMPOSolver:
 					check_msg += "Error 423: " "The metadata string cannot contain the new line "\
 								 "character code ('\\n'). Please reformat the string\n"
 					continue
-
 			elif key == "load_files_prefix" or key == "output_files_prefix":
 				if not isinstance(parameters[key], str):
 					check_msg += "Error 425: " + key + " is not a string\n"
 					continue
-
 			elif key == "1q_components":
 				x_c = 0
 				y_c = 0
@@ -608,7 +600,6 @@ class LindbladMPOSolver:
 				if (x_c > 1) or (y_c > 1) or (z_c > 1):
 					check_msg += "Error 460: " + key + " only takes x,y,z (or a subset)\n"
 					continue
-
 			elif key == "1q_indices":
 				if parameters[key] != "":
 					if not isinstance(parameters[key], list):
@@ -640,7 +631,6 @@ class LindbladMPOSolver:
 					if not len(set(parameters[key])) == len(parameters[key]):
 						check_msg += "Error 520: " + key + " 's List does not contain unique elements"
 						continue
-
 			elif key == "2q_components":
 				if not isinstance(parameters[key], list):
 					check_msg += "Error 530: " + key + "only receives xx,yy,zz,xy,xz,yz (or a subset) " \
@@ -679,7 +669,6 @@ class LindbladMPOSolver:
 						break
 				if flag_continue:
 					continue
-
 			elif key == "2q_indices" or key == "init_graph_state":  # expecting an integer tuples list
 				if not isinstance(parameters[key], list):
 					check_msg += "Error 570: " + key + " should be an list of tuples of size 2," \
@@ -711,17 +700,16 @@ class LindbladMPOSolver:
 						break
 				if flag_continue:
 					continue
-
 				if len(parameters[key]) > number_of_qubits ** 2:
 					check_msg += "Error 620: " + key + " 's length should be smaller than N^2\n"
 					continue
 				if not len(set(parameters[key])) == len(parameters[key]):
 					check_msg += "Error 630: " + key + " 's List does not contains all unique elements"
 					continue
-
 			elif ignore_params is None or key not in ignore_params:
 				check_msg += "Error: unknown parameter key passed: " + key + "\n"
 		# End of: "for key in dict.keys(parameters)"
+
 		# More cross-parameter checks:
 		if ("t_final" in parameters) and ("tau" in parameters):
 			if (LindbladMPOSolver._is_float(parameters["tau"])) and\

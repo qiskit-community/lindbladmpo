@@ -241,6 +241,29 @@ def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 							   n_t_ticks = 10, t_ticks_round = 3,
 							   t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+	"""
+	Prepare the data used for plotting a space-time diagram of a single-qubit observable.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the specific single-qubit observable, used a key into the relevant
+			observables dict, and also in formatting the descriptive tex label of the data.
+		qubits: An optional list of qubits to include in the data. If None, all qubits are used.
+		n_t_ticks: The number of labeled major tick marks to generate for the time axis.
+		t_ticks_round: The number of digits to round time axis tick labels to.
+		t_init: An optional initial time - if None, it is taken from the parameters dict.
+		t_final: An optional final time - if None, it is taken from the parameters dict.
+
+	Returns:
+		A tuple with the following four entries:
+			data: An array of the times for which the solver parameters indicate output is to
+				be evaluated for (based on the `t_init`, `t_final`, and `tau` parameters.
+			t_tick_indices: The indices of the time axis tick marks.
+			t_tick_labels: The formatted labels of the time axis tick marks.
+			qubits: The qubits used in the data.
+	"""
+
 	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round,
 																	t_init, t_final)
 	if qubits is None:
@@ -262,6 +285,31 @@ def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 							   n_t_ticks = 10, t_ticks_round = 3,
 							   t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+	"""
+	Prepare the data used for plotting a space-time diagram of a two-qubit observable.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the specific single-qubit observable, used a key into the relevant
+			observables dict, and also in formatting the descriptive tex label of the data.
+		qubit_0: An optional index of the first qubit of the 2Q observable.
+			Exactly one of the arguments qubit_0 and qubit_1 must be None.
+		qubit_1: An optional index of the second qubit of the 2Q observable.
+			Exactly one of the arguments qubit_0 and qubit_1 must be None.
+		n_t_ticks: The number of labeled major tick marks to generate for the time axis.
+		t_ticks_round: The number of digits to round time axis tick labels to.
+		t_init: An optional initial time - if None, it is taken from the parameters dict.
+		t_final: An optional final time - if None, it is taken from the parameters dict.
+
+	Returns:
+		A tuple with the following four entries:
+			data: An array of the times for which the solver parameters indicate output is to
+				be evaluated for (based on the `t_init`, `t_final`, and `tau` parameters.
+			t_tick_indices: The indices of the time axis tick marks.
+			t_tick_labels: The formatted labels of the time axis tick marks.
+			qubits: The qubits used in the data.
+	"""
 	_, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(parameters, n_t_ticks, t_ticks_round,
 																	t_init, t_final)
 	N = parameters['N']
