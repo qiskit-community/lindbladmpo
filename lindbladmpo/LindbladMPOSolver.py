@@ -549,7 +549,7 @@ class LindbladMPOSolver:
 				if (parameters[key] != 2) and (parameters[key] != 3) and (parameters[key] != 4):
 					check_msg += "Error 401: " + key + " should be 2, 3 or 4\n"
 					continue
-			elif (key == "min_dim_rho") or (key == "max_dim_rho"):  # int
+			elif key == "max_dim_rho":  # int
 				if not LindbladMPOSolver._is_int(parameters[key]) or parameters[key] < 0:
 					check_msg += "Error 410: " + key + " must be a non-negative integer\n"
 					continue

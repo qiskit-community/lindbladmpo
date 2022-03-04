@@ -140,7 +140,6 @@ int main(int argc, char *argv[])
 	// which is of course not appropriate for a density matrix.
 	auto argsRho = Args();
 	argsRho.add("Normalize", false);
-	argsRho.add("MinDim", param.longval("min_dim_rho"));
 	argsRho.add("MaxDim", param.longval("max_dim_rho"));
 	argsRho.add("Cutoff", param.val("cut_off_rho"));
 
@@ -269,8 +268,7 @@ int main(int argc, char *argv[])
 
 		cout2 << "C.rho.orthogonalize...";
 		cout2.flush();
-		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MinDim", param.longval("min_dim_rho"),
-			"MaxDim", param.longval("max_dim_rho")));
+		C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
 		cout2 << "done.\n";
 		cout2 << "New max bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
 		cout2.flush();

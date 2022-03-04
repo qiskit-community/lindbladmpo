@@ -324,18 +324,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		out = LindbladMPOSolver.verify_parameters(parameters)
 		self.assertEqual(expected, out)
 
-	def test_arg_min_dim_rho_F1(self):
-		parameters = {'min_dim_rho': 5.1, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
-		expected = ""
-		out = LindbladMPOSolver.verify_parameters(parameters)
-		self.assertNotEqual(expected, out)
-
-	def test_arg_min_dim_rho_P(self):
-		parameters = {'min_dim_rho': 1, 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
-		expected = ""
-		out = LindbladMPOSolver.verify_parameters(parameters)
-		self.assertEqual(expected, out)
-
 	def test_arg_metadata_F1(self):
 		parameters = {'metadata': "CR/LF \n", 'N': DEFAULT_N, 't_final': DEFAULT_T_FINAL, 'tau': DEFAULT_TAU}
 		expected = ""
@@ -473,7 +461,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_periodic_x'] = True
 		parameters['b_periodic_y'] = False
 		parameters['trotter_order'] = 3
-		parameters['min_dim_rho'] = 100
 		parameters['max_dim_rho'] = 200
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
@@ -522,7 +509,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_periodic_x'] = 0  # this should fail
 		parameters['b_periodic_y'] = 1  # this should fail
 		parameters['trotter_order'] = 3
-		parameters['min_dim_rho'] = 100
 		parameters['max_dim_rho'] = 200
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
@@ -571,7 +557,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_periodic_x'] = 0
 		parameters['b_periodic_y'] = 1
 		parameters['trotter_order'] = (3.99, 99)
-		parameters['min_dim_rho'] = 100.99
 		parameters['max_dim_rho'] = 200.99
 		parameters['cut_off'] = "1e-10"
 		parameters['cut_off_rho'] = "1e-11"
@@ -622,7 +607,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_periodic_x'] = True
 		parameters['b_periodic_y'] = False
 		parameters['trotter_order'] = 3
-		parameters['min_dim_rho'] = 100
 		parameters['max_dim_rho'] = 200
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
@@ -672,7 +656,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_periodic_x'] = True
 		parameters['b_periodic_y'] = False
 		parameters['trotter_order'] = 3
-		parameters['min_dim_rho'] = 100
 		parameters['max_dim_rho'] = 200
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11
@@ -722,7 +705,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['b_periodic_x'] = True
 		parameters['b_periodic_y'] = False
 		parameters['trotter_order'] = 3
-		parameters['min_dim_rho'] = 100
 		parameters['max_dim_rho'] = 200
 		parameters['cut_off'] = 1e-10
 		parameters['cut_off_rho'] = 1e-11

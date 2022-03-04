@@ -58,7 +58,7 @@ The default value for each parameter is indicated with an equality sign (only th
 * Numerical simulation control:
     * trotter_order = 4 (int): Trotter approximation order, Possible values are 2, 3, 4.
     * max_dim_rho = 400 (int): Maximum bond dimension for density matrices.
-    * cut_off_rho = 1e-16 (float): Maximum truncation error (discarded Schmidt weight) for density matrices.
+    * cut_off_rho = 1e-16 (float): Maximum truncation error (discarded Schmidt weight) for density matrices. The actual truncation is done using the most severe condition between cut_off_rho and max_dim_rho.
     * b_force_rho_trace = True (bool): Whether to force the density matrix trace to one by substituting <img src="https://render.githubusercontent.com/render/math?math=\rho \to\rho/ {\rm tr}\{\rho\}" style="vertical-align:bottom"> at every time step, compensating for some finite-step errors.
     * force_rho_hermitian_step = 4 (int): Determines every how many evolution time steps (<img src="https://render.githubusercontent.com/render/math?math=\tau" style="vertical-align:bottom">), to substitute <img src="https://render.githubusercontent.com/render/math?math=\rho \to (\rho %2b \rho^\dagger)/2" style="vertical-align:bottom">. This may reduce some errors, but is computationally expensive.
     * b_initial_rho_compression = True (bool): Whether a density matrix that is loaded from a previously saved state, should be re-gauged and compressed. Has no effect if the initial state is not loaded from a previously saved state.

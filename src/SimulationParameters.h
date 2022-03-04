@@ -22,8 +22,8 @@ public:
 
         operator[]("trotter_order") = "4";  // Possible choices are 2, 3, 4. 3 or 4 are recommended.
         operator[]("max_dim_rho") = "400";  // Maximum bond dimension for density matrices
-        operator[]("min_dim_rho") = "1";    // Minimum bond dimension for density matrices
-        operator[]("cut_off_rho") = "1e-16"; //Maximum truncation error for density matrices
+        operator[]("cut_off_rho") = "1e-16"; // Maximum truncation error for density matrices. The actual
+        	// truncation is done using the most severe condition between cut_off_rho and max_dim_rho.
 
         operator[]("b_force_rho_trace") = "1";		// Whether to force the density matrix trace to 1,
             // by substituting rho /= trace{rho} at every time step, compensating for finite-step errors
