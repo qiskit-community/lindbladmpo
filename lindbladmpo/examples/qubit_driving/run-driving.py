@@ -13,7 +13,11 @@ with different topologies (connectivity), in which an edge qubit is being driven
 in the lab frame, and the qubits have alternating frequencies between nearest neighbors.
 The problem is simulated in the frame rotating with the driven qubit's frequency (after a rotating
 wave approximation), with the qubits initialized along the z axis of the Bloch sphere
-(the pure product ground state), and subject to energy relaxation and decoherence.     
+(the pure product ground state), and subject to energy relaxation and decoherence.
+
+Note that both qiskit and qiskit-dynamics packages must be installed if the scipy solver is used
+in the following (and invoking scipy with numpy arrays). Some Qiskit code is used also for plotting
+the qubits configuration, for both the scipy and MPO solver.      
 """
 
 # Plotting parameters
