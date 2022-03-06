@@ -28,5 +28,6 @@ For a detailed background, information, and examples, the following sections of 
 * [Background and literature on the solver method](docs/background.md)
 * [Supported model](docs/dynamical_model.md)
 * [Python interface](docs/API_DOCS.md) (**full documentation** of the Python input, output, and call interface)
+* [Simulation examples](docs/examples.md)  (**Advanced** Python examples for research using the solver)
 * [C++ solver interface](docs/cpp_solver_interface.md) (only relevant for an advanced, low-level usage)
 * [C++ code structure](docs/cpp_code_structure.md) (only relevant for contributing to the C++ code)
