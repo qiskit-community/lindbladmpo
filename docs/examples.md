@@ -2,7 +2,7 @@
 
 The `/lindbladmpo/examples` directory contains three subdirectories with Python example files that can be useful for users interested in performing research using the MPO solver. 
 
-* `/examples/disordered_chain` - Contains a single file, [disordered_chain.py](../lindbladmpo/examples/disordred_chain/disordred_chain.py),
+* `/examples/disordered_chain` - Contains a single file, [disordered_chain.py](/lindbladmpo/examples/disordred_chain/disordred_chain.py),
   with a basic example that is relatively similar to the tutorial in 
   [qubit_chain_tutorial.ipynb](qubit_chain_tutorial.ipynb), which can be
   used as another starting point for using the solver. The problem being
