@@ -1,12 +1,12 @@
 # Introduction
 
-This package contains a solver simulating the time evolution of a noisy quantum system of coupled two-level qubits, modeled by a Lindblad master equation.
+**This package contains a solver simulating the time evolution of an open quantum system of coupled two-level qubits, modeled by a Lindblad master equation.**
 
-The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ for maximizing performance using multi-threaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features. The solver performs integration using fixed time steps, of the Lindblad master equation for the density matrix of a quantum system,
+The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ for maximizing performance using multi-threaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features. The solver integrates in fixed time steps the Markovian master equation for the density matrix,
 
 <img src="https://render.githubusercontent.com/render/math?math=\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho]">
 
-The solver supports various initial states and observables, with the Hamiltonian and dissipator terms of the master equation having time-independent coefficients;
+The solver supports various initial states and observables, with the Hamiltonian and dissipator terms having time-independent coefficients;
 
 <img src="https://render.githubusercontent.com/render/math?math={H}/{\hbar} = \sum_{i}\frac{1}{2}\left(h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right) %2b \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} %2b J_{ij}\sigma^y_i \sigma^y_{j} %2b J_{ij}^z \sigma^z_i \sigma^z_{j}\right)," align=middle>
 
