@@ -2,14 +2,9 @@
 
 This package contains a solver simulating the time evolution of a noisy quantum system of coupled two-level qubits, modeled by a Lindblad master equation.
 
-The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ for maximizing performance using multi-threaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features.
-
-The solver performs integration using fixed time steps, of the Lindblad master equation:
+The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ for maximizing performance using multi-threaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features. The solver performs integration using fixed time steps, of the Lindblad master equation for the density matrix of a quantum system,
 
 <img src="https://render.githubusercontent.com/render/math?math=\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho]">
-
-where <img src="https://render.githubusercontent.com/render/math?math=\rho" style="vertical-align:bottom"> is the density matrix of a quantum system, and
-<img src="https://render.githubusercontent.com/render/math?math=[\cdot,\cdot]" align=middle> is the commutator of two operators.
 
 The supported Hamiltonian and dissipator terms of the master equation have time-independent coefficients parametrized as follows;
 
@@ -19,7 +14,7 @@ The supported Hamiltonian and dissipator terms of the master equation have time-
 
 with all the parameters of the model easily specified, and various initial states and observables supported.
 
-For a detailed background, information, and examples, the following sections of the documentation can be consulted:
+For more details check the extensive documentation:
 
 ## Table of Contents
 
