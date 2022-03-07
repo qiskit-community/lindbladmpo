@@ -55,7 +55,7 @@ def _create_ring_A(n_qubits: int, i_offset: int = 0) -> Tuple[list, list, list]:
 
 
 # Add a 1D chain topology for an odd number of qubits (3 to 29 qubits).
-# The chain topology entries have keys of the form 'N.chain.M' where N is the number of qubits,
+# This chain topology entries have keys of the form 'N.chain.M' where N is the number of qubits,
 # and M indicates that the middle qubit has h_z amplitude 0.
 for n_qubits in range(3, 33, 2):
 	c_map = []

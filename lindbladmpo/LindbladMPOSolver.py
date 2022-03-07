@@ -712,7 +712,7 @@ class LindbladMPOSolver:
 			if (LindbladMPOSolver._is_float(parameters["tau"])) and\
 					(LindbladMPOSolver._is_float(parameters["t_final"])):
 				if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
-					if parameters["tau"] > parameters["t_final"] - parameters["t_init"]:
+					if parameters["tau"] > parameters["t_final"] - parameters.get("t_init", 0.):
 						check_msg += "Error 640: t_final (total time) is smaller than tau (time step " \
 									 "for time evolution)\n "
 					elif "output_step" in parameters:

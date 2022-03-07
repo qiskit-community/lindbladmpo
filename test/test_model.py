@@ -5,12 +5,14 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
-
+import os
 from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 import unittest
 import numpy as np
 
-s_output_path = "./"
+s_output_path = os.path.abspath('./output') + '/'  # All solver output files will be written here
+if not os.path.exists(s_output_path):
+	os.mkdir(s_output_path)
 s_cygwin_path = None
 s_solver_path = None
 

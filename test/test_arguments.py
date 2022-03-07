@@ -570,7 +570,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
 		parameters['2q_indices'] = [(1, 2), (3, 5, 4), (2, 4)]
 
 		out = LindbladMPOSolver.verify_parameters(parameters)
-		if out.count("Error") == 25:
+		if out.count("Error") == 24:
 			self.assertTrue(True)
 		else:
 			self.assertTrue(False)
