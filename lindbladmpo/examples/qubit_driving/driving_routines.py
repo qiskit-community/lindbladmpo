@@ -11,8 +11,8 @@ Routines for managing the research project running multiple simulations.
 """
 
 import os.path
-from topologies import *
-from output_routines import *
+from .topologies import *
+from .output_routines import *
 from lindbladmpo.plot_routines import *
 from lindbladmpo.examples.simulation_building.LindbladMatrixSolver import LindbladMatrixSolver
 
