@@ -28,13 +28,13 @@ fontsize = 22 				# Font size of the figures
 # Simulation parameters to vary - all of these are the metadata (database) entries
 N = 9 						# Number of qubits. Note that the topologies are implemented only
 # for some qubit numbers - see in the following.
-topology = 'plaquette'  		# Options: 'chain.M', 'chain.E', 'ring', 'plaquette'
+topology = 'chain.E'  		# Options: 'chain.M', 'chain.E', 'ring', 'plaquette'
 # Setting 'chain.M', the system is a linear 1D chain, with the Middle qubit driven by an x term,
 # Setting 'chain.E', the system is a linear 1D chain, with the Edge (0) qubit driven by an x term,
 # Setting 'ring', the system is a closed ring, with qubit 0 driven by an x term,
 # Setting 'plaquette', the system is a closed ring with two additional edge qubits at opposite side,
 # 	with one edge qubit (0) driven by an x term.
-solver = 'scipy'  			# Options: 'mpo', 'scipy'
+solver = 'mpo'  			# Options: 'mpo', 'scipy'
 # Setting 'mpo' the MPO executable is invoked for the solution, while 'scipy' uses qiskit-dynamics
 # and its scipy solver
 
