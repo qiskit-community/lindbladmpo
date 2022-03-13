@@ -32,7 +32,7 @@ The `/lindbladmpo/examples` directory contains three subdirectories with Python 
   (for low enough qubit numbers),
   to compare and validate the numerical results.
   
-  ## Generating an input file for simulations on a remote machine
+## Generating an input file for simulations on a remote machine
   
 An important use case is to run the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.  In this case, follow the steps below after generaring an inout file using the Python interface:
 * Update the paths inserted in the input file to be those relevant for target machine.
