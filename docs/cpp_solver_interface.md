@@ -1,12 +1,14 @@
 # The C++ solver interface  
-This file describes the low-level C++ interface. Typical usage of the package does not require following most of the details described below.
+This file describes the low-level C++ interface. Typical usage of the package does not require following most of the details described below. The recommended usage is with Python, where the wrapper generates the input file for the solver in the correct format.
 
-One notable use-case is when running the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.
+One notable use-case is when running the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.  In this case, follow the steps below after generaring an inout file using the Python interface:
+* Update the paths inserted in the input file to be those relevant for target machine.
+* Run the solver from the command line. The solver executable expects a single parameter in its command line,
+which is the string literal `input_file`, followed by a space and the file name of an input file. See the installation instructions for guaranteeing the proper multithreaded BLAS/LAPACK libraries are available.
+* When the solver terminates, use the Python interface to load the output data files and plot the results.
 
 ## C++ solver input files
 
-The solver executable expects a single parameter in its command line,
-which is the string literal `input_file`, followed by a space and the file name of an input file.
 In the input file each parameter is specified on a separate line,
 which contains the parameter name, a space, the equality sign '=',
 a space, and a single value or a comma-separated list of values (without spaces).
