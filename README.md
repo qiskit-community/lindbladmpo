@@ -22,7 +22,7 @@ For more details, tutorials, and full-fledged examples check the extensive docum
 * [Tutorial: Solving the Lindblad dynamics of a qubit ring](docs/qubit_chain_tutorial.ipynb) (go here for a **basic example**)
 * [Background and literature on the solver method](docs/background.md)
 * [Supported model](docs/dynamical_model.md)
-* [Python interface](docs/API_DOCS.md) (**full documentation** of the Python input, output, and call interface)
+* [Python interface](docs/API_DOCS.md) (**API documentation** of the Python input, output, and call interface)
 * [Simulation examples](docs/examples.md)  (**advanced** Python examples for research using the solver)
 * [C++ solver interface](docs/cpp_solver_interface.md) (only relevant for an advanced, low-level usage)
 * [C++ code structure](docs/cpp_code_structure.md) (only relevant for contributing to the C++ code)
