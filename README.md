@@ -12,11 +12,13 @@ The solver supports various initial states and observables, with the Hamiltonian
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}[\rho] = \sum_i g_{0,i}\left(\sigma_i^%2b \rho\sigma_i^- - \frac{1}{2} \{\sigma_i^- \sigma_i^%2b,\rho\}\right) %2b \sum_i g_{1,i}\left( \sigma_i^-\rho \sigma_i^{%2b}-\frac{1}{2}\left\{\sigma_i^{%2b}\sigma_i^-,\rho\right\}\right) %2b \sum_i g_{2,i} \left(\sigma_i^z \rho\sigma_i^z - \rho\right)." style="vertical-align:bottom">
 
-For more details check the extensive documentation:
+Note that the C++ binaries of the solver must be **built locally** - see the [installation guide](INSTALL.md).
+
+For more details, tutorials, and full-fledged examples check the extensive documentation:
 
 ## Table of Contents
 
-* [Installation guide](INSTALL.md) (The C++ binaries must be **built locally**)
+* [Installation guide](INSTALL.md)
 * [Tutorial: Solving the Lindblad dynamics of a qubit ring](docs/qubit_chain_tutorial.ipynb) (go here for a **basic example**)
 * [Background and literature on the solver method](docs/background.md)
 * [Supported model](docs/dynamical_model.md)
