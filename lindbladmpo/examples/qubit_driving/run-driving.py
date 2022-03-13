@@ -23,7 +23,7 @@ the qubits configuration, for both the scipy and MPO solver.
 # Plotting parameters
 b_save_figures = True		# Whether to save the plotted figures to disk
 b_save_to_db = True			# Whether to save to a .csv file an entry describing the simulation
-fontsize = 22 				# Font size of the figures
+fontsize = 18 				# Font size of the figures
 
 # Simulation parameters to vary - all of these are the metadata (database) entries
 N = 9 						# Number of qubits. Note that the topologies are implemented only

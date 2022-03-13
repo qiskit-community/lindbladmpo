@@ -219,7 +219,7 @@ def plot_curves(obs_data_list: List[Tuple[Any, Any]], tex_labels: Optional[List[
 		An axis object (either the one passed as an argument, or a newly created one).
 	"""
 	if ax is None:
-		_, ax = plt.subplots(figsize = (12, 7))
+		_, ax = plt.subplots(figsize = (10, 6))
 	plt.rcParams.update({'font.size': fontsize})
 	if line_styles is None:
 		line_styles = LINDBLADMPO_LINE_STYLES
@@ -242,7 +242,7 @@ def prepare_1q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 							   t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
 	"""
-	Prepare the data used for plotting a space-time diagram of a single-qubit observable.
+	Prepare the data used for plotting a space-time (qubit-time) diagram of a single-qubit observable.
 
 	Args:
 		parameters: A dictionary from which the basic time parameters are taken.
@@ -285,7 +285,7 @@ def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 							   t_init: Optional[float] = None, t_final: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
 	"""
-	Prepare the data used for plotting a space-time diagram of a two-qubit observable.
+	Prepare the data used for plotting a space-time (qubit-time) diagram of a two-qubit observable.
 
 	Args:
 		parameters: A dictionary from which the basic time parameters are taken.
@@ -303,8 +303,7 @@ def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 
 	Returns:
 		A tuple with the following four entries:
-			data: An array of the times for which the solver parameters indicate output is to
-				be evaluated for (based on the `t_init`, `t_final`, and `tau` parameters.
+			data: An array with space-time (qubit-time) data.
 			t_tick_indices: The indices of the time axis tick marks.
 			t_tick_labels: The formatted labels of the time axis tick marks.
 			qubits: The qubits used in the data.
@@ -332,6 +331,21 @@ def prepare_2q_space_time_data(parameters: dict, result: dict, s_obs_name: str,
 
 def prepare_2q_matrix_data(parameters: dict, result: dict, s_obs_name: str, t: Optional[float] = None)\
 		-> (np.ndarray, np.ndarray):
+	"""
+	Prepare the data used for plotting a two-qubit connected correlation matrix.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the specific two-qubit observable, used a key into the relevant
+			observables dict, and also in formatting the descriptive tex label of the data.
+		t: An optional time for which to take the data. If unspecified the final time is used.
+
+	Returns:
+		A tuple with the following two entries:
+			data: An array with qubit-qubit data.
+			qubits: The qubits used in the data.
+	"""
 	N = parameters['N']
 	if t is None:
 		t = parameters['t_final']
@@ -343,9 +357,25 @@ def prepare_2q_matrix_data(parameters: dict, result: dict, s_obs_name: str, t: O
 
 def plot_1q_space_time(data, s_obs_name: str, qubits, t_tick_indices, t_tick_labels,
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+	"""
+	Plot a single-qubit space-time (qubit-time) diagram.
+
+	Args:
+		data: The data to plot, prepared b a call to `prepare_1q_space_time_data()`.
+		s_obs_name: The name of the single-qubit observable, used in formatting the descriptive
+			tex label of the data and the saved file name.
+		qubits: The qubits used in the data.
+		t_tick_indices: The indices of the time axis tick marks.
+		t_tick_labels: The formatted labels of the time axis tick marks.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+
+	"""
 	s_obs_name = s_obs_name.lower()
 	if ax is None:
-		_, ax = plt.subplots(figsize = (12, 7))
+		_, ax = plt.subplots(figsize = (10, 6))
 	plt.rcParams.update({'font.size': fontsize})
 	im = ax.imshow(data, interpolation = 'none', aspect = 'auto')
 	divider = make_axes_locatable(ax)
@@ -367,9 +397,24 @@ def plot_1q_space_time(data, s_obs_name: str, qubits, t_tick_indices, t_tick_lab
 def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
 							   s_title = None):
+	"""
+	Plot a two-qubit connected correlation matrix figure.
+
+	Args:
+		data: The data to plot, prepared b a call to `prepare_2q_matrix_data()`.
+		s_obs_name: The name of the two-qubit observable, used in formatting the descriptive
+			tex label of the data and the saved file name.
+		t: An optional time for which to take the data. If unspecified the final time is used.
+		qubits: The qubits used in the data.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+		s_title: An optional title for the figure. If empty, a default title is formatted.
+	"""
 	s_obs_name = s_obs_name.lower()
 	if ax is None:
-		_, ax = plt.subplots(figsize = (9, 8))
+		_, ax = plt.subplots(figsize = (8, 7))
 	plt.rcParams.update({'font.size': fontsize})
 	im = ax.imshow(data, interpolation = 'none', aspect = 'equal')
 	divider = make_axes_locatable(ax)
@@ -398,6 +443,19 @@ def plot_2q_correlation_matrix(data, s_obs_name: str, t: float, qubits,
 
 def plot_full_1q_space_time(parameters: dict, result: dict, s_obs_name: str,
 							ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+	"""
+	Prepare the data and plot a single-qubit space-time (qubit-time) diagram.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the single-qubit observable, used in formatting the descriptive
+			tex label of the data and the saved file name.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+	"""
 	data, t_tick_indices, t_tick_labels, qubits =\
 		prepare_1q_space_time_data(parameters, result, s_obs_name)
 	plot_1q_space_time(data, s_obs_name, qubits, t_tick_indices, t_tick_labels,
@@ -408,6 +466,21 @@ def plot_full_2q_correlation_matrix(parameters: dict, result: dict, s_obs_name: 
 									t: Optional[float] = None, ax = None,
 									fontsize = 16, b_save_figures = True, s_file_prefix = '',
 									s_title = None):
+	"""
+	Prepare the data and plot a two-qubit connected correlation matrix figure.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the two-qubit observable, used to obtain the data, and in formatting
+			the descriptive tex label of the data and the saved file name.
+		t: An optional time for which to take the data. If unspecified the final time is used.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+		s_title: An optional title for the figure. If empty, a default title is formatted.
+	"""
 	if t is None:
 		t = parameters['t_final']
 	data, qubits = prepare_2q_matrix_data(parameters, result, s_obs_name, t)
@@ -419,6 +492,21 @@ def plot_1q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 					   qubits: Optional[List[int]] = None,
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
 					   s_title = None):
+	"""
+	Prepare the data and plot a single-qubit observable vs. time for multiple qubits.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the observable, used to obtain the data, and in formatting
+			the descriptive tex label of the data and the saved file name.
+		qubits: The qubits to take for plotting.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+		s_title: An optional title for the figure. If empty, a default title is formatted.
+	"""
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
@@ -441,6 +529,21 @@ def plot_2q_obs_curves(parameters: dict, result: dict, s_obs_name: str,
 					   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
 					   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
 					   s_title = None):
+	"""
+	Prepare the data and plot a two-qubit observable vs. time for multiple qubits.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the observable, used to obtain the data, and in formatting
+			the descriptive tex label of the data and the saved file name.
+		qubit_pairs: The qubit pairs to take for plotting.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+		s_title: An optional title for the figure. If empty, a default title is formatted.
+	"""
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
@@ -464,6 +567,21 @@ def plot_2q_correlation_curves(parameters: dict, result: dict, s_obs_name: str,
 							   qubit_pairs: Optional[List[Tuple[int, int]]] = None,
 							   ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = '',
 							   s_title = None):
+	"""
+	Prepare the data and plot a two-qubit connected correlation curve vs. time for multiple qubits.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the observable, used to obtain the data, and in formatting
+			the descriptive tex label of the data and the saved file name.
+		qubit_pairs: The qubit pairs to take for plotting.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+		s_title: An optional title for the figure. If empty, a default title is formatted.
+	"""
 	obs_data_list = []
 	tex_labels = []
 	s_obs_name = s_obs_name.lower()
@@ -485,6 +603,19 @@ def plot_2q_correlation_curves(parameters: dict, result: dict, s_obs_name: str,
 
 def plot_global_obs_curve(parameters: dict, result: dict, s_obs_name: str,
 						  ax = None, fontsize = 16, b_save_figures = True, s_file_prefix = ''):
+	"""
+	Prepare the data and plot a global quantity curve vs. time.
+
+	Args:
+		parameters: A dictionary from which the basic time parameters are taken.
+		result: A dictionary from which the observables are taken.
+		s_obs_name: The name of the observable, used to obtain the data, and in formatting
+			the descriptive tex label of the data and the saved file name.
+		ax: An optional axis object. If None, a new figure is created.
+		fontsize: The fontsize to use in the figure.
+		b_save_figures: Whether to save the plotted figure to file.
+		s_file_prefix: An optional path and file name prefix for the saved figures.
+	"""
 	s_obs_name = s_obs_name.lower()
 	obs_data, s_tex_label = prepare_curve_data(result, 'global', s_obs_name, ())
 	s_title = f'${s_tex_label}(t)$'
