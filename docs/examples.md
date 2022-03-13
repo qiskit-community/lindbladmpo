@@ -32,6 +32,8 @@ The `/lindbladmpo/examples` directory contains three subdirectories with Python 
   (for low enough qubit numbers),
   to compare and validate the numerical results.
   
+In the examples above, there is an extensive usage of plotting functions imported from the file [`plot_routines.py`](/lindbladmpo/plot_routines.py), which are very useful for easily plotting the solver output (observables and entropies) in different formats - in curves as a function of time, connected correlation matrices, and space-time (qubit-time) diagrams.
+
 ## Generating an input file for simulations on a remote machine
   
 An important use case is to run the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.  In this case, follow the steps below after generaring an inout file using the Python interface:
