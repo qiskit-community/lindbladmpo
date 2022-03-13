@@ -54,10 +54,10 @@ def _create_ring_A(n_qubits: int, i_offset: int = 0) -> Tuple[list, list, list]:
 	return c_map, q_coordinates, h_z_pat
 
 
-# Add a 1D chain topology for an odd number of qubits (3 to 29 qubits).
+# Add a 1D chain topology for an odd number of qubits (3 to 61 qubits).
 # This chain topology entries have keys of the form 'N.chain.M' where N is the number of qubits,
 # and M indicates that the middle qubit has h_z amplitude 0.
-for n_qubits in range(3, 33, 2):
+for n_qubits in range(3, 63, 2):
 	c_map = []
 	q_coordinates = []
 	h_z_pat = []
@@ -91,9 +91,9 @@ for n_qubits in range(2, 63):
 	h_z_patterns[s_key] = h_z_pat
 
 
-# We add ring topologies for 4 to 32 qubits, with keys in the form 'N.ring.A' where N is the number
+# We add ring topologies for 4 to 62 qubits, with keys in the form 'N.ring.A' where N is the number
 # of qubits, and A is the mpo_ordering - indicating a ladder-like ordering of the qubits.
-for n_qubits in range(4, 34, 2):
+for n_qubits in range(4, 64, 2):
 	c_map, q_coordinates, h_z_pat = _create_ring_A(n_qubits)
 	s_key = f'{n_qubits}.ring.A'
 	coupling_maps[s_key] = c_map
@@ -101,9 +101,9 @@ for n_qubits in range(4, 34, 2):
 	h_z_patterns[s_key] = h_z_pat
 
 
-# We add ring topologies for 4 to 32 qubits, with keys in the form 'N.ring.B' where N is the number of
+# We add ring topologies for 4 to 62 qubits, with keys in the form 'N.ring.B' where N is the number of
 # qubits, and B is the mpo_ordering - indicating qubits ordered to have one large jump at the last one.
-for n_qubits in range(4, 34, 2):
+for n_qubits in range(4, 64, 2):
 	c_map = []
 	q_coordinates = []
 	h_z_pat = []
@@ -125,9 +125,9 @@ for n_qubits in range(4, 34, 2):
 	h_z_patterns[s_key] = h_z_pat
 
 
-# We add plaquette topologies for 6 to 42 qubits, with keys in the form 'N.plaquette.A' where N is
+# We add plaquette topologies for 6 to 62 qubits, with keys in the form 'N.plaquette.A' where N is
 # the number of qubits, and A is the mpo_ordering - indicating a ladder-like ordering of the qubits.
-for n_qubits in range(6, 44, 2):
+for n_qubits in range(6, 64, 2):
 	c_map1, q_coordinates1, h_z_pat1 = _create_ring_A(n_qubits - 2, 1)
 	c_map = [[0, 1]]
 	c_map.extend(c_map1)
@@ -146,7 +146,7 @@ for n_qubits in range(6, 44, 2):
 	h_z_patterns[s_key] = h_z_pat
 
 
-# We add some plaquette topologies, with keys in the form 'N.plaquette.B' where N is the number of
+# We add a few plaquette topologies, with keys in the form 'N.plaquette.B' where N is the number of
 # qubits, and B is the mpo_ordering - indicating qubits ordered to have one large jump at the last one.
 
 coupling_maps['10.plaquette.B'] = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5],

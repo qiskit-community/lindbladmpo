@@ -71,6 +71,11 @@ def solve_simulation(sim_metadata: dict, fontsize = 20, b_save_to_db = True, b_s
 		# The qubits to plot at the end of the simulation are by default not all qubits.
 		if N < 3:
 			raise Exception("At least 3 qubits must be in the driven chain.")
+		if N % 2 == 0:
+			raise Exception("Only an odd number of qubits is supported in the `chain.M` topology.")
+		if N > 61:
+			raise Exception("Up to 61 qubits are currently implemented in the driven chain."
+							" See the file topologies.py for further details.")
 		i_driven_q = int(N / 2)
 		_1q_plot_indices = [i_driven_q, i_driven_q - 1, i_driven_q + 1]
 		_2q_plot_indices = [(0, i_driven_q)]
@@ -82,6 +87,9 @@ def solve_simulation(sim_metadata: dict, fontsize = 20, b_save_to_db = True, b_s
 		# The qubits to plot at the end of the simulation are by default not all qubits.
 		if N < 3:
 			raise Exception("At least 3 qubits must be in the driven chain.")
+		if N > 61:
+			raise Exception("Up to 61 qubits are currently implemented in the driven chain."
+							" See the file topologies.py for further details.")
 		i_driven_q = 0
 		_1q_plot_indices = [0, 1, 2]
 		if N >= 6:
@@ -103,6 +111,12 @@ def solve_simulation(sim_metadata: dict, fontsize = 20, b_save_to_db = True, b_s
 	elif topology == 'plaquette' or topology == 'ring':
 		if N < 6:
 			raise Exception("At least 6 qubits must be in the driven plaquette or ring.")
+		if N > 62:
+			raise Exception("Up to 62 qubits are currently implemented in this topology."
+							" See the file topologies.py for further details.")
+		if N % 2 == 1:
+			raise Exception("Only an even number of qubits is supported in the `ring` and `plaquette`"
+							" topologies. See the file topologies.py for further details.")
 		i_driven_q = 0
 		if mpo_mapping == 'A':
 			_1q_plot_indices = [0, 2, 3]
@@ -118,6 +132,9 @@ def solve_simulation(sim_metadata: dict, fontsize = 20, b_save_to_db = True, b_s
 				_2q_plot_indices = [(0, 1), (0, 2), (0, N - 1)]
 				left_Q = int(N / 2) - 2
 			else:  # plaquette
+				if N != 10 and N != 12:
+					raise Exception("Only 10 and 12 qubits are supported in the `plaquette.B` topology."
+									" See the file topologies.py for further details.")
 				_1q_plot_indices = [0, 2, N - 1]
 				_2q_plot_indices = [(0, 1), (0, 2), (0, N - 1)]
 				left_Q = int(N / 2) - 1
