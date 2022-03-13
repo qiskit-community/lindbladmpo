@@ -32,5 +32,10 @@ The `/lindbladmpo/examples` directory contains three subdirectories with Python 
   (for low enough qubit numbers),
   to compare and validate the numerical results.
   
+An important use case is to run the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.  In this case, follow the steps below after generaring an inout file using the Python interface:
+* Update the paths inserted in the input file to be those relevant for target machine.
+* Run the solver from the command line on the target machine. The solver executable expects a single parameter in its command line,
+which is the string literal `input_file`, followed by a space and the file name of the input file. See the installation instructions for guaranteeing the proper multithreaded BLAS/LAPACK libraries are available.
+* When the solver terminates, use the Python interface to load the output data files and plot the results.
 
 
