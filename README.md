@@ -2,7 +2,7 @@
 
 **This package contains a solver simulating the time evolution of an open quantum system of coupled two-level qubits, modeled by a Lindblad master equation.**
 
-The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ for maximizing the performance using multithreaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features. The solver integrates in fixed time steps the Markovian master equation for the density matrix,
+The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ (using the [ITensor](https://itensor.org/) library) for maximizing the performance with multithreaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features. The solver integrates in fixed time steps the Markovian master equation for the density matrix,
 
 <img src="https://render.githubusercontent.com/render/math?math=\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho]">
 
