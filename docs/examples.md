@@ -21,9 +21,11 @@ The `/lindbladmpo/examples` directory contains three subdirectories with Python 
   This example is relied upon in the third, most extensive example;
   
 * `/examples/qubit_driving` - Contains an example for a large scale
-  research project performed using the solver package. The entry point file (to run) is 
+  research project performed using the solver package - see [arXiv:2203.05871](https://arxiv.org/abs/2203.05871).
+  This paper also exaplains in detail how to construct and verify numerical results with multiqubit simulations.
+  The entry point file (to run) is 
   [run-driving.py](/lindbladmpo/examples/qubit_driving/run-driving.py),
-  which runs a simulation according some parameters given in this file,
+  which runs a simulation according  to some parameters given in this file,
   saves a dataframe entry describing the simulation using its metadata
   (that can be later queried when there are multiple simulation), and saves 
   the output data and figure files when the simulation returns. The simulation
@@ -31,7 +33,7 @@ The `/lindbladmpo/examples` directory contains three subdirectories with Python 
   density matrix) simulation using [qiskit-dynamics](https://github.com/Qiskit/qiskit-dynamics)
   (for low enough qubit numbers),
   to compare and validate the numerical results.
-  
+
 In the disordered chain and the qubit driving project examples above, there is an extensive usage of plotting functions imported from the file [`plot_routines.py`](/lindbladmpo/plot_routines.py), which are very useful for easily plotting the solver output (observables and entropies) in different formats - in curves as a function of time, connected correlation matrices, and space-time (qubit-time) diagrams.
 
 ## Generating an input file for simulations on a remote machine
