@@ -23,337 +23,408 @@ from qiskit_dynamics.models import HamiltonianModel, LindbladModel
 
 
 class LindbladMatrixSolver(LindbladMPOSolver):
-	"""A solver duplicating the interface of LindbladMPOSolver, but uses qiskit-dynamics.
+    """A solver duplicating the interface of LindbladMPOSolver, but uses qiskit-dynamics.
 
-	This class makes it possible to define a simulation problem that can be solved either using
-	the MPO solver or using qiskit-dynamics with a very similar interface. It generates identical
-	input and output files, making it possible to use all the analysis and plotting functions
-	in the lindbladmpo package in a transparent way.
-	"""
+    This class makes it possible to define a simulation problem that can be solved either using
+    the MPO solver or using qiskit-dynamics with a very similar interface. It generates identical
+    input and output files, making it possible to use all the analysis and plotting functions
+    in the lindbladmpo package in a transparent way.
+    """
 
-	IMAGINARY_THRESHOLD = 1e-4
-	"""Threshold for the imaginary value of a quantity that should be real, to issue a warning."""
+    IMAGINARY_THRESHOLD = 1e-4
+    """Threshold for the imaginary value of a quantity that should be real, to issue a warning."""
 
-	TRACE_RHO_THRESHOLD = 1e-4
-	"""Threshold for the deviation of the density matrix trace from 1, to issue a warning."""
+    TRACE_RHO_THRESHOLD = 1e-4
+    """Threshold for the deviation of the density matrix trace from 1, to issue a warning."""
 
-	DEFAULT_PARAMETERS =\
-	{
-		't_init': (0., 's'),
-		'output_files_prefix': ('lindblad', 's'),
-		'b_unique_id': (False, 's'),
-		'h_x': (0., 'v'),
-		'h_y': (0., 'v'),
-		'h_z': (0., 'v'),
-		'J_z': (0., 'm'),
-		'J': (0., 'm'),
-		'g_0': (0., 'v'),
-		'g_1': (0., 'v'),
-		'g_2': (0., 'v'),
-		'init_pauli_state': ('+z', 'v'),
-		'b_save_final_state': (False, 's'),
-		'1q_components': (['z'], 's'),
-		'2q_components': (['zz'], 's'),
-		'method': ('RK45', 's'),
-		'atol': (1e-8, 's'),
-		'rtol': (1e-8, 's')
-	}
-	"""Default values for some parameters, with an indication of being a scalar, vector, or matrix."""
+    DEFAULT_PARAMETERS = {
+        "t_init": (0.0, "s"),
+        "output_files_prefix": ("lindblad", "s"),
+        "b_unique_id": (False, "s"),
+        "h_x": (0.0, "v"),
+        "h_y": (0.0, "v"),
+        "h_z": (0.0, "v"),
+        "J_z": (0.0, "m"),
+        "J": (0.0, "m"),
+        "g_0": (0.0, "v"),
+        "g_1": (0.0, "v"),
+        "g_2": (0.0, "v"),
+        "init_pauli_state": ("+z", "v"),
+        "b_save_final_state": (False, "s"),
+        "1q_components": (["z"], "s"),
+        "2q_components": (["zz"], "s"),
+        "method": ("RK45", "s"),
+        "atol": (1e-8, "s"),
+        "rtol": (1e-8, "s"),
+    }
+    """Default values for some parameters, with an indication of being a scalar, vector, or matrix."""
 
-	def __init__(self, parameters: Optional[dict] = None):
-		"""Initialize the instance, and possibly build the input file from the parameters.
+    def __init__(self, parameters: Optional[dict] = None):
+        """Initialize the instance, and possibly build the input file from the parameters.
 
-		Args:
-			parameters: The model parameters. If not None, the member build() function is
-				invoked to build the input file.
-		"""
-		super().__init__(parameters)
-		self._log_file = None
+        Args:
+                parameters: The model parameters. If not None, the member build() function is
+                        invoked to build the input file.
+        """
+        super().__init__(parameters)
+        self._log_file = None
 
-	def solve(self):
-		"""Solves the simulation and loads the result dictionaries."""
-		if self.s_input_file == '':
-			self.build()
+    def solve(self):
+        """Solves the simulation and loads the result dictionaries."""
+        if self.s_input_file == "":
+            self.build()
 
-		file_1q = None
-		file_2q = None
-		file_gl = None
-		self._log_file = open(self.s_output_path + ".log.txt", "w")
-		try:
-			input_file = open(self.s_input_file, "r")
-			self._print("-------------------------------------------------------------------------")
-			self._print(input_file.read())
-			self._print("-------------------------------------------------------------------------")
-			self._print("Creating solver matrices and executing scipy solver using qiskit-dynamics.")
-			parameters = self.parameters
-			n_qubits = parameters.get('N', None)
-			t_final = parameters.get('t_final', None)
-			tau = parameters.get('tau', None)
-			if n_qubits is None or t_final is None or tau is None:
-				raise Exception("The three input parameters 'N', 't_final', and 'tau' must be assigned, "
-								"as they do not have a default value.")
-			init_pauli_state: list = self._get_parameter('init_pauli_state')
-			init_graph_state: list = self._get_parameter('init_graph_state')
-			s_load_files_prefix = parameters.get('load_files_prefix', '')
-			ts0 = time.time()
+        file_1q = None
+        file_2q = None
+        file_gl = None
+        self._log_file = open(self.s_output_path + ".log.txt", "w")
+        try:
+            input_file = open(self.s_input_file, "r")
+            self._print(
+                "-------------------------------------------------------------------------"
+            )
+            self._print(input_file.read())
+            self._print(
+                "-------------------------------------------------------------------------"
+            )
+            self._print(
+                "Creating solver matrices and executing scipy solver using qiskit-dynamics."
+            )
+            parameters = self.parameters
+            n_qubits = parameters.get("N", None)
+            t_final = parameters.get("t_final", None)
+            tau = parameters.get("tau", None)
+            if n_qubits is None or t_final is None or tau is None:
+                raise Exception(
+                    "The three input parameters 'N', 't_final', and 'tau' must be assigned, "
+                    "as they do not have a default value."
+                )
+            init_pauli_state: list = self._get_parameter("init_pauli_state")
+            init_graph_state: list = self._get_parameter("init_graph_state")
+            s_load_files_prefix = parameters.get("load_files_prefix", "")
+            ts0 = time.time()
 
-			h_x = self._get_parameter('h_x')
-			h_y = self._get_parameter('h_y')
-			h_z = self._get_parameter('h_z')
-			g_0 = self._get_parameter('g_0')
-			g_1 = self._get_parameter('g_1')
-			g_2 = self._get_parameter('g_2')
-			J = self._get_parameter('J')
-			J_z = self._get_parameter('J_z')
-			_1q_components = self._get_parameter('1q_components')
-			_1q_indices = parameters.get('1q_indices', None)
-			if _1q_indices is None: # Add 1Q observables for all qubits.
-				_1q_indices = range(0, n_qubits)
+            h_x = self._get_parameter("h_x")
+            h_y = self._get_parameter("h_y")
+            h_z = self._get_parameter("h_z")
+            g_0 = self._get_parameter("g_0")
+            g_1 = self._get_parameter("g_1")
+            g_2 = self._get_parameter("g_2")
+            J = self._get_parameter("J")
+            J_z = self._get_parameter("J_z")
+            _1q_components = self._get_parameter("1q_components")
+            _1q_indices = parameters.get("1q_indices", None)
+            if _1q_indices is None:  # Add 1Q observables for all qubits.
+                _1q_indices = range(0, n_qubits)
 
-			_2q_components = self._get_parameter('2q_components')
-			_2q_indices = parameters.get('2q_indices', None)
-			if _2q_indices is None:  # Add 2Q observables for all qubit pairs.
-				_2q_indices = []
-				for i in range(0, n_qubits):
-					for j in range(0, n_qubits):
-						if i != j:
-							_2q_indices.append((i, j))
-			t_init = self._get_parameter('t_init')
-			method = self._get_parameter('method')
-			atol = self._get_parameter('atol')
-			rtol = self._get_parameter('rtol')
+            _2q_components = self._get_parameter("2q_components")
+            _2q_indices = parameters.get("2q_indices", None)
+            if _2q_indices is None:  # Add 2Q observables for all qubit pairs.
+                _2q_indices = []
+                for i in range(0, n_qubits):
+                    for j in range(0, n_qubits):
+                        if i != j:
+                            _2q_indices.append((i, j))
+            t_init = self._get_parameter("t_init")
+            method = self._get_parameter("method")
+            atol = self._get_parameter("atol")
+            rtol = self._get_parameter("rtol")
 
-			r_qubits = range(n_qubits)
-			subsystem_dims = OrderedDict()
-			H = .0 * Id(0)  # just dummy initialization
-			rho_0 = Id(0)  # just dummy initialization
+            r_qubits = range(n_qubits)
+            subsystem_dims = OrderedDict()
+            H = 0.0 * Id(0)  # just dummy initialization
+            rho_0 = Id(0)  # just dummy initialization
 
-			L_ops = []; L_sig = []; obs_1q = []; obs_2q = []
-			obs_1q_key = []; obs_2q_key = []
-			for i_qubit in r_qubits:
-				subsystem_dims[i_qubit] = 2
-				if s_load_files_prefix == '':
-					if init_graph_state is None:
-						rho_0 *= get_operator_from_label(init_pauli_state[i_qubit], i_qubit)
-					else:  # Initialize all qubits to '+x', in preparing for the CZs applied below
-						rho_0 *= get_operator_from_label('+x', i_qubit)
-				if h_x[i_qubit]:
-					H += (.5 * h_x[i_qubit]) * Sx(i_qubit)
-				if h_y[i_qubit]:
-					H += (.5 * h_y[i_qubit]) * Sy(i_qubit)
-				if h_z[i_qubit]:
-					H += (.5 * h_z[i_qubit]) * Sz(i_qubit)
-				if g_0[i_qubit]:
-					L_ops.append(Sp(i_qubit))
-					L_sig.append(Signal(g_0[i_qubit]))
-				if g_1[i_qubit]:
-					L_ops.append(Sm(i_qubit))
-					L_sig.append(Signal(g_1[i_qubit]))
-				if g_2[i_qubit]:
-					L_ops.append(Sz(i_qubit))
-					L_sig.append(Signal(g_2[i_qubit]))
+            L_ops = []
+            L_sig = []
+            obs_1q = []
+            obs_2q = []
+            obs_1q_key = []
+            obs_2q_key = []
+            for i_qubit in r_qubits:
+                subsystem_dims[i_qubit] = 2
+                if s_load_files_prefix == "":
+                    if init_graph_state is None:
+                        rho_0 *= get_operator_from_label(
+                            init_pauli_state[i_qubit], i_qubit
+                        )
+                    else:  # Initialize all qubits to '+x', in preparing for the CZs applied below
+                        rho_0 *= get_operator_from_label("+x", i_qubit)
+                if h_x[i_qubit]:
+                    H += (0.5 * h_x[i_qubit]) * Sx(i_qubit)
+                if h_y[i_qubit]:
+                    H += (0.5 * h_y[i_qubit]) * Sy(i_qubit)
+                if h_z[i_qubit]:
+                    H += (0.5 * h_z[i_qubit]) * Sz(i_qubit)
+                if g_0[i_qubit]:
+                    L_ops.append(Sp(i_qubit))
+                    L_sig.append(Signal(g_0[i_qubit]))
+                if g_1[i_qubit]:
+                    L_ops.append(Sm(i_qubit))
+                    L_sig.append(Signal(g_1[i_qubit]))
+                if g_2[i_qubit]:
+                    L_ops.append(Sz(i_qubit))
+                    L_sig.append(Signal(g_2[i_qubit]))
 
-			for i in r_qubits:
-				for j in r_qubits:
-					if J[i, j]:
-						H += .5 * J[i, j] * (Sx(i) * Sx(j) + Sy(i) * Sy(j))
-					if J_z[i, j]:
-						H += .5 * J_z[i, j] * (Sz(i) * Sz(j))
-			for i_qubit in _1q_indices:
-				for s_op in _1q_components:
-					obs_1q.append(get_operator_from_label(s_op, i_qubit))
-					obs_1q_key.append((s_op, i_qubit))
-			for _2q in _2q_indices:
-				for s_op in _2q_components:
-					obs_2q.append(get_operator_from_label(s_op[0], _2q[0]) *
-								  get_operator_from_label(s_op[1], _2q[1]))
-					obs_2q_key.append((s_op, _2q[0], _2q[1]))
+            for i in r_qubits:
+                for j in r_qubits:
+                    if J[i, j]:
+                        H += 0.5 * J[i, j] * (Sx(i) * Sx(j) + Sy(i) * Sy(j))
+                    if J_z[i, j]:
+                        H += 0.5 * J_z[i, j] * (Sz(i) * Sz(j))
+            for i_qubit in _1q_indices:
+                for s_op in _1q_components:
+                    obs_1q.append(get_operator_from_label(s_op, i_qubit))
+                    obs_1q_key.append((s_op, i_qubit))
+            for _2q in _2q_indices:
+                for s_op in _2q_components:
+                    obs_2q.append(
+                        get_operator_from_label(s_op[0], _2q[0])
+                        * get_operator_from_label(s_op[1], _2q[1])
+                    )
+                    obs_2q_key.append((s_op, _2q[0], _2q[1]))
 
-			H_matrix = build_matrices(H, subsystem_dims)
-			L_matrices = build_matrices(L_ops, subsystem_dims)
-			hamiltonian = HamiltonianModel(operators = [H_matrix],
-										   signals = [Signal(1.)])
-			lindbladian = LindbladModel.from_hamiltonian(hamiltonian = hamiltonian,
-														 dissipator_operators = L_matrices,
-														 dissipator_signals = L_sig)
-			if s_load_files_prefix != '':  # Load initial state
-				rho_0_mat = np.load(s_load_files_prefix + ".state.npy")
-			else:
-				rho_0_mat = build_matrices(rho_0, subsystem_dims)
-				if init_graph_state is not None:  # Apply CZ to all qubit tuples in the list
-					for q_pair in init_graph_state:
-						i = q_pair[0]; j = q_pair[1]
-						CZ = .5 * (Sz(i) + Sz(j) - Sz(i) * Sz(j) + Id(i) * Id(j))
-						CZ_matrix = build_matrices(CZ, subsystem_dims)
-						rho_0_mat = CZ_matrix @ rho_0_mat @ CZ_matrix
-						# Taking a dagger above is meaningless as CZ is real and diagonal.
+            H_matrix = build_matrices(H, subsystem_dims)
+            L_matrices = build_matrices(L_ops, subsystem_dims)
+            hamiltonian = HamiltonianModel(operators=[H_matrix], signals=[Signal(1.0)])
+            lindbladian = LindbladModel.from_hamiltonian(
+                hamiltonian=hamiltonian,
+                dissipator_operators=L_matrices,
+                dissipator_signals=L_sig,
+            )
+            if s_load_files_prefix != "":  # Load initial state
+                rho_0_mat = np.load(s_load_files_prefix + ".state.npy")
+            else:
+                rho_0_mat = build_matrices(rho_0, subsystem_dims)
+                if (
+                    init_graph_state is not None
+                ):  # Apply CZ to all qubit tuples in the list
+                    for q_pair in init_graph_state:
+                        i = q_pair[0]
+                        j = q_pair[1]
+                        CZ = 0.5 * (Sz(i) + Sz(j) - Sz(i) * Sz(j) + Id(i) * Id(j))
+                        CZ_matrix = build_matrices(CZ, subsystem_dims)
+                        rho_0_mat = CZ_matrix @ rho_0_mat @ CZ_matrix
+                        # Taking a dagger above is meaningless as CZ is real and diagonal.
 
-			obs_1q_mat = build_matrices(obs_1q, subsystem_dims)
-			obs_2q_mat = build_matrices(obs_2q, subsystem_dims)
-			y0 = rho_0_mat / np.trace(rho_0_mat)
-			t_eval = np.arange(t_init, t_final, tau)
-			if t_final not in t_eval:
-				t_eval = np.concatenate((t_eval, [t_final]))
-			sol = solve_lmde(lindbladian, t_span = Array((t_init, t_final)), y0 = y0, t_eval = Array(t_eval),
-							 method = method, atol = atol, rtol = rtol)
+            obs_1q_mat = build_matrices(obs_1q, subsystem_dims)
+            obs_2q_mat = build_matrices(obs_2q, subsystem_dims)
+            y0 = rho_0_mat / np.trace(rho_0_mat)
+            t_eval = np.arange(t_init, t_final, tau)
+            if t_final not in t_eval:
+                t_eval = np.concatenate((t_eval, [t_final]))
+            sol = solve_lmde(
+                lindbladian,
+                t_span=Array((t_init, t_final)),
+                y0=y0,
+                t_eval=Array(t_eval),
+                method=method,
+                atol=atol,
+                rtol=rtol,
+            )
 
-			if parameters.get('b_save_final_state', False):  # Write final state
-				np.save(self.s_output_path + ".state", sol.y[-1])
+            if parameters.get("b_save_final_state", False):  # Write final state
+                np.save(self.s_output_path + ".state", sol.y[-1])
 
-			file_1q = open(self.s_output_path + ".obs-1q.dat", "w")
-			file_2q = open(self.s_output_path + ".obs-2q.dat", "w")
-			file_gl = open(self.s_output_path + ".global.dat", "w")
-			file_1q.write("#time\toperator\tindex\tvalue\n")
-			file_2q.write("#time\toperator\tindex_1\tindex_2\tvalue\n")
-			file_gl.write("#time\tquantity\tvalue\n")
+            file_1q = open(self.s_output_path + ".obs-1q.dat", "w")
+            file_2q = open(self.s_output_path + ".obs-2q.dat", "w")
+            file_gl = open(self.s_output_path + ".global.dat", "w")
+            file_1q.write("#time\toperator\tindex\tvalue\n")
+            file_2q.write("#time\toperator\tindex_1\tindex_2\tvalue\n")
+            file_gl.write("#time\tquantity\tvalue\n")
 
-			n_times = len(sol.y)
-			for t_i, sol_t in enumerate(sol.y):
-				rho_t = DensityMatrix(sol_t)
-				t = t_eval[t_i]
+            n_times = len(sol.y)
+            for t_i, sol_t in enumerate(sol.y):
+                rho_t = DensityMatrix(sol_t)
+                t = t_eval[t_i]
 
-				for i_obs, obs in enumerate(obs_1q):
-					val = rho_t.expectation_value(obs_1q_mat[i_obs])
-					key = obs_1q_key[i_obs]
-					if abs(val.imag) > self.IMAGINARY_THRESHOLD:
-						self._print(f"Warning: imaginary component {val.imag} in observable "
-									f"{key[0].upper()}, qubit {key[1] + 1}.\n")
-					file_1q.write(f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{val.real}\n")
-				file_1q.write("\n")
-				file_1q.flush()
-				for i_obs, obs in enumerate(obs_2q):
-					val = rho_t.expectation_value(obs_2q_mat[i_obs])
-					key = obs_2q_key[i_obs]
-					if abs(val.imag) > self.IMAGINARY_THRESHOLD:
-						self._print(f"Warning: imaginary component {val.imag} in observable "
-									f"{key[0].upper()}, qubits ({key[1] + 1}, {key[2] + 1}).\n")
-					file_2q.write(f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{key[2] + 1}\t{val.real}\n")
-				file_2q.write("\n")
-				file_2q.flush()
-				rho = rho_t.data
-				tr_rho = np.trace(rho).real
-				if abs(tr_rho - 1) > self.TRACE_RHO_THRESHOLD:
-					self._print(f"Warning: Tr[rho] != 1 : {tr_rho}.\n")
-				S_2 = -math.log(sum(scipy.linalg.eigvals(rho) ** 2).real)
-				OSEE = np.nan
-				bd = np.nan
-				if t_i == n_times - 1:
-					ts1 = time.time()
-					duration = ts1 - ts0
-					self._print(f"Execution time: {duration}s")
-				else:
-					duration = np.nan
-				file_gl.write(f"{t}\ttr_rho\t{tr_rho}\n")
-				file_gl.write(f"{t}\tS_2\t{S_2}\n")
-				file_gl.write(f"{t}\tOSEE_center\t{OSEE}\n")
-				file_gl.write(f"{t}\tmax_bond_dim\t{bd}\n")
-				file_gl.write(f"{t}\tduration_ms\t{duration * 1000}\n")
-				file_gl.write(f"\n")
-				file_gl.flush()
+                for i_obs, obs in enumerate(obs_1q):
+                    val = rho_t.expectation_value(obs_1q_mat[i_obs])
+                    key = obs_1q_key[i_obs]
+                    if abs(val.imag) > self.IMAGINARY_THRESHOLD:
+                        self._print(
+                            f"Warning: imaginary component {val.imag} in observable "
+                            f"{key[0].upper()}, qubit {key[1] + 1}.\n"
+                        )
+                    file_1q.write(f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{val.real}\n")
+                file_1q.write("\n")
+                file_1q.flush()
+                for i_obs, obs in enumerate(obs_2q):
+                    val = rho_t.expectation_value(obs_2q_mat[i_obs])
+                    key = obs_2q_key[i_obs]
+                    if abs(val.imag) > self.IMAGINARY_THRESHOLD:
+                        self._print(
+                            f"Warning: imaginary component {val.imag} in observable "
+                            f"{key[0].upper()}, qubits ({key[1] + 1}, {key[2] + 1}).\n"
+                        )
+                    file_2q.write(
+                        f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{key[2] + 1}\t{val.real}\n"
+                    )
+                file_2q.write("\n")
+                file_2q.flush()
+                rho = rho_t.data
+                tr_rho = np.trace(rho).real
+                if abs(tr_rho - 1) > self.TRACE_RHO_THRESHOLD:
+                    self._print(f"Warning: Tr[rho] != 1 : {tr_rho}.\n")
+                S_2 = -math.log(sum(scipy.linalg.eigvals(rho) ** 2).real)
+                OSEE = np.nan
+                bd = np.nan
+                if t_i == n_times - 1:
+                    ts1 = time.time()
+                    duration = ts1 - ts0
+                    self._print(f"Execution time: {duration}s")
+                else:
+                    duration = np.nan
+                file_gl.write(f"{t}\ttr_rho\t{tr_rho}\n")
+                file_gl.write(f"{t}\tS_2\t{S_2}\n")
+                file_gl.write(f"{t}\tOSEE_center\t{OSEE}\n")
+                file_gl.write(f"{t}\tmax_bond_dim\t{bd}\n")
+                file_gl.write(f"{t}\tduration_ms\t{duration * 1000}\n")
+                file_gl.write(f"\n")
+                file_gl.flush()
 
-			self.result = self.load_output(self.s_output_path)
-		except Exception as e:
-			self._print(str(e))
-			raise e
-		finally:
-			self._close_file(self._log_file)
-			self._log_file = None
-			self._close_file(file_1q)
-			self._close_file(file_2q)
-			self._close_file(file_gl)
+            self.result = self.load_output(self.s_output_path)
+        except Exception as e:
+            self._print(str(e))
+            raise e
+        finally:
+            self._close_file(self._log_file)
+            self._log_file = None
+            self._close_file(file_1q)
+            self._close_file(file_2q)
+            self._close_file(file_gl)
 
-	def _get_parameter(self, s_key: str) -> Union[Sized, Iterable, str, float, list, np.ndarray]:
-		val = self.parameters.get(s_key, None)
-		def_val = self.DEFAULT_PARAMETERS.get(s_key, None)
-		if (s_key == 'init_pauli_state' or s_key == 'init_graph_state')\
-				and val is not None and val != '':
-			s_load_files_prefix = self.parameters.get('load_files_prefix', '')
-			if s_load_files_prefix != '':
-				raise Exception("If the parameter 'load_files_prefix' is not empty, then "
-								"'init_pauli_state' must be empty.")
-		if s_key == 'init_graph_state' and val is not None:
-			init_pauli_state = self.parameters.get('init_pauli_state', None)
-			if init_pauli_state is not None and init_pauli_state != '':
-				raise Exception("If the parameter 'init_graph_state' is not empty, then "
-								"'init_pauli_state' must be empty.")
+    def _get_parameter(
+        self, s_key: str
+    ) -> Union[Sized, Iterable, str, float, list, np.ndarray]:
+        val = self.parameters.get(s_key, None)
+        def_val = self.DEFAULT_PARAMETERS.get(s_key, None)
+        if (
+            (s_key == "init_pauli_state" or s_key == "init_graph_state")
+            and val is not None
+            and val != ""
+        ):
+            s_load_files_prefix = self.parameters.get("load_files_prefix", "")
+            if s_load_files_prefix != "":
+                raise Exception(
+                    "If the parameter 'load_files_prefix' is not empty, then "
+                    "'init_pauli_state' must be empty."
+                )
+        if s_key == "init_graph_state" and val is not None:
+            init_pauli_state = self.parameters.get("init_pauli_state", None)
+            if init_pauli_state is not None and init_pauli_state != "":
+                raise Exception(
+                    "If the parameter 'init_graph_state' is not empty, then "
+                    "'init_pauli_state' must be empty."
+                )
 
-		if val is None and def_val is not None:
-			val = def_val[0]
-		if (isinstance(val, str) or not isinstance(val, Container)) and\
-				not isinstance(val, np.ndarray) and def_val is not None and def_val[1] != 's':
-			# Not a scalar
-			n_qubits = self.parameters["N"]
-			if def_val[1] == 'v':
-				val = [val] * n_qubits  # create a list of identical values
-			elif def_val[1] == 'm':
-				val = np.full((n_qubits, n_qubits), val)  # create a matrix of identical values
-		return val
+        if val is None and def_val is not None:
+            val = def_val[0]
+        if (
+            (isinstance(val, str) or not isinstance(val, Container))
+            and not isinstance(val, np.ndarray)
+            and def_val is not None
+            and def_val[1] != "s"
+        ):
+            # Not a scalar
+            n_qubits = self.parameters["N"]
+            if def_val[1] == "v":
+                val = [val] * n_qubits  # create a list of identical values
+            elif def_val[1] == "m":
+                val = np.full(
+                    (n_qubits, n_qubits), val
+                )  # create a matrix of identical values
+        return val
 
-	@staticmethod
-	def _close_file(file):
-		if file is not None:
-			file.close()
+    @staticmethod
+    def _close_file(file):
+        if file is not None:
+            file.close()
 
-	def _print(self, s_output: str):
-		print(s_output)
-		if self._log_file is not None:
-			self._log_file.write(s_output + "\n")
-			self._log_file.flush()
+    def _print(self, s_output: str):
+        print(s_output)
+        if self._log_file is not None:
+            self._log_file.write(s_output + "\n")
+            self._log_file.flush()
 
-	def _virtual_verify_parameters(self, ignore_params: Optional[list] = None) -> str:
-		"""Returns a detailed Error message if parameters are not in the correct format.
+    def _virtual_verify_parameters(self, ignore_params: Optional[list] = None) -> str:
+        """Returns a detailed Error message if parameters are not in the correct format.
 
-		Args:
-			ignore_params: A list with parameter names that this solver does not recognize, but
-				should be ignored in the verification (so that an error message for unknown parameters
-				is not issued). This is useful for derived classes.
-		Returns:
-			A detailed error message if parameters arguments are not in the correct format (which
-				is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
-		"""
-		return LindbladMatrixSolver.verify_parameters(self.parameters, ignore_params)
+        Args:
+                ignore_params: A list with parameter names that this solver does not recognize, but
+                        should be ignored in the verification (so that an error message for unknown parameters
+                        is not issued). This is useful for derived classes.
+        Returns:
+                A detailed error message if parameters arguments are not in the correct format (which
+                        is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
+        """
+        return LindbladMatrixSolver.verify_parameters(self.parameters, ignore_params)
 
-	@staticmethod
-	def verify_parameters(parameters: dict, ignore_params: Optional[list] = None) -> str:
-		"""Returns a detailed Error message if parameters are not in the correct format.
+    @staticmethod
+    def verify_parameters(
+        parameters: dict, ignore_params: Optional[list] = None
+    ) -> str:
+        """Returns a detailed Error message if parameters are not in the correct format.
 
-		Args:
-			parameters: A dictionary of solver parameters.
-			ignore_params: A list with parameter names that this solver does not recognize, but
-				should be ignored in the verification (so that an error message for unknown parameters
-				is not issued). Passed on to the base class (LindbladMPOSolver).
-		Returns:
-			A detailed error message if parameters are not in the correct format.
-			Otherwise, returns "" (checks passed).
-		"""
-		check_msg = ""
-		unsupported_mpo_params = ["l_x", "l_y", "b_periodic_x", "b_periodic_y",
-								  "b_force_rho_trace", "force_rho_hermitian_step",
-								  "trotter_order", "b_initial_rho_compression",
-								  "max_dim_rho", "cut_off", "cut_off_rho"]
+        Args:
+                parameters: A dictionary of solver parameters.
+                ignore_params: A list with parameter names that this solver does not recognize, but
+                        should be ignored in the verification (so that an error message for unknown parameters
+                        is not issued). Passed on to the base class (LindbladMPOSolver).
+        Returns:
+                A detailed error message if parameters are not in the correct format.
+                Otherwise, returns "" (checks passed).
+        """
+        check_msg = ""
+        unsupported_mpo_params = [
+            "l_x",
+            "l_y",
+            "b_periodic_x",
+            "b_periodic_y",
+            "b_force_rho_trace",
+            "force_rho_hermitian_step",
+            "trotter_order",
+            "b_initial_rho_compression",
+            "max_dim_rho",
+            "cut_off",
+            "cut_off_rho",
+        ]
 
-		for key in dict.keys(parameters):
-			if isinstance(parameters[key], str) and "" == parameters[key]:
-				# ignore empty entrances/space holders <"">
-				continue
-			if key in unsupported_mpo_params:
-				check_msg += "LindbladMatrixSolver Error 1000: " + key + " parameter is unsupported\n"
-				continue
-			if key == "output_step":
-				if not LindbladMPOSolver._is_int(parameters[key]):
-					check_msg += "LindbladMatrixSolver Error 1010: " + key + " should be an integer\n"
-					continue
-				if parameters[key] < 0:
-					check_msg += "LindbladMatrixSolver Error 1020: " + key + \
-								 " should be bigger/equal to 0 (integer)\n"
-					continue
-			elif (key == "atol") or (key == "rtol"):
-				if not LindbladMPOSolver._is_float(parameters[key]):
-					check_msg += "LindbladMatrixSolver Error 1030: " + key + " is not a float\n"
-					continue
+        for key in dict.keys(parameters):
+            if isinstance(parameters[key], str) and "" == parameters[key]:
+                # ignore empty entrances/space holders <"">
+                continue
+            if key in unsupported_mpo_params:
+                check_msg += (
+                    "LindbladMatrixSolver Error 1000: "
+                    + key
+                    + " parameter is unsupported\n"
+                )
+                continue
+            if key == "output_step":
+                if not LindbladMPOSolver._is_int(parameters[key]):
+                    check_msg += (
+                        "LindbladMatrixSolver Error 1010: "
+                        + key
+                        + " should be an integer\n"
+                    )
+                    continue
+                if parameters[key] < 0:
+                    check_msg += (
+                        "LindbladMatrixSolver Error 1020: "
+                        + key
+                        + " should be bigger/equal to 0 (integer)\n"
+                    )
+                    continue
+            elif (key == "atol") or (key == "rtol"):
+                if not LindbladMPOSolver._is_float(parameters[key]):
+                    check_msg += (
+                        "LindbladMatrixSolver Error 1030: " + key + " is not a float\n"
+                    )
+                    continue
 
-		if ignore_params is None:
-			ignore_params = []
-		ignore_params.extend(["atol", "rtol", "method"])
-		check_msg += LindbladMPOSolver.verify_parameters(parameters, ignore_params)
-		return check_msg
+        if ignore_params is None:
+            ignore_params = []
+        ignore_params.extend(["atol", "rtol", "method"])
+        check_msg += LindbladMPOSolver.verify_parameters(parameters, ignore_params)
+        return check_msg
