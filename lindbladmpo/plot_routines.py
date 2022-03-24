@@ -562,7 +562,7 @@ def plot_full_2q_correlation_matrix(
     fontsize=16,
     b_save_figures=True,
     s_file_prefix="",
-    s_title=None,
+    s_title = None,
 ):
     """
     Prepare the data and plot a two-qubit connected correlation matrix figure.
