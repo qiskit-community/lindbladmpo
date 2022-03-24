@@ -16,7 +16,7 @@ DEFAULT_TAU = 0.1
 DEFAULT_T_FINAL = 20
 DEFAULT_N = 10
 
-s_output_path = "./"
+s_output_path = "../"
 s_cygwin_path = None
 s_solver_path = None
 
