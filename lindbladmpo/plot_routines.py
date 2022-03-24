@@ -91,14 +91,15 @@ def prepare_curve_data(
             result: A dictionary from which the observables are taken.
             s_output_type: The type of output, used a key into the result dict, and also in formatting
                     the descriptive tex label of the data.
-            s_obs_name: The name of the specific observable, used a key into the relevant observables dict,
-                    and also in formatting the descriptive tex label of the data.
+            s_obs_name: The name of the specific observable, used a key into the relevant observables
+                    dict, and also in formatting the descriptive tex label of the data.
             q_indices: A tuple with the indices of the qubits identifying the observable to plot, or
                     an empty tuple if the observable is a global one.
 
     Returns:
             A tuple with the following two entries:
-                    obs_data: A tuple of two lists, the first being the time points, the second being the data.
+                    obs_data: A tuple of two lists, the first being the time points, the second being
+                    the data.
                     s_tex_label: A formatted tex label for the data.
     """
     obs_dict = result[s_output_type]
@@ -110,7 +111,8 @@ def prepare_curve_data(
         if s_output_type == "obs-1q":
             s_tex_label = f"\\sigma^{s_obs_name}_{{{q_indices[0]}}}"
         elif s_output_type == "obs-2q":
-            s_tex_label = f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} \\sigma^{s_obs_name[1]}_{{{q_indices[1]}}}"
+            s_tex_label = f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} " \
+                          f"\\sigma^{s_obs_name[1]}_{{{q_indices[1]}}}"
         elif s_output_type == "global":
             s_tex_label = LINDBLADMPO_TEX_LABELS[s_obs_name]
     return obs_data, s_tex_label
@@ -126,15 +128,17 @@ def prepare_2q_correlation_data(
 
     Args:
             result: A dictionary from which the observables are taken.
-            s_obs_name: The name of the specific observable, used a key into the relevant observables dict,
-                    and also in formatting the descriptive tex label of the data.
+            s_obs_name: The name of the specific observable, used a key into the relevant observables
+                    dict, and also in formatting the descriptive tex label of the data.
             q_indices: A tuple with the indices of the qubits identifying the correlation function.
 
     Returns:
             A tuple with the following two entries:
-                    obs_data: A tuple of two lists, the first being the time points, the second being the data.
-                    s_tex_label: A formatted tex label for the data - note that this string does not indicate
-                            that the data is of 2Q connected correlation (the subtraction of the 1Q product).
+                    obs_data: A tuple of two lists, the first being the time points, the second being
+                            the data.
+                    s_tex_label: A formatted tex label for the data - note that this string does not
+                            indicate that the data is of 2Q connected correlation (the subtraction of
+                            the 1Q product).
     """
     obs_1q_dict = result["obs-1q"]
     obs_2q_dict = result["obs-2q"]
@@ -179,16 +183,17 @@ def prepare_2q_correlation_matrix(
 
     Args:
             result: A dictionary from which the observables are taken.
-            s_obs_name: The name of the specific observable, used a key into the relevant observables dict,
-                    and also in formatting the descriptive tex label of the data.
+            s_obs_name: The name of the specific observable, used a key into the relevant observables
+                    dict, and also in formatting the descriptive tex label of the data.
             t: The simulation time for which the data is to be calculated.
             n_qubits: The number of qubits in the simulation.
 
     Returns:
             A tuple with the following two entries:
                     obs_data: A matrix with the connected correlation function of all qubits at time `t`.
-                    s_tex_label: A formatted tex label for the data - note that this string does not indicate
-                            that the data is of 2Q connected correlation (the subtraction of the 1Q product).
+                    s_tex_label: A formatted tex label for the data - note that this string does not
+                            indicate that the data is of 2Q connected correlation (the subtraction of
+                            the 1Q product).
     """
     obs_1q_dict = result["obs-1q"]
     obs_2q_dict = result["obs-2q"]

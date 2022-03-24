@@ -5,13 +5,18 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+
+"""
+Defines the main class of the packages, implementing the interface with the solver.
+"""
+
 import collections
 import subprocess
 import uuid
 from typing import Dict, Optional
-import numpy as np
 import platform
 import os
+import numpy as np
 
 
 class LindbladMPOSolver:
@@ -108,6 +113,10 @@ class LindbladMPOSolver:
 
         Args:
                 parameters: The model parameters.
+
+        Raises:
+                Exception: If the build encounters some validation errors, those are given in
+                    the error message.
         """
         if parameters is not None:
             self.parameters = parameters
@@ -138,10 +147,10 @@ class LindbladMPOSolver:
         second_bond_indices = []
         interactions = []
         if "J" in parameters.keys():
-            if type(parameters["J"]) == np.ndarray:
+            if isinstance(parameters["J"], np.ndarray):
                 interactions.append("J")
         if "J_z" in parameters.keys():
-            if type(parameters["J_z"]) == np.ndarray:
+            if isinstance(parameters["J_z"], np.ndarray):
                 interactions.append("J_z")
         if len(interactions) == 2:
             if parameters["J"].shape == parameters["J_z"].shape:
@@ -171,8 +180,8 @@ class LindbladMPOSolver:
             elif key == "output_files_prefix":
                 file.write(key + " = " + s_output_path + "\n")
             elif (
-                (key == "J" or key == "J_z")
-                and type(parameters[key]) == np.ndarray
+                (key in ("J", "J_z"))
+                and isinstance(parameters[key], np.ndarray)
                 and len(parameters[key]) > 1
             ):
                 # check if to create bond indices arrays
@@ -366,7 +375,8 @@ class LindbladMPOSolver:
     @staticmethod
     # checks if the value is a float (for cleaner code)
     def _is_float(value):
-        # in python terms the value <4> is not float type, in the simulator context float can also be a python int:
+        # in python terms the value <4> is not float type, in the simulator context float
+        # can also be a python int:
         return isinstance(value, (float, int))
 
     @staticmethod
@@ -382,8 +392,8 @@ class LindbladMPOSolver:
 
         Args:
                 ignore_params: A list with parameter names that this solver does not recognize, but
-                        should be ignored in the verification (so that an error message for unknown parameters
-                        is not issued). This is useful for derived classes.
+                        should be ignored in the verification (so that an error message for unknown
+                        parameters is not issued). This is useful for derived classes.
         Returns:
                 A detailed error message if parameters arguments are not in the correct format (which
                         is stated in the spec of the simulator). Otherwise, returns "" (checks passed).
@@ -399,8 +409,8 @@ class LindbladMPOSolver:
         Args:
                 parameters: A dictionary of solver parameters.
                 ignore_params: A list with parameter names that this solver does not recognize, but
-                        should be ignored in the verification (so that an error message for unknown parameters
-                        is not issued). This parameter is mostly useful for derived subclasses.
+                        should be ignored in the verification (so that an error message for unknown
+                        parameters is not issued). This is mostly useful for derived subclasses.
         Returns:
                 A detailed error message if parameters are not in the correct format.
                 Otherwise, returns "" (checks passed).
