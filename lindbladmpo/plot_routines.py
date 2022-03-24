@@ -111,8 +111,10 @@ def prepare_curve_data(
         if s_output_type == "obs-1q":
             s_tex_label = f"\\sigma^{s_obs_name}_{{{q_indices[0]}}}"
         elif s_output_type == "obs-2q":
-            s_tex_label = f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} " \
-                          f"\\sigma^{s_obs_name[1]}_{{{q_indices[1]}}}"
+            s_tex_label = (
+                f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} "
+                f"\\sigma^{s_obs_name[1]}_{{{q_indices[1]}}}"
+            )
         elif s_output_type == "global":
             s_tex_label = LINDBLADMPO_TEX_LABELS[s_obs_name]
     return obs_data, s_tex_label
@@ -567,7 +569,7 @@ def plot_full_2q_correlation_matrix(
     fontsize=16,
     b_save_figures=True,
     s_file_prefix="",
-    s_title = None,
+    s_title=None,
 ):
     """
     Prepare the data and plot a two-qubit connected correlation matrix figure.
