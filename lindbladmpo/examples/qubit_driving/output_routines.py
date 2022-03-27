@@ -18,127 +18,133 @@ from pandas import DataFrame
 from lindbladmpo.plot_routines import *
 
 
-def generate_paths(s_output_path: str, b_make_paths = True):
-	"""Concatenate a data directory and figures directory path, and optionally create the directories.
+def generate_paths(s_output_path: str, b_make_paths=True):
+    """Concatenate a data directory and figures directory path, and optionally create the directories.
 
-		Args:
-			s_output_path: The output path, a base directory for the data and figures directories
-			b_make_paths: If True the directories are created if missing.
+    Args:
+            s_output_path: The output path, a base directory for the data and figures directories
+            b_make_paths: If True the directories are created if missing.
 
-		Returns:
-			A tuple with the data and plot directory strings.
-	"""
-	s_data_path = ''
-	s_plot_path = ''
-	if not os.path.exists(s_output_path):
-		if b_make_paths:
-			os.mkdir(s_output_path)
-		else:
-			return s_data_path, s_plot_path
-	s_data_path = s_output_path + 'data/'
-	if not os.path.exists(s_data_path):
-		if b_make_paths:
-			os.mkdir(s_data_path)
-	s_plot_path = s_output_path + 'figures/'
-	if not os.path.exists(s_plot_path):
-		if b_make_paths:
-			os.mkdir(s_plot_path)
-	return s_data_path, s_plot_path
+    Returns:
+            A tuple with the data and plot directory strings.
+    """
+    s_data_path = ""
+    s_plot_path = ""
+    if not os.path.exists(s_output_path):
+        if b_make_paths:
+            os.mkdir(s_output_path)
+        else:
+            return s_data_path, s_plot_path
+    s_data_path = s_output_path + "data/"
+    if not os.path.exists(s_data_path):
+        if b_make_paths:
+            os.mkdir(s_data_path)
+    s_plot_path = s_output_path + "figures/"
+    if not os.path.exists(s_plot_path):
+        if b_make_paths:
+            os.mkdir(s_plot_path)
+    return s_data_path, s_plot_path
 
 
 def save_to_db(s_db_path: str, sim_metadata: dict):
-	"""Save a data line into the .csv dataframe file using pandas.
+    """Save a data line into the .csv dataframe file using pandas.
 
-		Args:
-			s_db_path: The full filename for the .csv dataframe file.
-			sim_metadata: The dictionary giving one line of db data.
-	"""
-	if not os.path.isfile(s_db_path):
-		# New database, write header line based on metadata keys
-		with open(s_db_path, 'w') as f:
-			header = sim_metadata.keys()
-			writer = csv.writer(f)
-			writer.writerow(header)
-			f.close()
+    Args:
+            s_db_path: The full filename for the .csv dataframe file.
+            sim_metadata: The dictionary giving one line of db data.
+    """
+    if not os.path.isfile(s_db_path):
+        # New database, write header line based on metadata keys
+        with open(s_db_path, "w") as f:
+            header = sim_metadata.keys()
+            writer = csv.writer(f)
+            writer.writerow(header)
+            f.close()
 
-	df = pd.read_csv(s_db_path)
-	db_line = {}
-	for key in sim_metadata.keys():
-		db_line[key] = [sim_metadata[key]]
-	db_data = pd.DataFrame(db_line)
-	df = df.append(db_data)
-	df.to_csv(s_db_path, index = False)
+    df = pd.read_csv(s_db_path)
+    db_line = {}
+    for key in sim_metadata.keys():
+        db_line[key] = [sim_metadata[key]]
+    db_data = pd.DataFrame(db_line)
+    df = df.append(db_data)
+    df.to_csv(s_db_path, index=False)
 
 
 def find_db_files(s_db_path: str):
-	"""Find all csv files in a given directory and store them in a list.
+    """Find all csv files in a given directory and store them in a list.
 
-    	Args:
-    		s_db_path: A string with the data path to the database folder.
+    Args:
+            s_db_path: A string with the data path to the database folder.
 
-    	Returns:
-    	    files: A list with db (.csv) files in the folder.
+    Returns:
+        files: A list with db (.csv) files in the folder.
     """
-	s_data_path = Path(s_db_path)
-	files = []
-	for item in s_data_path.glob('**/*'):
-		if item.suffix in ['.csv']:
-			files.append(Path.resolve(item))
-	return files
+    s_data_path = Path(s_db_path)
+    files = []
+    for item in s_data_path.glob("**/*"):
+        if item.suffix in [".csv"]:
+            files.append(Path.resolve(item))
+    return files
 
 
-def query_simulations(files: List[str], s_filter_query: str,
-					  sort_by: Optional[Any] = None,
-					  ascending: Union[bool, List[bool]] = True, na_position = "last"):
-	"""Find the simulations according to the criteria query and metadata dictionaries in a list.
+def query_simulations(
+    files: List[str],
+    s_filter_query: str,
+    sort_by: Optional[Any] = None,
+    ascending: Union[bool, List[bool]] = True,
+    na_position="last",
+):
+    """Find the simulations according to the criteria query and metadata dictionaries in a list.
 
-		Args:
-			files: A list with db (.csv) files.
-			s_filter_query: A string with the desired query.
-			sort_by: If not None, defines sorting using the method sort_values() of the data frame.
-			ascending: If sort_by is not None, defines an option for the sort
-			na_position: If sort_by is not None, defines an option for the sort
+    Args:
+            files: A list with db (.csv) files.
+            s_filter_query: A string with the desired query.
+            sort_by: If not None, defines sorting using the method sort_values() of the data frame.
+            ascending: If sort_by is not None, defines an option for the sort
+            na_position: If sort_by is not None, defines an option for the sort
 
-		Returns:
-			A list with the relevant simulation dicts.
-	"""
-	sims = []
-	for file in files:
-		df = pd.read_csv(file)
-		df_2 = df.query(s_filter_query)
-		if sort_by is not None:
-			df_3 = df_2.sort_values(sort_by, ascending = ascending, na_position = na_position)
-		else:
-			df_3 = df_2
-		sims.extend(_take_list(df_3))
-	return sims
+    Returns:
+            A list with the relevant simulation dicts.
+    """
+    sims = []
+    for file in files:
+        df = pd.read_csv(file)
+        df_2 = df.query(s_filter_query)
+        if sort_by is not None:
+            df_3 = df_2.sort_values(
+                sort_by, ascending=ascending, na_position=na_position
+            )
+        else:
+            df_3 = df_2
+        sims.extend(_take_list(df_3))
+    return sims
 
 
 def get_simulation_dict(s_output_path: str, s_unique_id: str):
-	"""Returns a dictionary corresponding to a unique simulation id from the dataframe.
+    """Returns a dictionary corresponding to a unique simulation id from the dataframe.
 
-		Args:
-			s_output_path: A string with the data path to the database folder.
-			s_unique_id: The uuid of the simulation to return.
+    Args:
+            s_output_path: A string with the data path to the database folder.
+            s_unique_id: The uuid of the simulation to return.
 
-		Returns:
-			The requested simulation dict.
-	"""
-	files = find_db_files(s_output_path)
-	sim_dict = None
-	for file in files:
-		df = pd.read_csv(file)
-		df_2 = df.query(f"unique_id == '{s_unique_id}'")
-		if df_2 is not None:
-			sim_dict = _take_list(df_2)[0]
-	return sim_dict
+    Returns:
+            The requested simulation dict.
+    """
+    files = find_db_files(s_output_path)
+    sim_dict = None
+    for file in files:
+        df = pd.read_csv(file)
+        df_2 = df.query(f"unique_id == '{s_unique_id}'")
+        if df_2 is not None:
+            sim_dict = _take_list(df_2)[0]
+    return sim_dict
 
 
 def _take_list(df: DataFrame):
-	sims = []
-	for i in range(len(df)):
-		sim_dict = df.take([i]).to_dict('list')
-		for key in sim_dict.keys():
-			sim_dict[key] = sim_dict[key][0]
-		sims.append(sim_dict)
-	return sims
+    sims = []
+    for i in range(len(df)):
+        sim_dict = df.take([i]).to_dict("list")
+        for key in sim_dict.keys():
+            sim_dict[key] = sim_dict[key][0]
+        sims.append(sim_dict)
+    return sims
