@@ -322,9 +322,7 @@ def prepare_1q_space_time_data(
     n_qubits = len(qubits)
     data = np.full(shape=(n_qubits, n_t_steps), dtype=float, fill_value=np.nan)
     for i_q, qubit in enumerate(qubits):
-        obs_data, _ = prepare_curve_data(
-            result, "obs-1q", s_obs_name, (qubit,)
-        )
+        obs_data, _ = prepare_curve_data(result, "obs-1q", s_obs_name, (qubit,))
         if obs_data is not None:
             data[i_q, :] = obs_data[1][0:n_t_steps]
     return data, t_tick_indices, t_tick_labels, qubits
@@ -386,9 +384,7 @@ def prepare_2q_space_time_data(
             qubits_pair = (qubit, qubit_1)
         else:  # else can be used according to the verification above
             qubits_pair = (qubit_0, qubit)
-        obs_data, _ = prepare_curve_data(
-            result, "obs-2q", s_obs_name, qubits_pair
-        )
+        obs_data, _ = prepare_curve_data(result, "obs-2q", s_obs_name, qubits_pair)
         if obs_data is not None:
             data[i_q, :] = obs_data[1][0:n_t_steps]
     return data, t_tick_indices, t_tick_labels, qubits
