@@ -199,7 +199,7 @@ class LindbladMPOSolver:
                     )
                     not_first_value = True
                 file.write("\n")
-            elif type(parameters[key]) == np.ndarray:
+            elif isinstance(parameters[key], np.ndarray):
                 file.write(key + " = ")
                 for i in range(parameters[key].shape[0]):
                     file.write(str(parameters[key][i]))

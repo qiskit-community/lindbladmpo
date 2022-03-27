@@ -103,6 +103,10 @@ disable=arguments-renamed,              # TODO: investigate / re-enable
         unspecified-encoding,           # TODO: investigate / re-enable
         use-dict-literal,               # TODO: investigate / re-enable
         use-list-literal,               # TODO: investigate / re-enable
+        consider-using-in,
+        too-many-boolean-expressions,
+        consider-using-enumerate,
+
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

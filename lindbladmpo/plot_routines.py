@@ -15,7 +15,6 @@ from typing import Optional, Tuple, List, Union, Any, Sequence
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import numpy as np
-from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 
 
 LINDBLADMPO_TEX_LABELS = {
@@ -313,7 +312,7 @@ def prepare_1q_space_time_data(
                     qubits: The qubits used in the data.
     """
 
-    t_eval, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(
+    _, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(
         parameters, n_t_ticks, t_ticks_round, t_init, t_final
     )
     if qubits is None:
@@ -323,7 +322,7 @@ def prepare_1q_space_time_data(
     n_qubits = len(qubits)
     data = np.full(shape=(n_qubits, n_t_steps), dtype=float, fill_value=np.nan)
     for i_q, qubit in enumerate(qubits):
-        obs_data, s_tex_label = prepare_curve_data(
+        obs_data, _ = prepare_curve_data(
             result, "obs-1q", s_obs_name, (qubit,)
         )
         if obs_data is not None:
@@ -365,6 +364,9 @@ def prepare_2q_space_time_data(
                     t_tick_indices: The indices of the time axis tick marks.
                     t_tick_labels: The formatted labels of the time axis tick marks.
                     qubits: The qubits used in the data.
+
+    Raises:
+            Exception if not just one of qubit_0 and qubit_1 is set to None.
     """
     _, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(
         parameters, n_t_ticks, t_ticks_round, t_init, t_final
@@ -384,7 +386,7 @@ def prepare_2q_space_time_data(
             qubits_pair = (qubit, qubit_1)
         else:  # else can be used according to the verification above
             qubits_pair = (qubit_0, qubit)
-        obs_data, s_tex_label = prepare_curve_data(
+        obs_data, _ = prepare_curve_data(
             result, "obs-2q", s_obs_name, qubits_pair
         )
         if obs_data is not None:
@@ -415,7 +417,7 @@ def prepare_2q_matrix_data(
         t = parameters["t_final"]
     qubits = np.arange(N)
     n_qubits = len(qubits)
-    data, s_tex_label = prepare_2q_correlation_matrix(result, s_obs_name, t, n_qubits)
+    data, _ = prepare_2q_correlation_matrix(result, s_obs_name, t, n_qubits)
     return data, qubits
 
 
@@ -640,7 +642,7 @@ def plot_1q_obs_curves(
     if s_title is None:
         s_title = f"$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$"
     ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-    _, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
+    _, _, t_tick_labels, _ = prepare_time_data(parameters)
     # ax.set_xticks(t_tick_indices)
     ax.set_xticks(t_tick_labels)
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
@@ -687,7 +689,7 @@ def plot_2q_obs_curves(
             f"$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$"
         )
     ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-    _, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
+    _, _, t_tick_labels, _ = prepare_time_data(parameters)
     # ax.set_xticks(t_tick_indices)
     ax.set_xticks(t_tick_labels)
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
@@ -732,7 +734,7 @@ def plot_2q_correlation_curves(
     if s_title is None:
         s_title = f"$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle_{{c}}$"
     ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
-    _, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
+    _, _, t_tick_labels, _ = prepare_time_data(parameters)
     # ax.set_xticks(t_tick_indices)
     ax.set_xticks(t_tick_labels)
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
@@ -766,7 +768,7 @@ def plot_global_obs_curve(
     obs_data, s_tex_label = prepare_curve_data(result, "global", s_obs_name, ())
     s_title = f"${s_tex_label}(t)$"
     ax = plot_curves([obs_data], [s_title], s_title, ax, fontsize)
-    _, t_tick_indices, t_tick_labels, _ = prepare_time_data(parameters)
+    _, _, t_tick_labels, _ = prepare_time_data(parameters)
     # ax.set_xticks(t_tick_indices)
     ax.set_xticks(t_tick_labels)
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
