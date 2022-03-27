@@ -5,10 +5,14 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+
+"""
+Tests of the actual solver model and results.
+"""
+
 import os
-from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 import unittest
-import numpy as np
+from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 
 s_output_path = (
     os.path.abspath("./output") + "/"
@@ -20,7 +24,10 @@ s_solver_path = None
 
 
 class LindbladMPOSolverModel(unittest.TestCase):
+    """The class testing the actual solver model and numerical results."""
+
     def test_All_zero(self):
+        """Test a trivial setup."""
         solver_params = {
             "tau": 1,
             "t_final": 1,
@@ -42,6 +49,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
         self.assertEqual(solver.result["obs-1q"][("z", (1,))][1][-1], expected_Z)
 
     def test_hz_not_zero(self):
+        """Test the dynamics with h_z nonzero."""
         solver_params = {
             "tau": 1,
             "t_final": 1,
@@ -65,6 +73,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
         self.assertEqual(solver.result["obs-1q"][("z", (1,))][1][-1], expected_Z)
 
     def test_steady_state(self):
+        """Test a strong decay to the Bloch sphere's south pole."""
         solver_params = {
             "tau": 1,
             "t_final": 10,
@@ -88,6 +97,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
         self.assertAlmostEqual(solver.result["obs-1q"][("z", (1,))][1][-1], expected_Z)
 
     def test_steady_state_2(self):
+        """Test an intermediate-z steady state."""
         solver_params = {
             "tau": 1,
             "t_final": 10,

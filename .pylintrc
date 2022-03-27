@@ -106,6 +106,8 @@ disable=arguments-renamed,              # TODO: investigate / re-enable
         consider-using-in,
         too-many-boolean-expressions,
         consider-using-enumerate,
+        redundant-unittest-assert,
+        broad-except,
 
 
 # Enable the message, report, category or checker with the given id(s). You can

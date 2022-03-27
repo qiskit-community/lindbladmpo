@@ -5,10 +5,14 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
-from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 
-import numpy as np
+"""
+Tests of the solver parameters handling.
+"""
+
 import unittest
+import numpy as np
+from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 
 # Defaults that should not interfere with the parameters check, are added just so we don't fail
 # due to them being required arguments (don't have default values):
@@ -30,67 +34,80 @@ s_solver_path = None
 
 
 class LindbladMPOSolverTestArguments(unittest.TestCase):
+    """This class tests the handling of parameters by the solver."""
+
     def test_arg_N_F1(self):
+        """Argument test."""
         parameters = {"N": "5", "t_final": DEFAULT_T_FINAL, "tau": DEFAULT_TAU}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
     def test_arg_N_F2(self):
+        """Argument test."""
         parameters = {"N": -1, "t_final": DEFAULT_T_FINAL, "tau": DEFAULT_TAU}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
     def test_arg_N_P(self):
+        """Argument test."""
         parameters = {"N": 20, "t_final": DEFAULT_T_FINAL, "tau": DEFAULT_TAU}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertEqual(expected, out)
 
     def test_arg_t_final_F1(self):
+        """Argument test."""
         parameters = {"t_final": "20", "tau": DEFAULT_TAU, "N": DEFAULT_N}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
     def test_arg_t_final_F2(self):
+        """Argument test."""
         parameters = {"t_final": -20, "tau": DEFAULT_TAU, "N": DEFAULT_N}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
     def test_arg_t_final_P(self):
+        """Argument test."""
         parameters = {"t_final": 20, "tau": DEFAULT_TAU, "N": DEFAULT_N}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertEqual(expected, out)
 
     def test_arg_t_init_P(self):
+        """Argument test."""
         parameters = {"t_init": 10, "t_final": 20, "tau": DEFAULT_TAU, "N": DEFAULT_N}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertEqual(expected, out)
 
     def test_arg_tau_F1(self):
+        """Argument test."""
         parameters = {"tau": "20", "N": DEFAULT_N, "t_final": DEFAULT_T_FINAL}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
     def test_arg_tau_F2(self):
+        """Argument test."""
         parameters = {"tau": -20, "N": DEFAULT_N, "t_final": DEFAULT_T_FINAL}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
     def test_arg_tau_P(self):
+        """Argument test."""
         parameters = {"tau": 20, "N": DEFAULT_N, "t_final": DEFAULT_T_FINAL}
         expected = ""
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertEqual(expected, out)
 
     def test_arg_l_x_F1(self):
+        """Argument test."""
         parameters = {
             "l_x": 3.3,
             "N": DEFAULT_N,
@@ -102,6 +119,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_l_x_F2(self):
+        """Argument test."""
         parameters = {
             "l_x": -4,
             "N": DEFAULT_N,
@@ -113,6 +131,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_l_x_P(self):
+        """Argument test."""
         parameters = {
             "l_x": 4,
             "N": DEFAULT_N,
@@ -124,6 +143,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_l_y_F1(self):
+        """Argument test."""
         parameters = {
             "l_y": 3.3,
             "N": DEFAULT_N,
@@ -135,6 +155,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_l_y_F2(self):
+        """Argument test."""
         parameters = {
             "l_y": -4,
             "N": DEFAULT_N,
@@ -146,6 +167,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_l_y_P(self):
+        """Argument test."""
         parameters = {
             "l_y": 4,
             "N": DEFAULT_N,
@@ -157,6 +179,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_output_step_F1(self):
+        """Argument test."""
         parameters = {
             "output_step": 1.1,
             "N": DEFAULT_N,
@@ -168,6 +191,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_output_step_P(self):
+        """Argument test."""
         parameters = {
             "output_step": 1,
             "N": DEFAULT_N,
@@ -179,6 +203,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_h_x_F1(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": "11",
@@ -190,6 +215,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_F2(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": (1, 1),
@@ -201,6 +227,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_F3(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": np.zeros([5, 5]),
@@ -212,6 +239,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_F4(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": [1, 2, 3, 4],
@@ -223,6 +251,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_F5(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": [1, 2, 3, 4, "5"],
@@ -234,6 +263,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_F6(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": np.array([1, 2, 3, 4, 5, 6]),
@@ -245,6 +275,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_F7(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": np.array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]),
@@ -256,6 +287,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_h_x_P1(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": [1, 2, 3, 4, 5],
@@ -267,6 +299,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_h_x_P2(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "h_x": np.array([1, 2, 3, 4, 5]),
@@ -278,6 +311,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_J_F1(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": [
@@ -295,6 +329,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_J_F2(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": [
@@ -311,6 +346,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_J_F3(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": [
@@ -328,6 +364,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_J_F4(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": np.array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]),
@@ -339,6 +376,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_J_F5(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": np.array([[1, 2.0], [0, 0], (1 + 1, 3.0)]),
@@ -350,6 +388,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_J_F6(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": np.array(
@@ -369,6 +408,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_J_P_1(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": np.array(
@@ -388,6 +428,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_J_P_2(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": -55,
@@ -399,6 +440,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_J_P_3(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": [
@@ -416,6 +458,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_J_P_4(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": np.array(-55),
@@ -427,6 +470,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_J_P_5(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "J_z": np.zeros((5, 5)),
@@ -438,6 +482,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_init_Pauli_state_F1(self):
+        """Argument test."""
         parameters = {
             "init_pauli_state": "-a",
             "N": DEFAULT_N,
@@ -449,6 +494,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_init_Pauli_state_F2(self):
+        """Argument test."""
         parameters = {
             "init_pauli_state": -22,
             "N": DEFAULT_N,
@@ -460,6 +506,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_init_Pauli_state_P(self):
+        """Argument test."""
         parameters = {
             "init_pauli_state": "-x",
             "N": DEFAULT_N,
@@ -471,6 +518,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_b_periodic_x_F1(self):
+        """Argument test."""
         parameters = {
             "b_periodic_x": -22,
             "N": DEFAULT_N,
@@ -482,6 +530,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_b_periodic_x_P(self):
+        """Argument test."""
         parameters = {
             "b_periodic_x": False,
             "N": DEFAULT_N,
@@ -493,6 +542,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_trotter_order_F1(self):
+        """Argument test."""
         parameters = {
             "trotter_order": 5,
             "N": DEFAULT_N,
@@ -504,6 +554,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_trotter_order_P(self):
+        """Argument test."""
         parameters = {
             "trotter_order": 3,
             "N": DEFAULT_N,
@@ -515,6 +566,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_metadata_F1(self):
+        """Argument test."""
         parameters = {
             "metadata": "CR/LF \n",
             "N": DEFAULT_N,
@@ -526,6 +578,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_metadata_F2(self):
+        """Argument test."""
         parameters = {
             "metadata": 0,
             "N": DEFAULT_N,
@@ -537,6 +590,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_cut_off_rho_F1(self):
+        """Argument test."""
         parameters = {
             "cut_off_rho": [1, 1],
             "N": DEFAULT_N,
@@ -548,6 +602,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_cut_off_rho_P(self):
+        """Argument test."""
         parameters = {
             "cut_off_rho": 1.1e-199,
             "N": DEFAULT_N,
@@ -559,6 +614,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_1q_components_F1(self):
+        """Argument test."""
         parameters = {
             "1q_components": [1, 1],
             "N": DEFAULT_N,
@@ -570,6 +626,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_1q_components_P(self):
+        """Argument test."""
         parameters = {
             "1q_components": ["x", "y"],
             "N": DEFAULT_N,
@@ -581,6 +638,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_1q_indices_F1(self):
+        """Argument test."""
         parameters = {
             "1q_indices": [1, 1],
             "N": DEFAULT_N,
@@ -592,6 +650,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_1q_indices_F2(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "1q_indices": [2, 5, 1],
@@ -603,6 +662,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_1q_indices_P(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "1q_indices": [2, 4, 1],
@@ -614,6 +674,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_2q_components_F1(self):
+        """Argument test."""
         parameters = {
             "2q_components": ["xx", "xx"],
             "N": DEFAULT_N,
@@ -625,6 +686,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_2q_components_F2(self):
+        """Argument test."""
         parameters = {
             "2q_components": "xy",
             "N": DEFAULT_N,
@@ -636,6 +698,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_2q_components_P1(self):
+        """Argument test."""
         parameters = {
             "2q_components": ["XX", "XY", "XZ", "YY", "YZ", "ZZ"],
             "N": DEFAULT_N,
@@ -647,6 +710,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_2q_components_P2(self):
+        """Argument test."""
         parameters = {
             "2q_components": ["XX", "YY", "YZ", "ZZ"],
             "N": DEFAULT_N,
@@ -658,6 +722,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_2q_indices_F1(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "2q_indices": [(1, 2), (3, 1), (2, 5), (3, 4)],
@@ -669,6 +734,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_2q_indices_F2(self):
+        """Argument test."""
         parameters = {
             "N": 2,
             "2q_indices": [
@@ -689,6 +755,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertNotEqual(expected, out)
 
     def test_arg_2q_indices_P1(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "2q_indices": [(1, 2), (3, 1), (2, 4), (3, 4)],
@@ -700,6 +767,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_2q_indices_P2(self):
+        """Argument test."""
         parameters = {
             "N": 5,
             "2q_indices": [(1, 2), (3, 4)],
@@ -711,7 +779,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         self.assertEqual(expected, out)
 
     def test_arg_1(self):
-        # this check should pass (no errors)
+        """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 5
         parameters["t_final"] = 20
@@ -760,12 +828,11 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["2q_indices"] = [(1, 2), (3, 1), (2, 4), (3, 4)]
 
         out = LindbladMPOSolver.verify_parameters(parameters)
-        if out == "":
-            self.assertTrue(True)  # print("Check 1 Passed")
-        else:
-            self.assertTrue(False)  # print("Check 1 Failed")
+        # this check should pass (no errors)
+        self.assertTrue(out == "")
 
     def test_arg_2(self):
+        """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 5
         parameters["t_final"] = -9  # should fail
@@ -819,13 +886,10 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["2q_indices"] = [(1, 2), (3, 5, 4), (2, 4)]  # this should fail
 
         out = LindbladMPOSolver.verify_parameters(parameters)
-        if out.count("Error") == 13:
-            self.assertTrue(True)
-        else:
-            self.assertTrue(False)
+        self.assertTrue(out.count("Error") == 13)
 
     def test_arg_3(self):
-        # in this check we should get 25 fails !
+        """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 9
         parameters["t_final"] = "22"
@@ -871,13 +935,10 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["2q_indices"] = [(1, 2), (3, 5, 4), (2, 4)]
 
         out = LindbladMPOSolver.verify_parameters(parameters)
-        if out.count("Error") == 24:
-            self.assertTrue(True)
-        else:
-            self.assertTrue(False)
+        self.assertTrue(out.count("Error") == 24)
 
     def test_arg_4(self):
-        # this check should pass (no errors)
+        """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 5
         parameters["t_final"] = 20
@@ -925,12 +986,11 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["2q_indices"] = [(1, 2), (3, 2), (2, 4)]
 
         out = LindbladMPOSolver.verify_parameters(parameters)
-        if out == "":
-            self.assertTrue(True)
-        else:
-            self.assertTrue(False)
+        # this check should pass (no errors)
+        self.assertTrue(out == "")
 
     def test_arg_5(self):
+        """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 5
         parameters["t_final"] = 20
@@ -980,10 +1040,11 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
             solver = LindbladMPOSolver(parameters, s_cygwin_path, s_solver_path)
             solver.build()
             self.assertTrue(False, "Test failed, expected to get an exception\n")
-        except:
+        except Exception:
             self.assertTrue(True)
 
     def test_arg_6(self):
+        """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 5
         parameters["t_final"] = 20
@@ -1033,7 +1094,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
             solver = LindbladMPOSolver(parameters, s_cygwin_path, s_solver_path)
             solver.build()
             self.assertTrue(True)
-        except:
+        except Exception:
             self.assertTrue(False, "Test failed, exception was not expected")
 
 
