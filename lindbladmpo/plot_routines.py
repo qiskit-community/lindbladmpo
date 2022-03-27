@@ -364,7 +364,7 @@ def prepare_2q_space_time_data(
                     qubits: The qubits used in the data.
 
     Raises:
-            Exception if not just one of qubit_0 and qubit_1 is set to None.
+            Exception: if neither of or both qubit_0 and qubit_1 are set to None.
     """
     _, t_tick_indices, t_tick_labels, n_t_steps = prepare_time_data(
         parameters, n_t_ticks, t_ticks_round, t_init, t_final
