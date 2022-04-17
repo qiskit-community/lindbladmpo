@@ -11,6 +11,7 @@ Routines for managing the research project running multiple simulations.
 """
 
 import os.path
+from lindbladmpo.LindbladMPOSolver import *
 from lindbladmpo.examples.qubit_driving.topologies import *
 from lindbladmpo.examples.qubit_driving.output_routines import *
 from lindbladmpo.plot_routines import *
