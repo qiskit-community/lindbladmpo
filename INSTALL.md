@@ -49,12 +49,16 @@ Run the following command in the Linux/Mac OS terminal, or on Windows - navigate
 
 ## Building the lindbladmpo solver
 
-In order to leave the ITensor library and download the lindbladmpo repo and build the solver, run the following commands in the terminal:
+In order to leave the ITensor library and clone the lindbladmpo repo execute the following commands in the terminal:
 
     cd ..
     mkdir lindbladmpo
     cd lindbladmpo
-    git clone https://github.com/haggaila/lindbladmpo.git .
+    git clone https://github.com/qiskit-community/lindbladmpo.git .
+
+The above clone command uses https, while you can also clone using ssh if that is how you usually work with github.
+In order to build the solver binaries from enter the sources directory type:
+
     cd src
     make
 
