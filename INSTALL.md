@@ -2,7 +2,7 @@
 
 ## Cygwin Installation - Windows only
 
-This stage is only for Windows users.
+This step is for Windows users only.
 
 Go to Cygwin's official site:
 
@@ -12,7 +12,7 @@ Download the executable and run the installation process, making sure to install
 
     gcc, BLAS, LAPACK.
 
-After the installation is finished open the Cygwin terminal and follow the instructions below.
+After the installation is done open the Cygwin64 Terminal App and follow the instructions below.
 
 Note that in Cygwin the root directory of a particular drive (say "C"): 
 
@@ -30,50 +30,61 @@ To create a particular directory under which the git repos will be downloaded, e
 
 ## ITensor installation
 
-Execute the following commands in the terminal (on Windows, replace the "cp" command with "copy"). This assumes that you have git locally configured:
+Execute the following commands in the terminal. This assumes that you have git locally configured:
 
     mkdir itensor3
     cd itensor3
     git clone https://github.com/ITensor/ITensor.git .
+
+The above clone command uses https, while you can also clone using ssh if that is how you usually work with github.
+
+Now that ITensor is cloned locally, its binaries should be built. The default settings are configured for _Linux_ and _Windows_ (using Cygwin), with the basic BLAS/LAPACK installation.
+
+On _Linux_ execute:
+
     cp options.mk.sample options.mk
-
-Open options.mk in a text editor and if necessary, comment/uncomment the lines configuring the compilation and BLAS/LAPACK platform according to the operating system (Linux, Mac OS or Cygwin on Windows), and save. By default, no editing is required on Linux or Windows (using cygwin), with the basic BLAS/LAPACK installation.
-
-Alternatively, within the lindbladmpo repository (see below) there is an options.mk file that can also be copied to the itensor directory, where the choice of operating system is done once by defining a variable at the top of the file (or setting it from the command-line invokation of make).
-
-Execute the following command in the Linux/Mac OS terminal, or on Windows - navigate inside the Cygwin64 Terminal to the same directory and type:
-
     make
+
+On _Mac OS_ or on _Windows_ (in the Cygwin64 Terminal App), there are two options:
+- Use the first command as above to copy `options.mk.sample` into `options.mk` but then first edit `options.mk` in a text editor, commenting out the lines configuring the compilation and BLAS/LAPACK platform for Linux and uncommenting the ones for your platform (the file is well documented). Save and exit the editor, typing `make` in the command line to build the binaries.
+- Alternatively, within the lindbladmpo repository (see below) there is an `options.mk` file that can also be copied to the ITensor directory, where the choice of operating system is done once by defining the variable `OS_TARGET` at the top of the file, or setting it from the command-line invokation. See the details below and repeat the build of ITensor binaries.
 
 ## Building the lindbladmpo solver
 
-In order to leave the ITensor library and clone the lindbladmpo repo execute the following commands:
+In order to leave the ITensor folder and clone the lindbladmpo repository execute the following commands:
 
     cd ..
     mkdir lindbladmpo
     cd lindbladmpo
     git clone https://github.com/qiskit-community/lindbladmpo.git .
 
-The above clone command uses https, while you can also clone using ssh if that is how you usually work with github.
 In order to build the solver binaries from the sources directory type:
 
     cd src
     make
 
-The above script will work for the default locations. In order to override where ITensor has been built, use:
+The above script will work for the default locations, and on _Linux_ only (see below for _Mac OS_ and _Windows_). In order to override where ITensor has been built, use:
 
     make ITENSOR3_DIR="..."
 
-where above, replace the three dots with the path to the itensor library, for example "/cygdrive/c/Users/Goran/itensor3".
+where above, replace the three dots with the path to the ITensor library, for example "/cygdrive/c/Users/Goran/itensor3".
 
-In order to run a first test of the solver (with output to the console, and result files saved), type in the Linux terminal:
+In order to build on _Mac OS_ execute:
+
+    make OS_TARGET=MACOS
+    
+while in order to build on _Windows_ execute:
+
+    make OS_TARGET=WINDOWS
+
+The default `OS_TARGET` parameter can also be set directly at the top of the `options.mk` file.
+
+Finally, in order to run a simple test of the solver (with output to the console, and result files saved), execute:
 
     cd ../bin/
     ./lindbladmpo
 
-Or, on Windows, navigate inside the Cygwin64 Terminal on Windows to the /bin directory as above, and type:
-
-    ./lindbladmpo
+Great! Now we suggest opening your favorite Python IDE and following the tutorial and examples. Go back to the [README file](README.md).
 
 ## Note on multithreading
 
