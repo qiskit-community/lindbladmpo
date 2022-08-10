@@ -84,7 +84,7 @@ Finally, in order to run a simple test of the solver (with output to the console
     cd ../bin/
     ./lindbladmpo
 
-Great! Now we suggest opening your favorite Python IDE and following the tutorial and examples. Go back to the [README file](README.md).
+Great! Now we suggest opening your favorite Python IDE and following the tutorial and examples - go back to the [Table of Contents](README.md#table-of-contents).
 
 ## Note on multithreading
 
