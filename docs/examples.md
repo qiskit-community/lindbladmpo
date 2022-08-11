@@ -22,7 +22,7 @@ The `/lindbladmpo/examples` directory contains three subdirectories with Python 
   
 * `/examples/qubit_driving` - Contains an example for a large scale
   research project performed using the solver package - see [arXiv:2203.05871](https://arxiv.org/abs/2203.05871).
-  This paper also exaplains in detail how to construct and verify numerical results with multiqubit simulations.
+  This paper also explains in detail how to construct and verify numerical results with multiqubit simulations.
   The entry point file (to run) is 
   [run-driving.py](/lindbladmpo/examples/qubit_driving/run-driving.py),
   which runs a simulation according  to some parameters given in this file,
@@ -38,10 +38,10 @@ In the disordered chain and the qubit driving project examples above, there is a
 
 ## Generating an input file for simulations on a remote machine
   
-An important use case is to run the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.  In this case, follow the steps below after generaring an inout file using the Python interface:
+An important use case is to run the solver executable on a remote server (or cluster node) with an input file generated using the Python interface on a different machine.  In this case, follow the steps below after generaring an input file using the Python interface:
 * Update the paths inserted in the input file to be those relevant for target machine.
 * Run the solver from the command line on the target machine. The solver executable expects a single parameter in its command line,
-which is the string literal `input_file`, followed by a space and the file name of the input file. See the installation instructions for guaranteeing the proper multithreaded BLAS/LAPACK libraries are available.
+which is the string literal `input_file`, followed by a space and the file name of the input file. See the installation instructions for guaranteeing that the proper multithreaded BLAS/LAPACK libraries are available.
 * When the solver terminates, use the Python interface to load the output data files and plot the results.
 
 
