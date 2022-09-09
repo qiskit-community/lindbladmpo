@@ -175,7 +175,7 @@ class LindbladMPOSolver:
         print(s_input_file)
         file = open(s_input_file, "w")
         for key in parameters.keys():
-            if key == "b_unique_id":
+            if key == "b_unique_id" or parameters[key] is None:
                 pass
             elif key == "output_files_prefix":
                 file.write(key + " = " + s_output_path + "\n")
@@ -211,7 +211,7 @@ class LindbladMPOSolver:
                 or key == "1q_components"
                 or key == "2q_components"
             ):
-                if isinstance(parameters[key], str):
+                if isinstance(parameters[key], str) or isinstance(parameters[key], float):
                     val_list = [parameters[key]]
                 else:
                     val_list = parameters[key]
@@ -430,7 +430,7 @@ class LindbladMPOSolver:
             )
             return check_msg
         for key in dict.keys(parameters):
-            if (
+            if parameters[key] is None or (
                 isinstance(parameters[key], str) and "" == parameters[key]
             ):  # ignore empty entrances/space holders <"">
                 continue
@@ -633,32 +633,38 @@ class LindbladMPOSolver:
                     )
                     continue
             elif key == "init_pauli_state":
-                if not isinstance(parameters[key], str) and not isinstance(
-                    parameters[key], list
-                ):
+                if not isinstance(parameters[key], (str, float)) and \
+                    not isinstance(parameters[key], list) and \
+                    not isinstance(parameters[key], np.ndarray):
                     check_msg += (
                         "Error 350: "
                         + key
-                        + " must not be a string or a list of strings\n"
+                        + " must be a string, float or a list or array of strings or floats\n"
                     )
                     continue
                 init_list = (
                     [parameters[key]]
-                    if isinstance(parameters[key], str)
+                    if isinstance(parameters[key], (str, float))
                     else parameters[key]
                 )
-                for s_init in init_list:
-                    if not isinstance(s_init, str):
+                for q_init in init_list:
+                    if isinstance(q_init, float):
+                        if q_init < 0 or q_init > 1:
+                            check_msg += (
+                                "Error 361: a float member of " + key + " must be between 0 and 1\n"
+                            )
+                        continue
+                    if not isinstance(q_init, str):
                         check_msg += (
-                            "Error 360: each member of " + key + " must be a string\n"
+                            "Error 360: each member of " + key + " must be a string or a float\n"
                         )
                         continue
                     allowed_init = ["+x", "-x", "+y", "-y", "+z", "-z"]
-                    if s_init.lower() not in allowed_init:
+                    if q_init.lower() not in allowed_init:
                         check_msg += (
                             "Error 370: "
                             + key
-                            + " can only be one of: +x,-x,+y,-y,+z, z\n"
+                            + " can only be one of: +x,-x,+y,-y,+z,-z\n"
                         )
                         continue
             elif (

@@ -157,16 +157,24 @@ int main(int argc, char *argv[])
 	if (load_prefix != "" && b_graph_state)
 		cout2 << "Error: either load_files_prefix or init_graph_state can be nonempty, but not both.\n",
 		exit(1);
-	if ((load_prefix != "" || b_graph_state) && a_init_len > 1)
-		cout2 << "Error: if either load_files_prefix or init_graph_state are nonempty, " <<
+	if (load_prefix != "" && a_init_len > 1)
+		cout2 << "Error: if load_files_prefix is nonempty, " <<
 		"init_pauli_state must be left empty or unspecified.\n", exit(1);
+	if (a_init_len == 0)
+		a_init = vector<string>(N, "+z");
+	else if (a_init_len == 1)
+		a_init = vector<string>(N, a_init[0]);
 	if (b_graph_state)
 	{
 		validate_2q_list(graph_pairs, N, "init_graph_state");
-		a_init = vector<string>(N, "+x");
+		for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
+		{
+			const int i = graph_pairs[n], j = graph_pairs[n + 1];
+			a_init[i] = "+x";
+			a_init[j] = "+x";
+		}
+
 	}
-	if (a_init_len == 1)
-		a_init = vector<string>(N, a_init[0]);
 
 	MPS psi;
 	bool psi_defined = false;
@@ -185,8 +193,10 @@ int main(int argc, char *argv[])
     	// Set the initial wavefunction matrix product state
 		auto initState = InitState(C.sites);
 		for (int i = 1; i <= N; ++i) // Start with all spins up
-		initState.set(i, "Up");
+			initState.set(i, "Up");
 		psi = MPS(initState);
+		vector<double> a_mixed_state = vector<double>(N, 2.);
+		// We set a default value of 2 that will be ignored below, unless overwritten
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
@@ -211,7 +221,20 @@ int main(int argc, char *argv[])
 				I1 = -sqrt05;
 			}
 			else
-				cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state (should be in {+x, -x, +y, -y, +z, -z}).\n", exit(1);
+			{
+				R0 = 1.;  // A valid value must be set to get a regular pure state
+				double x;
+				try
+				{
+				  	double b = stod(s_init);
+				  	a_mixed_state[(unsigned int)site_number] = b;
+				}
+				catch (...)
+				{
+					cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state "
+						"(should be a string in {+x, -x, +y, -y, +z, -z}, or a float).\n", exit(1);
+				}
+			}
 
             auto spin_ind = siteIndex(psi, site_number);
             if (site_number == 1)
@@ -222,7 +245,7 @@ int main(int argc, char *argv[])
 				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
 				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
 			}
-			if (site_number == N)
+			else if (site_number == N)
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
@@ -230,7 +253,7 @@ int main(int argc, char *argv[])
 				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
 				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
 			}
-			if (site_number > 1 && site_number < N)
+			else
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				Index ri = rightLinkIndex(psi, site_number);
@@ -261,6 +284,37 @@ int main(int argc, char *argv[])
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
+		for (int site_number = 1; site_number <= N; site_number++)
+        {
+        	double b = a_mixed_state[(unsigned int)site_number];
+        	if (b >= 0. && b <= 1.)
+        	{
+				psi_defined=false;
+				auto pauli_ind = siteIndex(C.rho, site_number);
+				if (site_number == 1) {
+						  Index ri = rightLinkIndex(C.rho, site_number);
+						  C.rho.ref(site_number).set(pauli_ind = 1, ri = 1, b);// |u><u|
+						  C.rho.ref(site_number).set(pauli_ind = 2, ri = 1, 0);// |d><u|
+						  C.rho.ref(site_number).set(pauli_ind = 3, ri = 1, 0);// |u><d|
+						  C.rho.ref(site_number).set(pauli_ind = 4, ri = 1, 1-b);// |d><d|
+				}
+				else if (site_number == N) {
+						  Index li = leftLinkIndex(C.rho, site_number);
+						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, b);// |u><u|
+						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, 0);// |d><u|
+						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, 0);// |u><d|
+						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, 1-b);// |d><d|
+				}
+				else {
+						  Index li = leftLinkIndex(C.rho, site_number);
+						  Index ri = rightLinkIndex(C.rho, site_number);
+						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, ri = 1, b);// |u><u|
+						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, ri = 1, 0);// |d><u|
+						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, ri = 1, 0);// |u><d|
+						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, ri = 1, 1-b);// |d><d|
+				 }
+        	}
+		}
 		cout2 << "psi2rho done.\n";
 		cout2.flush();
 	}
@@ -564,7 +618,7 @@ void validate_2q_list(vector<long> &vect, int N, string const &list_name)
 				"`.\n", exit(1);
 		if (i == j)
 			cout2 << "Error: an invalid identical index pair (" << i << ") found in list `" <<
-				list_name << "`. Two-qubit observables must involve two distinct qubits.\n", exit(1);
+				list_name << "`. Two-qubit operators must involve two distinct qubits.\n", exit(1);
 	}
 }
 

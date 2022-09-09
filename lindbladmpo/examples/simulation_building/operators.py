@@ -83,8 +83,7 @@ class DynamicalOperator(ABC):
             # For a product of two operators, their order must be preserved
             return result
         else:
-            other_type = type(other)
-            if other_type is complex or other_type is float or other_type is int:
+            if self.is_scalar(other):
                 result.compound_type = (
                     "*"  # Indicates operator * scalar for OperatorBuilder
                 )
@@ -96,6 +95,11 @@ class DynamicalOperator(ABC):
             "The second operand of a multiplication must be"
             " a DynamicalOperator class or a scalar."
         )
+
+    @staticmethod
+    def is_scalar(val) -> bool:
+        """Returns True if argument is a scalar number."""
+        return isinstance(val, (complex, float, int))
 
     def __rmul__(self, other):
         """Multiplication of a DynamicalOperator by a scalar."""
