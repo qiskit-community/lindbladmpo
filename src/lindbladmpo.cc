@@ -223,7 +223,6 @@ int main(int argc, char *argv[])
 			else
 			{
 				R0 = 1.;  // A valid value must be set to get a regular pure state
-				double x;
 				try
 				{
 				  	double b = stod(s_init);
@@ -264,11 +263,8 @@ int main(int argc, char *argv[])
 			}
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
-		// Application of control-Z gates on all pairs of sites
 		if (b_graph_state) {
 			cout2 << "Application of control-Z gates on requested pairs of qubits.";
-//			for (int i=1;i<=N;i++)
-//				for (int j=i+1;j<=N;j++)
 			for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
 			{
 				const int i = graph_pairs[n], j = graph_pairs[n + 1];
@@ -296,14 +292,14 @@ int main(int argc, char *argv[])
 						  C.rho.ref(site_number).set(pauli_ind = 1, ri = 1, b);// |u><u|
 						  C.rho.ref(site_number).set(pauli_ind = 2, ri = 1, 0);// |d><u|
 						  C.rho.ref(site_number).set(pauli_ind = 3, ri = 1, 0);// |u><d|
-						  C.rho.ref(site_number).set(pauli_ind = 4, ri = 1, 1-b);// |d><d|
+						  C.rho.ref(site_number).set(pauli_ind = 4, ri = 1, 1. - b);// |d><d|
 				}
 				else if (site_number == N) {
 						  Index li = leftLinkIndex(C.rho, site_number);
 						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, b);// |u><u|
 						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, 0);// |d><u|
 						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, 0);// |u><d|
-						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, 1-b);// |d><d|
+						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, 1. - b);// |d><d|
 				}
 				else {
 						  Index li = leftLinkIndex(C.rho, site_number);
@@ -311,7 +307,7 @@ int main(int argc, char *argv[])
 						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, ri = 1, b);// |u><u|
 						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, ri = 1, 0);// |d><u|
 						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, ri = 1, 0);// |u><d|
-						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, ri = 1, 1-b);// |d><d|
+						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, ri = 1, 1. - b);// |d><d|
 				 }
         	}
 		}
