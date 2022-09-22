@@ -8,7 +8,7 @@
 from driving_routines import *
 
 """
-An example of a large scale research project for the dynamics qubit with XY (flip-flop) interactions
+An example of a large scale research project for the dynamics of qubits with XY (flip-flop) interactions
 with different topologies (connectivity), in which an edge qubit is being driven on resonance
 in the lab frame, and the qubits have alternating frequencies between nearest neighbors.
 The problem is simulated in the frame rotating with the driven qubit's frequency (after a rotating

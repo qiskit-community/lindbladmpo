@@ -231,6 +231,54 @@ def prepare_2q_correlation_matrix(
     return obs_data, s_tex_label
 
 
+def prepare_xy_current_data(
+    result: dict, qubit_pairs: Sequence[Sequence], t: float
+) -> (np.ndarray, str):
+    """
+    Prepare the data used for plotting the current operator between qubit pairs, based on
+    the 'xy' two-qubit observable.
+
+    Args:
+            result: A dictionary from which the observables are taken.
+            qubit_pairs: A sequence of qubit pairs for which the current operator is calculated.
+            t: The simulation time for which the data is to be calculated.
+
+    Returns:
+            A tuple with the following two entries:
+                    obs_data: A list with the current operator for each qubit pair at time `t`.
+                    s_tex_label: A formatted tex label describing the data.
+    """
+    obs_2q_dict = result["obs-2q"]
+    obs_data = np.full(shape=(len(qubit_pairs),), dtype=float, fill_value=np.nan)
+    s_obs_name = 'xy'
+    if obs_2q_dict is not None:
+        for i_bond, bond in enumerate(qubit_pairs):
+            i = bond[0]
+            j = bond[1]
+            if i == j:
+                continue
+            obs_1 = obs_2q_dict.get((s_obs_name, (i, j)))
+            obs_2 = obs_2q_dict.get((s_obs_name, (j, i)))
+            if (
+                obs_1 is not None
+                and obs_2 is not None
+                and len(obs_1[0]) == len(obs_2[0])
+            ):
+                # The data all comes from one simulation, so we can safely assume that the time
+                # arrays are identical, if they are equal in number. Verifying the time array lengths
+                # will avoid crashes due to interrupted simulations with incomplete data files.
+                try:
+                    t_index = obs_2[0].index(t)
+                    obs_data[i_bond] = (
+                        obs_1[1][t_index] - obs_2[1][t_index]
+                    )
+                except ValueError:
+                    pass
+    s_tex_label = f"\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}} -"\
+                  f"\\sigma^{s_obs_name[0]}_{{j}}\\sigma^{s_obs_name[1]}_{{i}}"
+    return obs_data, s_tex_label
+
+
 def plot_curves(
     obs_data_list: List[Tuple[Any, Any]],
     tex_labels: Optional[List[str]] = None,

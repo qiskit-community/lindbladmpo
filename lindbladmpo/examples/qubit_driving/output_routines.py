@@ -79,11 +79,14 @@ def find_db_files(s_db_path: str):
     Returns:
         files: A list with db (.csv) files in the folder.
     """
-    s_data_path = Path(s_db_path)
-    files = []
-    for item in s_data_path.glob("**/*"):
-        if item.suffix in [".csv"]:
-            files.append(Path.resolve(item))
+    if os.path.isfile(s_db_path):
+        files = [s_db_path]
+    else:
+        files = []
+        s_data_path = Path(s_db_path)
+        for item in s_data_path.glob("**/*"):
+            if item.suffix in [".csv"]:
+                files.append(Path.resolve(item))
     return files
 
 

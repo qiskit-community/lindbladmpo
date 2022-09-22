@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 				try
 				{
 				  	double b = stod(s_init);
-				  	a_mixed_state[(unsigned int)site_number] = b;
+				  	a_mixed_state[(unsigned int)(site_number - 1)] = b;
 				}
 				catch (...)
 				{
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
 		C.psi2rho(psi, argsRho);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
-        	double b = a_mixed_state[(unsigned int)site_number];
+        	double b = a_mixed_state[(unsigned int)(site_number - 1)];
         	if (b >= 0. && b <= 1.)
         	{
 				psi_defined=false;
