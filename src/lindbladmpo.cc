@@ -160,6 +160,8 @@ int main(int argc, char *argv[])
 	if (load_prefix != "" && a_init_len > 1)
 		cout2 << "Error: if load_files_prefix is nonempty, " <<
 		"init_pauli_state must be left empty or unspecified.\n", exit(1);
+	if (b_graph_state && a_init_len>0)
+		cout2<<"Warning: the graph state initialization will overwrite the 'init_pauli_state' parameters on the sites involved in the graph.\n";
 	if (a_init_len == 0)
 		a_init = vector<string>(N, "+z");
 	else if (a_init_len == 1)
@@ -169,11 +171,10 @@ int main(int argc, char *argv[])
 		validate_2q_list(graph_pairs, N, "init_graph_state");
 		for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
 		{
-			const int i = graph_pairs[n], j = graph_pairs[n + 1];
+			const int i = graph_pairs[n]-1, j = graph_pairs[n + 1]-1;
 			a_init[i] = "+x";
 			a_init[j] = "+x";
 		}
-
 	}
 
 	MPS psi;
@@ -264,14 +265,14 @@ int main(int argc, char *argv[])
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
 		if (b_graph_state) {
-			cout2 << "Application of control-Z gates on requested pairs of qubits.";
+			cout2 << "Application of control-Z gates on requested ("<<graph_pairs.size()/2<<") pairs of qubits.";
 			for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
 			{
 				const int i = graph_pairs[n], j = graph_pairs[n + 1];
 				ApplyControlZGate(psi,C.sites,i,j);
 			}
 			psi.orthogonalize(Args("Cutoff",0));
-			cout2<<"done.\n";
+			cout2<<" Done.\n";
 			cout2<<"|psi> MPS max. bond dim.="<< maxLinkDim(psi)<<"\n";
 			//for (int c=1;c<=N-1;c++)
 			int c=N/2;
@@ -289,25 +290,37 @@ int main(int argc, char *argv[])
 				auto pauli_ind = siteIndex(C.rho, site_number);
 				if (site_number == 1) {
 						  Index ri = rightLinkIndex(C.rho, site_number);
+						  if (ri.dim()>1) {
+							cout2 << "Error, mixed state initialization is not (yet) implemented when the local bond dimension is >1 (right bond dim="<<ri.dim()<<" at site "<<site_number<<").\n", exit(1);
+						  } else {
 						  C.rho.ref(site_number).set(pauli_ind = 1, ri = 1, b);// |u><u|
 						  C.rho.ref(site_number).set(pauli_ind = 2, ri = 1, 0);// |d><u|
 						  C.rho.ref(site_number).set(pauli_ind = 3, ri = 1, 0);// |u><d|
 						  C.rho.ref(site_number).set(pauli_ind = 4, ri = 1, 1. - b);// |d><d|
+						  }
 				}
 				else if (site_number == N) {
 						  Index li = leftLinkIndex(C.rho, site_number);
+						  if (li.dim()>1) {
+							cout2 << "Error, mixed state initialization is not (yet) implemented when the local bond dimension is >1 (left bond dim="<<li.dim()<<" at site "<<site_number<<").\n", exit(1);
+						  } else {
 						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, b);// |u><u|
 						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, 0);// |d><u|
 						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, 0);// |u><d|
 						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, 1. - b);// |d><d|
+						  }
 				}
 				else {
 						  Index li = leftLinkIndex(C.rho, site_number);
 						  Index ri = rightLinkIndex(C.rho, site_number);
+						  if (ri.dim()>1 || li.dim()>1) {
+							cout2 << "Error, mixed state initialization is not (yet) implemented when the local bond dimension is >1 (bond dimensions="<<ri.dim()<<" and "<<li.dim()<<" at site "<<site_number<<").\n", exit(1);
+						  } else {
 						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, ri = 1, b);// |u><u|
 						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, ri = 1, 0);// |d><u|
 						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, ri = 1, 0);// |u><d|
 						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, ri = 1, 1. - b);// |d><d|
+						  }
 				 }
         	}
 		}
