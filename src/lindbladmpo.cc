@@ -284,44 +284,54 @@ int main(int argc, char *argv[])
 		for (int site_number = 1; site_number <= N; site_number++)
         {
         	double b = a_mixed_state[(unsigned int)(site_number - 1)];
-        	if (b >= 0. && b <= 1.)
+        	if (b >= 0. && b <= 1. )
         	{
 				psi_defined=false;
 				auto pauli_ind = siteIndex(C.rho, site_number);
 				if (site_number == 1) {
 						  Index ri = rightLinkIndex(C.rho, site_number);
-						  if (ri.dim()>1) {
-							cout2 << "Error, mixed state initialization is not (yet) implemented when the local bond dimension is >1 (right bond dim="<<ri.dim()<<" at site "<<site_number<<").\n", exit(1);
-						  } else {
-						  C.rho.ref(site_number).set(pauli_ind = 1, ri = 1, b);// |u><u|
-						  C.rho.ref(site_number).set(pauli_ind = 2, ri = 1, 0);// |d><u|
-						  C.rho.ref(site_number).set(pauli_ind = 3, ri = 1, 0);// |u><d|
-						  C.rho.ref(site_number).set(pauli_ind = 4, ri = 1, 1. - b);// |d><d|
-						  }
+						  int dr=ri.dim();
+						  for (int r=1;r<=dr;r++) {
+								complex<double> trace=0;
+								for (int p=1;p<=4;p+=3) {
+    								trace+=eltC(C.rho.ref(site_number),ri=r,pauli_ind=p);
+								}
+								C.rho.ref(site_number).set(pauli_ind = 1, ri = r, b*trace);// |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, 0);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, ri = r, (1. - b)*trace);// |d><d|
+				 		   }
 				}
 				else if (site_number == N) {
 						  Index li = leftLinkIndex(C.rho, site_number);
-						  if (li.dim()>1) {
-							cout2 << "Error, mixed state initialization is not (yet) implemented when the local bond dimension is >1 (left bond dim="<<li.dim()<<" at site "<<site_number<<").\n", exit(1);
-						  } else {
-						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, b);// |u><u|
-						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, 0);// |d><u|
-						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, 0);// |u><d|
-						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, 1. - b);// |d><d|
-						  }
+						  int dl=li.dim();
+						  for (int l=1;l<=dl;l++) {
+								complex<double> trace=0;
+								for (int p=1;p<=4;p+=3) {
+    								trace+=eltC(C.rho.ref(site_number),li=l,pauli_ind=p);
+								}
+								C.rho.ref(site_number).set(pauli_ind = 1, li = l, b*trace);// |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, 0);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, (1. - b)*trace);// |d><d|
+				 		   }
 				}
 				else {
 						  Index li = leftLinkIndex(C.rho, site_number);
 						  Index ri = rightLinkIndex(C.rho, site_number);
-						  if (ri.dim()>1 || li.dim()>1) {
-							cout2 << "Error, mixed state initialization is not (yet) implemented when the local bond dimension is >1 (bond dimensions="<<ri.dim()<<" and "<<li.dim()<<" at site "<<site_number<<").\n", exit(1);
-						  } else {
-						  C.rho.ref(site_number).set(pauli_ind = 1, li = 1, ri = 1, b);// |u><u|
-						  C.rho.ref(site_number).set(pauli_ind = 2, li = 1, ri = 1, 0);// |d><u|
-						  C.rho.ref(site_number).set(pauli_ind = 3, li = 1, ri = 1, 0);// |u><d|
-						  C.rho.ref(site_number).set(pauli_ind = 4, li = 1, ri = 1, 1. - b);// |d><d|
-						  }
-				 }
+						  int dl=li.dim();int dr=ri.dim();
+						   for (int r=1;r<=dr;r++)
+							for (int l=1;l<=dl;l++) {
+								complex<double> trace=0;
+								for (int p=1;p<=4;p+=3) {
+    								trace+=eltC(C.rho.ref(site_number),li=l,ri=r,pauli_ind=p);
+								}
+								C.rho.ref(site_number).set(pauli_ind = 1, li = l, ri = r, b*trace);// |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, ri = r, 0);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, ri = r, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, ri = r, (1. - b)*trace);// |d><d|
+				 			}
+				}
         	}
 		}
 		cout2 << "psi2rho done.\n";
