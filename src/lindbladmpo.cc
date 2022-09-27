@@ -227,6 +227,9 @@ int main(int argc, char *argv[])
 				try
 				{
 				  	double b = stod(s_init);
+				  	if (b < 0. || b > 1.)
+						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial "
+							"mixed state coefficient (should be in the range [0, 1]).\n", exit(1);
 				  	a_mixed_state[(unsigned int)(site_number - 1)] = b;
 				}
 				catch (...)

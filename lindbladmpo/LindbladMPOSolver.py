@@ -211,7 +211,7 @@ class LindbladMPOSolver:
                 or key == "1q_components"
                 or key == "2q_components"
             ):
-                if isinstance(parameters[key], str) or isinstance(parameters[key], float):
+                if isinstance(parameters[key], (float, str)):
                     val_list = [parameters[key]]
                 else:
                     val_list = parameters[key]
@@ -633,9 +633,11 @@ class LindbladMPOSolver:
                     )
                     continue
             elif key == "init_pauli_state":
-                if not isinstance(parameters[key], (str, float)) and \
-                    not isinstance(parameters[key], list) and \
-                    not isinstance(parameters[key], np.ndarray):
+                if (
+                    not isinstance(parameters[key], (str, float))
+                    and not isinstance(parameters[key], list)
+                    and not isinstance(parameters[key], np.ndarray)
+                ):
                     check_msg += (
                         "Error 350: "
                         + key
@@ -651,12 +653,16 @@ class LindbladMPOSolver:
                     if isinstance(q_init, float):
                         if q_init < 0 or q_init > 1:
                             check_msg += (
-                                "Error 361: a float member of " + key + " must be between 0 and 1\n"
+                                "Error 361: a float member of "
+                                + key
+                                + " must be between 0 and 1\n"
                             )
                         continue
                     if not isinstance(q_init, str):
                         check_msg += (
-                            "Error 360: each member of " + key + " must be a string or a float\n"
+                            "Error 360: each member of "
+                            + key
+                            + " must be a string or a float\n"
                         )
                         continue
                     allowed_init = ["+x", "-x", "+y", "-y", "+z", "-z"]
@@ -878,7 +884,7 @@ class LindbladMPOSolver:
             ):  # expecting an integer tuples list
                 if not isinstance(parameters[key], list):
                     check_msg += (
-                        "Error 570: " + key + " should be an list of tuples of size 2,"
+                        "Error 570: " + key + " should be a list of tuples of size 2,"
                         " containing integers\n"
                     )
                     continue
@@ -895,7 +901,7 @@ class LindbladMPOSolver:
                         check_msg += (
                             "Error 590: "
                             + key
-                            + " should be an list of tuples of size 2, "
+                            + " should be a list of tuples of size 2, "
                             "containing integers\n "
                         )
                         flag_continue = True
@@ -908,7 +914,7 @@ class LindbladMPOSolver:
                         check_msg += (
                             "Error 600: "
                             + key
-                            + " should be an list of tuples of size 2, "
+                            + " should be a list of tuples of size 2, "
                             "containing integers\n "
                         )
                         flag_continue = True
@@ -917,7 +923,7 @@ class LindbladMPOSolver:
                         check_msg += (
                             "Error 610: "
                             + key
-                            + " should be an list of tuples of size 2, "
+                            + " should be a list of tuples of size 2, "
                             "containing integers equal/smaller than "
                             "the total number of qubits\n "
                         )

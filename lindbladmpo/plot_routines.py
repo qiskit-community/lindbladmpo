@@ -250,7 +250,7 @@ def prepare_xy_current_data(
     """
     obs_2q_dict = result["obs-2q"]
     obs_data = np.full(shape=(len(qubit_pairs),), dtype=float, fill_value=np.nan)
-    s_obs_name = 'xy'
+    s_obs_name = "xy"
     if obs_2q_dict is not None:
         for i_bond, bond in enumerate(qubit_pairs):
             i = bond[0]
@@ -269,13 +269,13 @@ def prepare_xy_current_data(
                 # will avoid crashes due to interrupted simulations with incomplete data files.
                 try:
                     t_index = obs_2[0].index(t)
-                    obs_data[i_bond] = (
-                        obs_1[1][t_index] - obs_2[1][t_index]
-                    )
+                    obs_data[i_bond] = obs_1[1][t_index] - obs_2[1][t_index]
                 except ValueError:
                     pass
-    s_tex_label = f"\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}} -"\
-                  f"\\sigma^{s_obs_name[0]}_{{j}}\\sigma^{s_obs_name[1]}_{{i}}"
+    s_tex_label = (
+        f"\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}} -"
+        f"\\sigma^{s_obs_name[0]}_{{j}}\\sigma^{s_obs_name[1]}_{{i}}"
+    )
     return obs_data, s_tex_label
 
 

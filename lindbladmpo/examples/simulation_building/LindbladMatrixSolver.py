@@ -152,7 +152,11 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             for i_qubit in r_qubits:
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
-                    q_init = init_pauli_state[i_qubit] if init_pauli_state is not None else ""
+                    q_init = (
+                        init_pauli_state[i_qubit]
+                        if init_pauli_state is not None
+                        else ""
+                    )
                     if qubit_in_graph[i_qubit]:
                         # If qubit is in a graph state, verify that it's initialized to '+x',
                         # in preparing for the CZs applied below
@@ -165,7 +169,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             )
                     if self._is_float(q_init):
                         b = q_init
-                        diagonal = [b, 1. - b]
+                        diagonal = [b, 1.0 - b]
                         rho_0 *= Diagonal(i_qubit, diagonal)
                     else:
                         rho_0 *= get_operator_from_label(q_init, i_qubit)
