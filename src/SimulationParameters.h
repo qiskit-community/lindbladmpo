@@ -38,6 +38,8 @@ public:
         	// The string format is + or - in the first character, and x, y, z in the second
         	// character, denoting a single-qubit state pointing along the positive/negative
         	// direction of the specified axis of the Bloch sphere.
+        	// If the string is not of this format, it is attempted to be parsed as floating point
+        	// number that defines a diagonal mixed, giving the probability of the |up> state.
         operator[]("init_graph_state") = "";  // Initialize a graph state. A list of qubit indexes
         	// is expected with all pairs on which a CZ gate is applied (after starting with all qubits
         	// along the +x axis).

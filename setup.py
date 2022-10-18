@@ -70,7 +70,7 @@ with open("README.md") as readme_file:
 
 setup(
     name="lindbladmpo",
-    version="0.1.0",
+    version="0.1.1",
     description="A matrix-product-operators solver for the Lindblad master equation",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -86,8 +86,6 @@ setup(
         # "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering",
@@ -96,12 +94,12 @@ setup(
     packages=find_packages(exclude=["test*"]),
     install_requires=REQUIREMENTS,
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     extras_require={
         "visualization": ["matplotlib>=2.1"],
     },
     project_urls={
-        "Source Code": "https://github.com/haggaila/lindbladmpo",
+        "Source Code": "https://github.com/qiskit-community/lindbladmpo",
     },
     zip_safe=False,
 )

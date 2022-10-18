@@ -25,7 +25,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.1.0";
+const string SOLVER_VERSION = "0.1.1";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -157,16 +157,25 @@ int main(int argc, char *argv[])
 	if (load_prefix != "" && b_graph_state)
 		cout2 << "Error: either load_files_prefix or init_graph_state can be nonempty, but not both.\n",
 		exit(1);
-	if ((load_prefix != "" || b_graph_state) && a_init_len > 1)
-		cout2 << "Error: if either load_files_prefix or init_graph_state are nonempty, " <<
+	if (load_prefix != "" && a_init_len > 1)
+		cout2 << "Error: if load_files_prefix is nonempty, " <<
 		"init_pauli_state must be left empty or unspecified.\n", exit(1);
+	if (b_graph_state && a_init_len>0)
+		cout2<<"Warning: the graph state initialization will overwrite the 'init_pauli_state' parameters on the sites involved in the graph.\n";
+	if (a_init_len == 0)
+		a_init = vector<string>(N, "+z");
+	else if (a_init_len == 1)
+		a_init = vector<string>(N, a_init[0]);
 	if (b_graph_state)
 	{
 		validate_2q_list(graph_pairs, N, "init_graph_state");
-		a_init = vector<string>(N, "+x");
+		for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
+		{
+			const int i = graph_pairs[n]-1, j = graph_pairs[n + 1]-1;
+			a_init[i] = "+x";
+			a_init[j] = "+x";
+		}
 	}
-	if (a_init_len == 1)
-		a_init = vector<string>(N, a_init[0]);
 
 	MPS psi;
 	bool psi_defined = false;
@@ -185,8 +194,10 @@ int main(int argc, char *argv[])
     	// Set the initial wavefunction matrix product state
 		auto initState = InitState(C.sites);
 		for (int i = 1; i <= N; ++i) // Start with all spins up
-		initState.set(i, "Up");
+			initState.set(i, "Up");
 		psi = MPS(initState);
+		vector<double> a_mixed_state = vector<double>(N, 2.);
+		// We set a default value of 2 that will be ignored below, unless overwritten
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
@@ -211,7 +222,22 @@ int main(int argc, char *argv[])
 				I1 = -sqrt05;
 			}
 			else
-				cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state (should be in {+x, -x, +y, -y, +z, -z}).\n", exit(1);
+			{
+				R0 = 1.;  // A valid value must be set to get a regular pure state
+				try
+				{
+				  	double b = stod(s_init);
+				  	if (b < 0. || b > 1.)
+						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial "
+							"mixed state coefficient (should be in the range [0, 1]).\n", exit(1);
+				  	a_mixed_state[(unsigned int)(site_number - 1)] = b;
+				}
+				catch (...)
+				{
+					cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state "
+						"(should be a string in {+x, -x, +y, -y, +z, -z}, or a float).\n", exit(1);
+				}
+			}
 
             auto spin_ind = siteIndex(psi, site_number);
             if (site_number == 1)
@@ -222,7 +248,7 @@ int main(int argc, char *argv[])
 				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
 				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
 			}
-			if (site_number == N)
+			else if (site_number == N)
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
@@ -230,7 +256,7 @@ int main(int argc, char *argv[])
 				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
 				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
 			}
-			if (site_number > 1 && site_number < N)
+			else
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				Index ri = rightLinkIndex(psi, site_number);
@@ -241,18 +267,15 @@ int main(int argc, char *argv[])
 			}
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
-		// Application of control-Z gates on all pairs of sites
 		if (b_graph_state) {
-			cout2 << "Application of control-Z gates on requested pairs of qubits.";
-//			for (int i=1;i<=N;i++)
-//				for (int j=i+1;j<=N;j++)
+			cout2 << "Application of control-Z gates on requested ("<<graph_pairs.size()/2<<") pairs of qubits.";
 			for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
 			{
 				const int i = graph_pairs[n], j = graph_pairs[n + 1];
 				ApplyControlZGate(psi,C.sites,i,j);
 			}
 			psi.orthogonalize(Args("Cutoff",0));
-			cout2<<"done.\n";
+			cout2<<" Done.\n";
 			cout2<<"|psi> MPS max. bond dim.="<< maxLinkDim(psi)<<"\n";
 			//for (int c=1;c<=N-1;c++)
 			int c=N/2;
@@ -261,6 +284,59 @@ int main(int argc, char *argv[])
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
+		for (int site_number = 1; site_number <= N; site_number++)
+        {
+        	double b = a_mixed_state[(unsigned int)(site_number - 1)];
+        	if (b >= 0. && b <= 1. )
+        	{
+				psi_defined=false;
+				auto pauli_ind = siteIndex(C.rho, site_number);
+				if (site_number == 1) {
+						  Index ri = rightLinkIndex(C.rho, site_number);
+						  int dr=ri.dim();
+						  for (int r=1;r<=dr;r++) {
+								complex<double> trace=0;
+								for (int p=1;p<=4;p+=3) {
+    								trace+=eltC(C.rho.ref(site_number),ri=r,pauli_ind=p);
+								}
+								C.rho.ref(site_number).set(pauli_ind = 1, ri = r, b*trace);// |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, 0);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, ri = r, (1. - b)*trace);// |d><d|
+				 		   }
+				}
+				else if (site_number == N) {
+						  Index li = leftLinkIndex(C.rho, site_number);
+						  int dl=li.dim();
+						  for (int l=1;l<=dl;l++) {
+								complex<double> trace=0;
+								for (int p=1;p<=4;p+=3) {
+    								trace+=eltC(C.rho.ref(site_number),li=l,pauli_ind=p);
+								}
+								C.rho.ref(site_number).set(pauli_ind = 1, li = l, b*trace);// |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, 0);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, (1. - b)*trace);// |d><d|
+				 		   }
+				}
+				else {
+						  Index li = leftLinkIndex(C.rho, site_number);
+						  Index ri = rightLinkIndex(C.rho, site_number);
+						  int dl=li.dim();int dr=ri.dim();
+						   for (int r=1;r<=dr;r++)
+							for (int l=1;l<=dl;l++) {
+								complex<double> trace=0;
+								for (int p=1;p<=4;p+=3) {
+    								trace+=eltC(C.rho.ref(site_number),li=l,ri=r,pauli_ind=p);
+								}
+								C.rho.ref(site_number).set(pauli_ind = 1, li = l, ri = r, b*trace);// |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, ri = r, 0);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, ri = r, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, ri = r, (1. - b)*trace);// |d><d|
+				 			}
+				}
+        	}
+		}
 		cout2 << "psi2rho done.\n";
 		cout2.flush();
 	}
@@ -564,7 +640,7 @@ void validate_2q_list(vector<long> &vect, int N, string const &list_name)
 				"`.\n", exit(1);
 		if (i == j)
 			cout2 << "Error: an invalid identical index pair (" << i << ") found in list `" <<
-				list_name << "`. Two-qubit observables must involve two distinct qubits.\n", exit(1);
+				list_name << "`. Two-qubit operators must involve two distinct qubits.\n", exit(1);
 	}
 }
 

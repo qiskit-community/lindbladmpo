@@ -99,9 +99,9 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     "The three input parameters 'N', 't_final', and 'tau' must be assigned, "
                     "as they do not have a default value."
                 )
-            init_pauli_state: list = self._get_parameter("init_pauli_state")
-            init_graph_state: list = self._get_parameter("init_graph_state")
-            s_load_files_prefix = parameters.get("load_files_prefix", "")
+            init_pauli_state: List = self._get_parameter("init_pauli_state")
+            init_graph_state: List = self._get_parameter("init_graph_state")
+            s_load_files_prefix: str = parameters.get("load_files_prefix", "")
             ts0 = time.time()
 
             h_x = self._get_parameter("h_x")
@@ -135,6 +135,14 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             H = 0.0 * Id(0)  # just dummy initialization
             rho_0 = Id(0)  # just dummy initialization
 
+            qubit_in_graph = np.zeros((n_qubits,))
+            if init_graph_state is not None:
+                for q_pair in init_graph_state:
+                    i = q_pair[0]
+                    j = q_pair[1]
+                    qubit_in_graph[i] = 1
+                    qubit_in_graph[j] = 1
+
             L_ops = []
             L_sig = []
             obs_1q = []
@@ -144,12 +152,27 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             for i_qubit in r_qubits:
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
-                    if init_graph_state is None:
-                        rho_0 *= get_operator_from_label(
-                            init_pauli_state[i_qubit], i_qubit
-                        )
-                    else:  # Initialize all qubits to '+x', in preparing for the CZs applied below
-                        rho_0 *= get_operator_from_label("+x", i_qubit)
+                    q_init = (
+                        init_pauli_state[i_qubit]
+                        if init_pauli_state is not None
+                        else ""
+                    )
+                    if qubit_in_graph[i_qubit]:
+                        # If qubit is in a graph state, verify that it's initialized to '+x',
+                        # in preparing for the CZs applied below
+                        if q_init == "":
+                            q_init = "+x"
+                        elif q_init != "+x":
+                            raise Exception(
+                                "A qubit that appears in init_graph_state must be initialized"
+                                "to '+x' in init_pauli_state if it is nonempty."
+                            )
+                    if self._is_float(q_init):
+                        b = q_init
+                        diagonal = [b, 1.0 - b]
+                        rho_0 *= Diagonal(i_qubit, diagonal)
+                    else:
+                        rho_0 *= get_operator_from_label(q_init, i_qubit)
                 if h_x[i_qubit]:
                     H += (0.5 * h_x[i_qubit]) * Sx(i_qubit)
                 if h_y[i_qubit]:
@@ -196,9 +219,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 rho_0_mat = np.load(s_load_files_prefix + ".state.npy")
             else:
                 rho_0_mat = build_matrices(rho_0, subsystem_dims)
-                if (
-                    init_graph_state is not None
-                ):  # Apply CZ to all qubit tuples in the list
+                if init_graph_state is not None:
+                    # Apply CZ to all qubit tuples in the list
                     for q_pair in init_graph_state:
                         i = q_pair[0]
                         j = q_pair[1]
@@ -296,27 +318,28 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
     def _get_parameter(
         self, s_key: str
-    ) -> Union[Sized, Iterable, str, float, list, np.ndarray]:
+    ) -> Union[None, Sized, Iterable, str, float, list, np.ndarray]:
         val = self.parameters.get(s_key, None)
         def_val = self.DEFAULT_PARAMETERS.get(s_key, None)
         if (
             (s_key == "init_pauli_state" or s_key == "init_graph_state")
             and val is not None
-            and val != ""
+            and (not isinstance(val, str) or val != "")
         ):
             s_load_files_prefix = self.parameters.get("load_files_prefix", "")
             if s_load_files_prefix != "":
                 raise Exception(
                     "If the parameter 'load_files_prefix' is not empty, then "
-                    "'init_pauli_state' must be empty."
+                    "'init_pauli_state' and 'init_graph_state' must both be empty."
                 )
-        if s_key == "init_graph_state" and val is not None:
-            init_pauli_state = self.parameters.get("init_pauli_state", None)
-            if init_pauli_state is not None and init_pauli_state != "":
-                raise Exception(
-                    "If the parameter 'init_graph_state' is not empty, then "
-                    "'init_pauli_state' must be empty."
-                )
+
+        if s_key == "init_pauli_state":
+            if val is None or (isinstance(val, str) and val == ""):
+                init_graph_state = self.parameters.get("init_graph_state", None)
+                if init_graph_state is not None:
+                    return None
+                # If user passed the init_graph_state variable together with an empty
+                # value for init_pauli_state, avoid setting it the default vector as done below
 
         if val is None and def_val is not None:
             val = def_val[0]
@@ -331,9 +354,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             if def_val[1] == "v":
                 val = [val] * n_qubits  # create a list of identical values
             elif def_val[1] == "m":
-                val = np.full(
-                    (n_qubits, n_qubits), val
-                )  # create a matrix of identical values
+                val = np.full((n_qubits, n_qubits), val)
+                # create a matrix of identical values
         return val
 
     @staticmethod

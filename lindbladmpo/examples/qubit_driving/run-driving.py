@@ -8,7 +8,7 @@
 from driving_routines import *
 
 """
-An example of a large scale research project for the dynamics qubit with XY (flip-flop) interactions
+An example of a large scale research project for the dynamics of qubits with XY (flip-flop) interactions
 with different topologies (connectivity), in which an edge qubit is being driven on resonance
 in the lab frame, and the qubits have alternating frequencies between nearest neighbors.
 The problem is simulated in the frame rotating with the driven qubit's frequency (after a rotating
@@ -40,9 +40,8 @@ solver = "mpo"  # Options: 'mpo', 'scipy'
 # Setting 'mpo' the MPO executable is invoked for the solution, while 'scipy' uses qiskit-dynamics
 # and its scipy solver
 
-load_unique_id = (
-    ""  # uuid of a previous simulation, in order to start the current simulation
-)
+load_unique_id = ""
+# uuid of a previous simulation, in order to start the current simulation
 # with the initial condition being the final state of the loaded simulation
 t_init = 0.0  # Initial time, can be set to the final time of the loaded simulation,
 # which is convenient for plotting but not essential for the solution
@@ -92,9 +91,8 @@ sim_metadata.update(
 if solver == "mpo":
     max_dim_rho = 60  # Maximal bond dimension
     cut_off_rho = 1e-14  # Cutoff parameter of the Schmidt decomposition singular values
-    force_rho_Hermitian_step = (
-        5  # Every how many steps to force the density matrix to be Hermitian
-    )
+    force_rho_Hermitian_step = 5
+    # Every how many steps to force the density matrix to be Hermitian
 
     sim_metadata.update(
         {

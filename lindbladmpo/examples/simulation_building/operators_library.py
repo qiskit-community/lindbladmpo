@@ -50,6 +50,35 @@ class Projector(DynamicalOperator):
         )
 
 
+class Diagonal(DynamicalOperator):
+    """A dynamical operator that builds a numpy diagonal matrix in the standard basis."""
+
+    def __init__(self, system_id="", diagonal=1):
+        self._diagonal = diagonal
+        super().__init__(system_id, "diagonal" + str(diagonal))
+
+    def get_operator_matrix(self, dim: int) -> Any:
+        """Returns a matrix describing a realization of the operator specified in the parameters.
+
+        Args:
+                dim: The physical dimension of the matrix to generate.
+        """
+        diagonal = self._diagonal
+        if self.is_scalar(diagonal):
+            result = np.zeros((dim, dim), complex)
+            result[0, 0] = diagonal
+            return result
+        else:
+            result = np.diag(diagonal)
+            result = np.asarray(result, complex)
+            # TODO: handle when diagonal is shorter than dim
+            return result
+        raise Exception(
+            f"A projector with row = {row} and column = {col} "
+            f"is incompatible with matrix generation of dimension {dim}."
+        )
+
+
 class Sx(DynamicalOperator):
     """A dynamical operator that builds a numpy Pauli x matrix."""
 
