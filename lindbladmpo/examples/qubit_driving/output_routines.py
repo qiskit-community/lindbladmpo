@@ -18,8 +18,12 @@ from pandas import DataFrame
 from lindbladmpo.plot_routines import *
 
 
-def generate_paths(s_output_path: str, b_make_paths=True,
-                   s_data_subdir = 'data/', s_plot_subdir = 'figures/'):
+def generate_paths(
+    s_output_path: str,
+    b_make_paths=True,
+    s_data_subdir="data/",
+    s_plot_subdir="figures/",
+):
     """Concatenate a data directory and figures directory path, and optionally create the directories.
 
     Args:
@@ -138,7 +142,7 @@ def get_simulation_dict(s_output_path: str, s_unique_id: str):
     sim_dict = None
     for file in files:
         df = pd.read_csv(file)
-        if 'unique_id' in df.keys():
+        if "unique_id" in df.keys():
             df_2 = df.query(f"unique_id == '{s_unique_id}'")
         else:
             df_2 = None
