@@ -94,12 +94,12 @@ setup(
     packages=find_packages(exclude=["test*"]),
     install_requires=REQUIREMENTS,
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     extras_require={
         "visualization": ["matplotlib>=2.1"],
     },
     project_urls={
-        "Source Code": "https://github.com/haggaila/lindbladmpo",
+        "Source Code": "https://github.com/qiskit-community/lindbladmpo",
     },
     zip_safe=False,
 )
