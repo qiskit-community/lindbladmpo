@@ -245,8 +245,8 @@ def prepare_xy_current_data(
 
     Returns:
             A tuple with the following two entries:
-                    obs_data: A list with the current operator for each qubit pair at time `t`.
-                    s_tex_label: A formatted tex label describing the data.
+                obs_data: A list with the current operator for each qubit pair at time `t`.
+                s_tex_label: A formatted tex label describing the data.
     """
     obs_2q_dict = result["obs-2q"]
     obs_data = np.full(shape=(len(qubit_pairs),), dtype=float, fill_value=np.nan)
@@ -658,6 +658,7 @@ def plot_1q_obs_curves(
     b_save_figures=True,
     s_file_prefix="",
     s_title=None,
+    b_legend_labels=True,
 ):
     """
     Prepare the data and plot a single-qubit observable vs. time for multiple qubits.
@@ -673,16 +674,18 @@ def plot_1q_obs_curves(
             b_save_figures: Whether to save the plotted figure to file.
             s_file_prefix: An optional path and file name prefix for the saved figures.
             s_title: An optional title for the figure. If empty, a default title is formatted.
+            b_legend_labels: Whether to add labels to the curves and plot a legend.
     """
     obs_data_list = []
-    tex_labels = []
+    tex_labels = [] if b_legend_labels else None
     s_obs_name = s_obs_name.lower()
     for qubit in qubits:
         obs_data, s_tex_label = prepare_curve_data(
             result, "obs-1q", s_obs_name, (qubit,)
         )
         obs_data_list.append(obs_data)
-        tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
+        if b_legend_labels:
+            tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
     if s_title is None:
         s_title = f"$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$"
     ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
@@ -704,6 +707,7 @@ def plot_2q_obs_curves(
     b_save_figures=True,
     s_file_prefix="",
     s_title=None,
+    b_legend_labels=True,
 ):
     """
     Prepare the data and plot a two-qubit observable vs. time for multiple qubits.
@@ -719,15 +723,17 @@ def plot_2q_obs_curves(
             b_save_figures: Whether to save the plotted figure to file.
             s_file_prefix: An optional path and file name prefix for the saved figures.
             s_title: An optional title for the figure. If empty, a default title is formatted.
+            b_legend_labels: Whether to add labels to the curves and plot a legend.
     """
     obs_data_list = []
-    tex_labels = []
+    tex_labels = [] if b_legend_labels else None
     s_obs_name = s_obs_name.lower()
     for q_pair in qubit_pairs:
         obs_data, s_tex_label = prepare_curve_data(result, "obs-2q", s_obs_name, q_pair)
         if obs_data is not None:
             obs_data_list.append(obs_data)
-            tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
+            if b_legend_labels:
+                tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
     if s_title is None:
         s_title = (
             f"$\\langle\\sigma^{s_obs_name[0]}_i\\sigma^{s_obs_name[1]}_j(t)\\rangle$"

@@ -18,12 +18,15 @@ from pandas import DataFrame
 from lindbladmpo.plot_routines import *
 
 
-def generate_paths(s_output_path: str, b_make_paths=True):
+def generate_paths(s_output_path: str, b_make_paths=True,
+                   s_data_subdir = 'data/', s_plot_subdir = 'figures/'):
     """Concatenate a data directory and figures directory path, and optionally create the directories.
 
     Args:
             s_output_path: The output path, a base directory for the data and figures directories
             b_make_paths: If True the directories are created if missing.
+            s_data_subdir: Subdirectory of the output folder where the data files are.
+            s_plot_subdir: Subdirectory of the output folder where the figures files are.
 
     Returns:
             A tuple with the data and plot directory strings.
@@ -33,13 +36,11 @@ def generate_paths(s_output_path: str, b_make_paths=True):
     if not os.path.exists(s_output_path):
         if b_make_paths:
             os.mkdir(s_output_path)
-        else:
-            return s_data_path, s_plot_path
-    s_data_path = s_output_path + "data/"
+    s_data_path = s_output_path + s_data_subdir
     if not os.path.exists(s_data_path):
         if b_make_paths:
             os.mkdir(s_data_path)
-    s_plot_path = s_output_path + "figures/"
+    s_plot_path = s_output_path + s_plot_subdir
     if not os.path.exists(s_plot_path):
         if b_make_paths:
             os.mkdir(s_plot_path)
@@ -84,7 +85,7 @@ def find_db_files(s_db_path: str):
     else:
         files = []
         s_data_path = Path(s_db_path)
-        for item in s_data_path.glob("**/*"):
+        for item in s_data_path.iterdir():
             if item.suffix in [".csv"]:
                 files.append(Path.resolve(item))
     return files
@@ -137,9 +138,13 @@ def get_simulation_dict(s_output_path: str, s_unique_id: str):
     sim_dict = None
     for file in files:
         df = pd.read_csv(file)
-        df_2 = df.query(f"unique_id == '{s_unique_id}'")
-        if df_2 is not None:
+        if 'unique_id' in df.keys():
+            df_2 = df.query(f"unique_id == '{s_unique_id}'")
+        else:
+            df_2 = None
+        if df_2 is not None and not df_2.empty:
             sim_dict = _take_list(df_2)[0]
+            break
     return sim_dict
 
 
