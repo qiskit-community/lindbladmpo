@@ -237,6 +237,8 @@ def prepare_xy_current_data(
     """
     Prepare the data used for plotting the current operator between qubit pairs, based on
     the 'xy' two-qubit observable.
+    The current operator is defined as: i(sigma^+_i sigma^-_j - H.c.) =
+        0.5 (X_i Y_j - X_j Y_i).
 
     Args:
             result: A dictionary from which the observables are taken.
@@ -269,7 +271,7 @@ def prepare_xy_current_data(
                 # will avoid crashes due to interrupted simulations with incomplete data files.
                 try:
                     t_index = obs_2[0].index(t)
-                    obs_data[i_bond] = obs_1[1][t_index] - obs_2[1][t_index]
+                    obs_data[i_bond] = 0.5 * (obs_1[1][t_index] - obs_2[1][t_index])
                 except ValueError:
                     pass
     s_tex_label = (
