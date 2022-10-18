@@ -833,5 +833,3 @@ def plot_global_obs_curve(
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
     s_file_label = s_obs_name
     _save_fig(b_save_figures, s_file_prefix, s_file_label)
-
-
