@@ -5,6 +5,9 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+import cmath
+from math import sqrt
+
 from .operators import DynamicalOperator, Id, Zero
 from typing import Any
 import numpy as np
@@ -47,6 +50,37 @@ class Projector(DynamicalOperator):
         raise Exception(
             f"A projector with row = {row} and column = {col } "
             f"is incompatible with matrix generation of dimension {dim}."
+        )
+
+
+class PolarState(DynamicalOperator):
+    """A dynamical operator that builds a numpy pure-state matrix from a polar representation."""
+
+    def __init__(self, system_id="", r=0.0, theta=0.0):
+        self._r = r
+        self._theta = theta
+        super().__init__(system_id, "polar" + str(r) + "_" + str(theta))
+
+    def get_operator_matrix(self, dim: int) -> Any:
+        """Returns a matrix describing a realization of the operator specified in the parameters.
+
+        Args:
+                dim: The physical dimension of the matrix to generate.
+        """
+        result = np.zeros((dim, dim), complex)
+        r = self._r
+        theta = self._theta
+        if 0.0 <= r <= 1.0:
+            a = r
+            b = sqrt(1.0 - r**2)
+            result[0, 0] = a**2
+            result[1, 1] = b**2
+            result[0, 1] = a * b * cmath.exp(-1j * theta)
+            result[1, 0] = a * b * cmath.exp(1j * theta)
+            return result
+        raise Exception(
+            "A pure-state in polar representation is defined by the amplitude `r` of |0>, "
+            "which must be in the range [0, 1], and the phase `theta` of |1>."
         )
 
 

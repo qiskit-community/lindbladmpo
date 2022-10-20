@@ -180,6 +180,18 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                         f"value(s) but 0, 1 or {n_qubits} value(s) were expected."
                     )
 
+            in_cz_gate = np.zeros((n_qubits,))
+            if init_cz_gates is not None:
+                for q_pair in init_cz_gates:
+                    i = q_pair[0]
+                    j = q_pair[1]
+                    if i >= n_qubits or j >= n_qubits:
+                        raise Exception(
+                            f"The parameter {s_cz_param} contains an invalid index pair, ({i}, {j})."
+                        )
+                    in_cz_gate[i] = 1
+                    in_cz_gate[j] = 1
+
             h_x = self._get_parameter("h_x")
             h_y = self._get_parameter("h_y")
             h_z = self._get_parameter("h_z")
@@ -221,12 +233,34 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
                     q_init = init_product_state[i_qubit]
-                    if self._is_float(q_init):
-                        b = q_init
+                    b_mixed = False
+                    b_tuple = isinstance(q_init, tuple)
+                    b_diagonal = self._is_float(q_init) or (
+                        b_tuple and len(q_init) == 1
+                    )
+                    if b_diagonal:
+                        b = q_init[0] if b_tuple else q_init
                         diagonal = [b, 1.0 - b]
                         rho_0 *= Diagonal(i_qubit, diagonal)
+                        if 0.0 < b < 1.0:
+                            b_mixed = True
+                    elif b_tuple:
+                        if len(q_init) == 2:
+                            rho_0 *= PolarState(i_qubit, q_init[0], q_init[1])
+                        else:
+                            raise Exception(
+                                f"The initial state of site {i_qubit} is defined "
+                                "using a tuple of an unsupported length."
+                            )
                     else:
+                        if q_init == "id":
+                            b_mixed = True
                         rho_0 *= get_operator_from_label(q_init, i_qubit)
+                    if b_mixed and in_cz_gate[i_qubit]:
+                        raise Exception(
+                            f"Site {i_qubit} is indicated for a CZ gate and also"
+                            " initialized to a mixed state, which is currently unsupported."
+                        )
                 if h_x[i_qubit]:
                     H += (0.5 * h_x[i_qubit]) * Sx(i_qubit)
                 if h_y[i_qubit]:

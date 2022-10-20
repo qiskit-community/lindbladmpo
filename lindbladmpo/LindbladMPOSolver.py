@@ -199,28 +199,43 @@ class LindbladMPOSolver:
                     )
                     not_first_value = True
                 file.write("\n")
-            elif isinstance(parameters[key], np.ndarray):
-                file.write(key + " = ")
-                for i in range(parameters[key].shape[0]):
-                    file.write(str(parameters[key][i]))
-                    if i + 1 != parameters[key].shape[0]:
-                        file.write(",")
-                file.write("\n")
             elif (
                 key == "init_pauli_state"
                 or key == "init_product_state"
                 or key == "1q_components"
                 or key == "2q_components"
             ):
-                if isinstance(parameters[key], (float, str)):
-                    val_list = [parameters[key]]
+                val = parameters[key]
+                if isinstance(val, (int, float, tuple, str)):
+                    val_list = [val]
                 else:
-                    val_list = parameters[key]
+                    val_list = val
                 n_indices = len(val_list)
                 file.write(key + " = ")
                 for i_op, op in enumerate(val_list):
-                    file.write(str(op).strip("'"))
+                    b_tuple = isinstance(op, tuple)
+                    if isinstance(op, str):
+                        file.write(str(op).strip("'"))
+                    elif isinstance(op, (int, float)) or (b_tuple and len(op) == 1):
+                        if key == "init_product_state":
+                            file.write("p ")
+                        s_val = op[0] if b_tuple else op
+                        file.write(str(s_val))
+                    elif b_tuple:
+                        if len(op) == 2:
+                            file.write("q " + str(op[0]) + " " + str(op[1]))
+                        else:
+                            file.write(
+                                "r " + str(op[0]) + " " + str(op[1]) + " " + str(op[2])
+                            )
                     if i_op != n_indices - 1:
+                        file.write(",")
+                file.write("\n")
+            elif isinstance(parameters[key], np.ndarray):
+                file.write(key + " = ")
+                for i in range(parameters[key].shape[0]):
+                    file.write(str(parameters[key][i]))
+                    if i + 1 != parameters[key].shape[0]:
                         file.write(",")
                 file.write("\n")
             elif key == "1q_indices":
@@ -639,24 +654,25 @@ class LindbladMPOSolver:
                     continue
             elif (key == "init_pauli_state") or (key == "init_product_state"):
                 if (
-                    not isinstance(parameters[key], (str, float))
+                    not isinstance(parameters[key], (str, float, tuple))
                     and not isinstance(parameters[key], list)
                     and not isinstance(parameters[key], np.ndarray)
                 ):
                     check_msg += (
                         "Error 350: "
                         + key
-                        + " must be a string, float or a list or array of strings or floats\n"
+                        + " must be a string, float, tuple or a list/ array of strings/floats/tuples\n"
                     )
                     continue
                 init_list = (
                     [parameters[key]]
-                    if isinstance(parameters[key], (str, float))
+                    if isinstance(parameters[key], (str, float, tuple))
                     else parameters[key]
                 )
                 for q_init in init_list:
-                    if isinstance(q_init, float):
-                        if q_init < 0 or q_init > 1:
+                    if isinstance(q_init, (int, float)) or isinstance(q_init, tuple):
+                        val = q_init[0] if isinstance(q_init, tuple) else q_init
+                        if val < 0 or val > 1:
                             check_msg += (
                                 "Error 361: a float member of "
                                 + key
@@ -667,15 +683,15 @@ class LindbladMPOSolver:
                         check_msg += (
                             "Error 360: each member of "
                             + key
-                            + " must be a string or a float\n"
+                            + " must be a string, a float, or a tuple\n"
                         )
                         continue
-                    allowed_init = ["+x", "-x", "+y", "-y", "+z", "-z"]
+                    allowed_init = ["+x", "-x", "+y", "-y", "+z", "-z", "id"]
                     if q_init.lower() not in allowed_init:
                         check_msg += (
                             "Error 370: "
                             + key
-                            + " can only be one of: +x,-x,+y,-y,+z,-z\n"
+                            + " can only be one of: +x, -x, +y, -y, +z, -z, id\n"
                         )
                         continue
             elif (

@@ -19,6 +19,8 @@
 #include "ModelParameters.h"
 #include "lindbladian.h"
 #include <chrono>
+#include <sstream>
+#include <iostream>
 
 using namespace itensor;
 using namespace std;
@@ -228,12 +230,13 @@ int main(int argc, char *argv[])
 		for (int i = 1; i <= N; ++i) // Start with all spins up
 			initState.set(i, "Up");
 		psi = MPS(initState);
-		vector<double> a_mixed_state = vector<double>(N, 2.);
-		// We set a default value of 2 that will be ignored below, unless overwritten
+		vector<double> a_mixed_state = vector<double>(N, -1.);
+		// We init values outside of the valid range, that will be ignored below unless overwritten
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
-			string s_init = init_product_state[site_number - 1];
+        	const unsigned int i_site = (unsigned int)site_number - 1;
+			string s_init = init_product_state[i_site];
 			double R0 = .0, I0 = .0, R1 = .0, I1 = .0;
 			if (s_init == "+z")
 				R0 = 1.;
@@ -255,26 +258,74 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				R0 = 1.;  // A valid value must be set to get a regular pure state
-				double b;
 				if (s_init == "id")
-					b = .5;
+				{
+					R0 = 1.;  // A valid value must be set to get a regular pure state
+					a_mixed_state[i_site] = .5;
+				}
 				else
 				{
-					try
+					string s_type = "";
+					if (s_init.size() > 2)
+					 	s_type = s_init.substr(0, 2);
+					if (s_type == "p ")
 					{
-						b = stod(s_init);
+						double b = 1.;  // Value is not expected to be used.
+						string s_val = s_init.substr(2);
+						try
+						{
+							b = stod(s_val);
+						}
+						catch (...)
+						{
+							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+								"After the prefix \"p \" should follow a valid float value.\n", exit(1);
+						}
 						if (b < 0. || b > 1.)
-							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial "
+							cout2 << "Error: " << s_val << " is an unknown 1-qubit initial "
 								"mixed state coefficient (should be in the range [0, 1]).\n", exit(1);
+						R0 = 1.;  // A valid value must be set to get a regular pure state
+						a_mixed_state[i_site] = b;
 					}
-					catch (...)
+					else if (s_type == "q ")
 					{
-						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state "
-							"(should be a string in {+x, -x, +y, -y, +z, -z, id}, or a float).\n", exit(1);
+						string s_val;
+						float val = 0.;
+						vector<double> values;
+						bool b_invalid = false;
+						istringstream s_stream(s_init.substr(2));
+						while (getline(s_stream, s_val, ' '))
+						{
+							try
+							{
+								val = stod(s_val);
+							}
+							catch (...)
+							{
+								b_invalid = true;
+								break;
+							}
+							values.push_back(val);
+						}
+						if (values.size() != 2)
+							b_invalid = true;
+						if (b_invalid)
+							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+								"After the prefix \"q \" should follow two space-separated floats.\n",
+								exit(1);
+						R0 = values[0];
+						double r1 = pow(1. - pow(R0, 2), .5);
+						R1 = r1 * cos(values[1]);
+						I1 = r1 * sin(values[1]);
+					}
+					else
+					{
+						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+							"It should be a string in {+x, -x, +y, -y, +z, -z, id}, \"p \" "
+							"followed by a float, or \"q \" followed by two space-separated floats).\n",
+							exit(1);
 					}
 				}
-			  	a_mixed_state[(unsigned int)(site_number - 1)] = b;
 			}
 
             auto spin_ind = siteIndex(psi, site_number);
@@ -310,12 +361,17 @@ int main(int argc, char *argv[])
 				 	eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
 			}
 		}
+		vector<bool> in_cz_gate = vector<bool>(N, false);
 		psi.orthogonalize(Args("Cutoff", 1e-6));
 		if (b_cz_pairs) {
 			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
 			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
 			{
 				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
+				const unsigned int i0 = (unsigned int)(i - 1);
+				const unsigned int j0 = (unsigned int)(j - 1);
+				in_cz_gate[i0] = true;
+				in_cz_gate[j0] = true;
 				ApplyControlZGate(psi,C.sites,i,j);
 			}
 			psi.orthogonalize(Args("Cutoff",0));
@@ -330,9 +386,14 @@ int main(int argc, char *argv[])
 		C.psi2rho(psi, argsRho);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
-        	double b = a_mixed_state[(unsigned int)(site_number - 1)];
+        	const unsigned int i_site = (unsigned int)(site_number - 1);
+        	double b = a_mixed_state[i_site];
         	if (b >= 0. && b <= 1. )
         	{
+        		if (in_cz_gate[i_site])
+   					cout2 << "Error: Site " << site_number << " is indicated for a CZ gate and also" <<
+   						" initialized to a mixed state, which is currently unsupported.\n", exit(1);
+
 				psi_defined=false;
 				auto pauli_ind = siteIndex(C.rho, site_number);
 				if (site_number == 1) {
