@@ -670,7 +670,7 @@ class LindbladMPOSolver:
                     else parameters[key]
                 )
                 for q_init in init_list:
-                    if isinstance(q_init, (int, float)) or isinstance(q_init, tuple):
+                    if isinstance(q_init, (float, int, tuple)):
                         val = q_init[0] if isinstance(q_init, tuple) else q_init
                         if val < 0 or val > 1:
                             check_msg += (
