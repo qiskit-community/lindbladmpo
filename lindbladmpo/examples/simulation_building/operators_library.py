@@ -382,7 +382,9 @@ def get_operator_from_label(s_op: str, system_id=""):
     s_op = s_op.lower()
     if s_op == "i":
         return Id(system_id)
-    if s_op == "zero":
+    elif s_op == "id":
+        return Id(system_id)
+    elif s_op == "zero":
         return Zero(system_id)
     elif s_op == "x":
         return Sx(system_id)

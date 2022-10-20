@@ -74,7 +74,7 @@ solver_params = {
     "J": J,
     "1q_components": ["x", "y", "z"],
     "2q_components": [],
-    "init_pauli_state": "+z",
+    "init_product_state": "+z",
     "output_files_prefix": s_output_path + s_file_prefix,
 }
 # Initialize class arguments - the parameters, cygwin path, and MPO executable path

@@ -208,6 +208,7 @@ class LindbladMPOSolver:
                 file.write("\n")
             elif (
                 key == "init_pauli_state"
+                or key == "init_product_state"
                 or key == "1q_components"
                 or key == "2q_components"
             ):
@@ -231,7 +232,11 @@ class LindbladMPOSolver:
                     if i_site != n_indices - 1:
                         file.write(",")
                 file.write("\n")
-            elif key == "2q_indices" or key == "init_graph_state":
+            elif (
+                key == "2q_indices"
+                or key == "init_graph_state"
+                or key == "init_cz_gates"
+            ):
                 file.write(key + " = ")
                 n_tuples = len(parameters[key])
                 for i_2q_tuple, _2q_tuple in enumerate(parameters[key]):
@@ -632,7 +637,7 @@ class LindbladMPOSolver:
                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     )
                     continue
-            elif key == "init_pauli_state":
+            elif (key == "init_pauli_state") or (key == "init_product_state"):
                 if (
                     not isinstance(parameters[key], (str, float))
                     and not isinstance(parameters[key], list)
@@ -880,7 +885,9 @@ class LindbladMPOSolver:
                 if flag_continue:
                     continue
             elif (
-                key == "2q_indices" or key == "init_graph_state"
+                key == "2q_indices"
+                or key == "init_graph_state"
+                or key == "init_cz_gates"
             ):  # expecting an integer tuples list
                 if not isinstance(parameters[key], list):
                     check_msg += (
@@ -937,11 +944,7 @@ class LindbladMPOSolver:
                     )
                     continue
                 if not len(set(parameters[key])) == len(parameters[key]):
-                    check_msg += (
-                        "Error 630: "
-                        + key
-                        + " 's List does not contains all unique elements"
-                    )
+                    check_msg += "Error 630: " + key + " contains duplicate elements\n"
                     continue
             elif ignore_params is None or key not in ignore_params:
                 check_msg += "Error: unknown parameter key passed: " + key + "\n"

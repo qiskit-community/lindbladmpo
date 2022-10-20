@@ -31,21 +31,36 @@ public:
         	// to substitute rho = 0.5 * (rho + rho^dagger). This may reduce certain errors, but is
         	// computationally expensive.
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from
-         	// a saved file, perform a re-gauging/compression using iTensor's method orthogonalize().
+         	// a saved file, perform a re-gauging/compression using ITensor's method orthogonalize().
 
-        operator[]("init_pauli_state") = "+z";  // Initialize a Pauli state. Can be specified for
-        	// every qubit separately (as a comma-separated list), or uniformly for all qubits.
-        	// The string format is + or - in the first character, and x, y, z in the second
-        	// character, denoting a single-qubit state pointing along the positive/negative
+        operator[]("init_product_state") = "";  // Initialize a product state. Can be specified
+        	// for every qubit separately (as a comma-separated list), or uniformly for all qubits.
+        	// The default, if left empty, is the "+z" Pauli state for all qubits, unless
+        	// init_graph_state is nonempty, in which case all qubits are initialized to "+x".
+        	// For a Pauli state, the format is + or - in the first character, and x, y, z in the
+        	// second character, denoting a single-qubit state pointing along the positive/negative
         	// direction of the specified axis of the Bloch sphere.
-        	// If the string is not of this format, it is attempted to be parsed as floating point
-        	// number that defines a diagonal mixed, giving the probability of the |up> state.
-        operator[]("init_graph_state") = "";  // Initialize a graph state. A list of qubit indexes
-        	// is expected with all pairs on which a CZ gate is applied (after starting with all qubits
-        	// along the +x axis).
+        	// The string "id" is supported for indicating the fully mixed state.
+        	// The format "p 0.25" is supported for indicating a diagonal density matrix, with
+        	// p the probability of |0> (|0> = |up>).
+        	// The format "q 0.7012 1.53" indicates the pure state:
+        	// 0.7012 |0> + exp(i 1.53)sqrt{1-0.7012^2} |1>
+        operator[]("init_pauli_state") = "";  // Initialize a Pauli state. This initialization
+        	// is deprecated in favor of init_product_state, but remains currently supported
+        	// as its synonym.
+        operator[]("init_graph_state") = "";  // Initialize a graph state. A list of qubit
+        	// pairs is expected, indicating all pairs to which a CZ gate is applied, after
+        	// rotating all qubits (even if some are not included in the list) to the +x axis.
+        	// Cannot be used together with any other initialization parameter.
+        operator[]("init_cz_gates") = "";  // Initialize two-qubit CZ gates. A list of qubit
+        	// pairs is expected, indicating all pairs to which a CZ gate is applied, after all
+        	// qubits have been initialized arbitrarily according to the init_product_state
+        	// parameter.
+
         operator[]("load_files_prefix") = "";	// If not an empty string, the initial state
          	// (density matrix rho) is to be read from the file system. Three files are being used,
          	// with names appended with ".state.ops", ".state.sites" and ".state.rho".
+         	// This parameter cannot be used together with any other initialization parameter.
         operator[]("b_save_final_state") = "0";	// Whether to save the final state (density matrix) to
         	// the file system. Three files are generated, with the files names starting with the
         	// `output_files_prefix` string, with the endings ".state.rho", ".state.sites", and ".state.ops".
