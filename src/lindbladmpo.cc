@@ -550,7 +550,7 @@ int main(int argc, char *argv[])
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
 
-				cout2 << "\tTr{rho}: " << tr << ", Rényi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
+				cout2 << "\tTr{rho}: " << tr << ", Renyi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
 //				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
 				if (!force_rho_Hermitian_step || (n % force_rho_Hermitian_step) != 0)
 				     cout2 << "\n\tMax bond dimension: " << bd_max;
@@ -753,7 +753,7 @@ void validate_2q_list(vector<long> &vect, int N, string const &list_name)
         if (param.longval("up_init") == 0 && param.longval("down_init") == 0)
         {
           for (int i = 1; i <= N; ++i)
-          { // Start the DMRG from the Néel state (|Néel> = |up|down|up|down|up|...> )
+          { // Start the DMRG from the Neel state (|Neel> = |up|down|up|down|up|...> )
             if (i % 2 == 1)
               initState.set(i, "Dn");
             else
