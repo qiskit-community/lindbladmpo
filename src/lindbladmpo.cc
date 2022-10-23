@@ -511,7 +511,6 @@ int main(int argc, char *argv[])
 	const int n_steps = int(t_total / tau);
 
 	// Open output files
-
 	ofstream file_1q(output_prefix + ".obs-1q.dat");
 	file_1q.precision(15);
 	file_1q << "#time\toperator\tindex\tvalue" << endl;
@@ -520,12 +519,10 @@ int main(int argc, char *argv[])
 	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
 	ofstream file_global(output_prefix + ".global.dat");
 	file_global.precision(15);
-//	file_global << "#time\ttr_rho\tS_2\tOSEE_center\tmax_bond_dim\tduration_ms" << endl;
 	file_global << "#time\tquantity\tvalue" << endl;
 
 	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qubit observables
-
 	auto components = param.stringvec("1q_components");
 	for (auto &s : components)
 	{
@@ -585,6 +582,8 @@ int main(int argc, char *argv[])
 
 	char buf[100];
 	const long force_rho_Hermitian_step = param.longval("force_rho_hermitian_step");
+ 	const bool b_quiet = param.boolval("b_quiet");
+ 	cout2.quiet(b_quiet);
 	for (int n = 0; n <= n_steps; n++)
 	{
 		const double t = t_0 + n * tau;
@@ -707,7 +706,8 @@ int main(int argc, char *argv[])
 			cout2.flush();
 		}
 	}
-
+	cout2.quiet(false);
+	
 	bool b_save_state = param.boolval("b_save_final_state");
 	if (b_save_state)
 	{

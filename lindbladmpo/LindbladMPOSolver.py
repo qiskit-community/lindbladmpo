@@ -736,6 +736,7 @@ class LindbladMPOSolver:
                 or (key == "b_periodic_y")
                 or (key == "b_force_rho_trace")
                 or (key == "b_unique_id")
+                or (key == "b_quiet")
                 or (key == "b_save_final_state")
                 or (key == "b_initial_rho_compression")
             ):

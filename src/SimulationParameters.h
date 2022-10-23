@@ -32,6 +32,8 @@ public:
         	// computationally expensive.
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from
          	// a saved file, perform a re-gauging/compression using ITensor's method orthogonalize().
+        operator[]("b_quiet") = "0";	// If nonzero, after initialization of the simulation
+         	// avoid the console output at every time step (but write it the log file).
 
         operator[]("init_product_state") = "";  // Initialize a product state. Can be specified
         	// for every qubit separately (as a comma-separated list), or uniformly for all qubits.

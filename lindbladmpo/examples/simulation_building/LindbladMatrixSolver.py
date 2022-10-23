@@ -49,6 +49,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
         "g_0": (0.0, "v"),
         "g_1": (0.0, "v"),
         "g_2": (0.0, "v"),
+        "b_quiet": (False, "s"),
         "b_save_final_state": (False, "s"),
         "1q_components": (["z"], "s"),
         "2q_components": (["zz"], "s"),

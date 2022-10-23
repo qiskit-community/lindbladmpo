@@ -34,6 +34,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "g_1": 0,
             "output_files_prefix": s_output_path + "test_all_zero",
             "1q_components": ["X", "Y", "Z"],
+            "b_quiet": True,
         }
         solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
         solver.solve()
@@ -58,6 +59,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "h_z": 1,
             "output_files_prefix": s_output_path + "test_hz_nonzero",
             "1q_components": ["X", "Y", "Z"],
+            "b_quiet": True,
         }
         solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
         solver.solve()
@@ -82,6 +84,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "h_z": 1,
             "output_files_prefix": s_output_path + "test_steady_state",
             "1q_components": ["X", "Y", "Z"],
+            "b_quiet": True,
         }
         solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
         solver.solve()
@@ -107,6 +110,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "h_z": 5,
             "output_files_prefix": s_output_path + "test_steady_state_2",
             "1q_components": ["X", "Y", "Z"],
+            "b_quiet": True,
         }
         solver = LindbladMPOSolver(solver_params, s_cygwin_path, s_solver_path)
         solver.solve()
@@ -147,6 +151,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "1q_components": ["X", "Y", "Z"],
             "2q_components": ["XY", "XZ", "ZZ"],
             "b_save_final_state": True,
+            "b_quiet": True,
         }
         solver_params2 = copy.deepcopy(solver_params1)
 

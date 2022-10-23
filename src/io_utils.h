@@ -47,9 +47,11 @@ class stream2d
 {
 public:
 	ostream *ostream1, *ostream2;
+	bool b_quiet;
 
 	stream2d(ostream *stream1 = NULL, ostream *stream2 = NULL)
 	{
+		b_quiet = false;
 		ostream1 = stream1;
 		ostream2 = stream2;
 	};
@@ -57,7 +59,7 @@ public:
 	template<class T>
 	stream2d& operator<<(T val)
 	{
-		if (ostream1)
+		if (ostream1 and !b_quiet)
 			*ostream1 << val;
 		if (ostream2)
 			*ostream2 << val;
@@ -78,6 +80,12 @@ public:
 			ostream1->flush();
 		if (ostream2)
 			ostream2->flush();
+		return *this;
+	}
+
+	stream2d& quiet(bool b_quiet_ = true)
+	{
+		b_quiet = b_quiet_;
 		return *this;
 	}
 };

@@ -67,6 +67,8 @@ The default value for each parameter is indicated with an equality sign (only th
     * 2q_components = ['ZZ'] (list[str]): A list of strings that specify the two-qubit Pauli observables to compute for all qubit pairs given in parameter "2q_indices". The allowed strings in the list are one of "xx", "yy", "zz", "xy", "xz", "yz", "yx", "zx", "zy" (lower or upper case). The observables results are saved using a file name ending with ".obs-2q.dat".
     * output_step = 1 (int): How often (in integer steps of time <img src="https://render.githubusercontent.com/render/math?math=\tau" style="vertical-align:bottom">) the observables are computed. In case of the value 0, no observables will be computed.
     * b_save_final_state = False (bool): Whether to save the final state to files (Three binary files will be saved, whose names will have the prefix defined in "output_files_prefix").
+    * b_quiet = False (bool): Whether to avoid writing the console output at every time step (while the output at every time step is still written to the log file). The initialization step output and the final output information are always written to the console (together with the log file).
+
 
 ## Class attributes
 
