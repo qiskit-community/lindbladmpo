@@ -9,9 +9,15 @@
 """
 Tests of the actual solver model and results.
 """
+import os
 import copy
 import unittest
-from lindbladmpo.examples.simulation_building.LindbladMatrixSolver import *
+import numpy as np
+
+from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
+from lindbladmpo.examples.simulation_building.LindbladMatrixSolver import (
+    LindbladMatrixSolver,
+)
 
 s_output_path = (
     os.path.abspath("./output") + "/"
