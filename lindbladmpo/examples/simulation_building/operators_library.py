@@ -6,7 +6,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 import cmath
-from math import sqrt
+from math import sqrt, cos
 
 from .operators import DynamicalOperator, Id, Zero
 from typing import Any
@@ -56,8 +56,8 @@ class Projector(DynamicalOperator):
 class PolarState(DynamicalOperator):
     """A dynamical operator that builds a numpy pure-state matrix from a polar representation."""
 
-    def __init__(self, system_id="", r=0.0, theta=0.0):
-        self._r = r
+    def __init__(self, system_id="", theta: float = 0., phi: float = 0.):
+        self._phi = phi
         self._theta = theta
         super().__init__(system_id, "polar" + str(r) + "_" + str(theta))
 
@@ -68,19 +68,19 @@ class PolarState(DynamicalOperator):
                 dim: The physical dimension of the matrix to generate.
         """
         result = np.zeros((dim, dim), complex)
-        r = self._r
+        phi = self._phi
         theta = self._theta
-        if 0.0 <= r <= 1.0:
-            a = r
-            b = sqrt(1.0 - r**2)
+        if 0.0 <= theta <= np.pi:
+            a = cos(theta / 2.)
+            b = sqrt(1.0 - a**2)
             result[0, 0] = a**2
             result[1, 1] = b**2
-            result[0, 1] = a * b * cmath.exp(-1j * theta)
-            result[1, 0] = a * b * cmath.exp(1j * theta)
+            result[0, 1] = a * b * cmath.exp(-1j * phi)
+            result[1, 0] = a * b * cmath.exp(1j * phi)
             return result
         raise Exception(
-            "A pure-state in polar representation is defined by the amplitude `r` of |0>, "
-            "which must be in the range [0, 1], and the phase `theta` of |1>."
+            "A pure-state in polar representation is defined by the polar angle theta in the range"
+            "[0, pi], and the azimuthal angle phi."
         )
 
 

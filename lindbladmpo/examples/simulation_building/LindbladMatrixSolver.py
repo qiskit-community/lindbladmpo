@@ -122,9 +122,9 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
             s_init_param = ""
             init_pauli_state = self._get_parameter("init_pauli_state")
-            init_product_state = self._get_parameter("init_product_state")
+            init_product_state: Any = self._get_parameter("init_product_state")
             if init_pauli_state is not None and (
-                self._is_float(init_pauli_state) or len(init_pauli_state) != 0
+                    self.is_float(init_pauli_state) or len(init_pauli_state) != 0
             ):
                 s_init_param = "init_pauli_state"
                 self._print(
@@ -132,7 +132,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     "will be removed in the future. Please use init_product_state instead."
                 )
                 if init_product_state is None or (
-                    not self._is_float(init_product_state)
+                    not self.is_float(init_product_state)
                     and len(init_product_state) == 0
                 ):
                     init_product_state = init_pauli_state
@@ -149,7 +149,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 init_len = 0
             else:
                 if (
-                    self._is_float(init_product_state)
+                    self.is_float(init_product_state)
                     or isinstance(init_product_state, str)
                     or isinstance(init_product_state, tuple)
                 ):
@@ -232,10 +232,10 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             for i_qubit in r_qubits:
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
-                    q_init = init_product_state[i_qubit]
+                    q_init: Any = init_product_state[i_qubit]
                     b_mixed = False
                     b_tuple = isinstance(q_init, tuple)
-                    b_diagonal = self._is_float(q_init) or (
+                    b_diagonal = self.is_float(q_init) or (
                         b_tuple and len(q_init) == 1
                     )
                     if b_diagonal:
@@ -246,7 +246,9 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             b_mixed = True
                     elif b_tuple:
                         if len(q_init) == 2:
-                            rho_0 *= PolarState(i_qubit, q_init[0], q_init[1])
+                            phi: float = q_init[1]
+                            theta: float = q_init[0]
+                            rho_0 *= PolarState(i_qubit, theta, phi)
                         else:
                             raise Exception(
                                 f"The initial state of site {i_qubit} is defined "
@@ -508,7 +510,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     )
                     continue
             elif (key == "atol") or (key == "rtol"):
-                if not LindbladMPOSolver._is_float(parameters[key]):
+                if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += (
                         "LindbladMatrixSolver Error 1030: " + key + " is not a float\n"
                     )

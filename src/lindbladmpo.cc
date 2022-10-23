@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
 							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
 								"After the prefix \"q \" should follow two space-separated floats.\n",
 								exit(1);
-						R0 = values[0];
+						R0 = cos(values[0] / 2.);
 						double r1 = pow(1. - pow(R0, 2), .5);
 						R1 = r1 * cos(values[1]);
 						I1 = r1 * sin(values[1]);

@@ -13,6 +13,7 @@ Defines the main class of the packages, implementing the interface with the solv
 import collections
 import subprocess
 import uuid
+from math import isfinite
 from typing import Dict, Optional
 import platform
 import os
@@ -394,7 +395,7 @@ class LindbladMPOSolver:
 
     @staticmethod
     # checks if the value is a float (for cleaner code)
-    def _is_float(value):
+    def is_float(value):
         # in python terms the value <4> is not float type, in the simulator context float
         # can also be a python int:
         return isinstance(value, (float, int))
@@ -466,7 +467,7 @@ class LindbladMPOSolver:
                     )
                     continue
             elif key == "t_init" or key == "t_final" or key == "tau":
-                if not LindbladMPOSolver._is_float(parameters[key]):
+                if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 140: " + key + " is not a float\n"
                     continue
                 if key != "t_init" and parameters[key] <= 0:
@@ -505,7 +506,7 @@ class LindbladMPOSolver:
                 or (key == "g_1")
                 or (key == "g_2")
             ):
-                if LindbladMPOSolver._is_float(parameters[key]):
+                if LindbladMPOSolver.is_float(parameters[key]):
                     continue
                 number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
                 if number_of_qubits == -1:
@@ -523,7 +524,7 @@ class LindbladMPOSolver:
                         )
                         continue
                     for element in parameters[key]:
-                        if not LindbladMPOSolver._is_float(element):
+                        if not LindbladMPOSolver.is_float(element):
                             check_msg += (
                                 "Error 220: " + key + "is not a float / N-length list "
                                 "/ numpy array (of floats)\n "
@@ -558,7 +559,7 @@ class LindbladMPOSolver:
                     )
                     continue
             elif (key == "J_z") or (key == "J"):
-                if LindbladMPOSolver._is_float(parameters[key]):
+                if LindbladMPOSolver.is_float(parameters[key]):
                     continue
                 number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
                 if number_of_qubits == -1:
@@ -598,7 +599,7 @@ class LindbladMPOSolver:
                             flag_continue = True
                             break
                         for val in lst:
-                            if not LindbladMPOSolver._is_float(val):
+                            if not LindbladMPOSolver.is_float(val):
                                 check_msg += (
                                     "Error 300: "
                                     + key
@@ -670,13 +671,39 @@ class LindbladMPOSolver:
                     else parameters[key]
                 )
                 for q_init in init_list:
-                    if isinstance(q_init, (float, int, tuple)):
+                    if isinstance(q_init, (float, int)) or \
+                            (isinstance(q_init, tuple) and len(q_init) == 1):
                         val = q_init[0] if isinstance(q_init, tuple) else q_init
-                        if val < 0 or val > 1:
+                        if not LindbladMPOSolver.is_float(val) or not isfinite(val)\
+                                or val < 0. or val > 1.:
                             check_msg += (
-                                "Error 361: a float member of "
+                                "Error 361: a float or a length-1 tuple member of "
                                 + key
-                                + " must be between 0 and 1\n"
+                                + " represents a probability and must be between 0 and 1\n"
+                            )
+                        continue
+                    elif isinstance(q_init, tuple):
+                        for val in q_init:
+                            if not LindbladMPOSolver.is_float(val) or not isfinite(val):
+                                check_msg += (
+                                        "Error 362: the values in a tuple member of "
+                                        + key
+                                        + " must be valid numbers\n"
+                                )
+                        if len(q_init) == 2:
+                            if q_init[0] < 0 or q_init[0] > np.pi:
+                                check_msg += (
+                                    "Error 363: the first value in a length-2 tuple of "
+                                    + key
+                                    + " represents a polar angle and must be in the range 0 to pi\n"
+                                )
+                        elif len(q_init) == 3:
+                            pass
+                        else:
+                            check_msg += (
+                                    "Error 364: a tuple member of "
+                                    + key
+                                    + " must be of 1, 2, or 3 elements\n"
                             )
                         continue
                     if not isinstance(q_init, str):
@@ -728,7 +755,7 @@ class LindbladMPOSolver:
                     )
                     continue
             elif (key == "cut_off") or (key == "cut_off_rho"):
-                if not LindbladMPOSolver._is_float(parameters[key]):
+                if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 420: " + key + " is not a float\n"
                     continue
             elif key == "metadata":
@@ -968,8 +995,8 @@ class LindbladMPOSolver:
 
         # More cross-parameter checks:
         if ("t_final" in parameters) and ("tau" in parameters):
-            if (LindbladMPOSolver._is_float(parameters["tau"])) and (
-                LindbladMPOSolver._is_float(parameters["t_final"])
+            if (LindbladMPOSolver.is_float(parameters["tau"])) and (
+                LindbladMPOSolver.is_float(parameters["t_final"])
             ):
                 if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
                     if parameters["tau"] > parameters["t_final"] - parameters.get(
