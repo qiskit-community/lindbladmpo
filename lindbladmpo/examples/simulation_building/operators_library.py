@@ -56,7 +56,7 @@ class Projector(DynamicalOperator):
 class PolarState(DynamicalOperator):
     """A dynamical operator that builds a numpy pure-state matrix from a polar representation."""
 
-    def __init__(self, system_id="", theta: float = 0., phi: float = 0.):
+    def __init__(self, system_id="", theta: float = 0.0, phi: float = 0.0):
         self._phi = phi
         self._theta = theta
         super().__init__(system_id, "polar" + str(r) + "_" + str(theta))
@@ -71,7 +71,7 @@ class PolarState(DynamicalOperator):
         phi = self._phi
         theta = self._theta
         if 0.0 <= theta <= np.pi:
-            a = cos(theta / 2.)
+            a = cos(theta / 2.0)
             b = sqrt(1.0 - a**2)
             result[0, 0] = a**2
             result[1, 1] = b**2

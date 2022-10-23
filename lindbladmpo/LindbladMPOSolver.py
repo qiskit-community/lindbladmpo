@@ -394,8 +394,13 @@ class LindbladMPOSolver:
         return isinstance(value, int)
 
     @staticmethod
-    # checks if the value is a float (for cleaner code)
     def is_float(value):
+        """checks if the value is a float (for cleaner code).
+        Args:
+                value : value to test.
+        Returns:
+                True if value is a float or int.
+        """
         # in python terms the value <4> is not float type, in the simulator context float
         # can also be a python int:
         return isinstance(value, (float, int))
@@ -671,24 +676,29 @@ class LindbladMPOSolver:
                     else parameters[key]
                 )
                 for q_init in init_list:
-                    if isinstance(q_init, (float, int)) or \
-                            (isinstance(q_init, tuple) and len(q_init) == 1):
+                    if isinstance(q_init, (float, int)) or (
+                        isinstance(q_init, tuple) and len(q_init) == 1
+                    ):
                         val = q_init[0] if isinstance(q_init, tuple) else q_init
-                        if not LindbladMPOSolver.is_float(val) or not isfinite(val)\
-                                or val < 0. or val > 1.:
+                        if (
+                            not LindbladMPOSolver.is_float(val)
+                            or not isfinite(val)
+                            or val < 0.0
+                            or val > 1.0
+                        ):
                             check_msg += (
                                 "Error 361: a float or a length-1 tuple member of "
                                 + key
                                 + " represents a probability and must be between 0 and 1\n"
                             )
                         continue
-                    elif isinstance(q_init, tuple):
+                    if isinstance(q_init, tuple):
                         for val in q_init:
                             if not LindbladMPOSolver.is_float(val) or not isfinite(val):
                                 check_msg += (
-                                        "Error 362: the values in a tuple member of "
-                                        + key
-                                        + " must be valid numbers\n"
+                                    "Error 362: the values in a tuple member of "
+                                    + key
+                                    + " must be valid numbers\n"
                                 )
                         if len(q_init) == 2:
                             if q_init[0] < 0 or q_init[0] > np.pi:
@@ -701,9 +711,9 @@ class LindbladMPOSolver:
                             pass
                         else:
                             check_msg += (
-                                    "Error 364: a tuple member of "
-                                    + key
-                                    + " must be of 1, 2, or 3 elements\n"
+                                "Error 364: a tuple member of "
+                                + key
+                                + " must be of 1, 2, or 3 elements\n"
                             )
                         continue
                     if not isinstance(q_init, str):

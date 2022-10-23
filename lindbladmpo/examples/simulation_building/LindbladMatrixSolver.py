@@ -124,7 +124,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             init_pauli_state = self._get_parameter("init_pauli_state")
             init_product_state: Any = self._get_parameter("init_product_state")
             if init_pauli_state is not None and (
-                    self.is_float(init_pauli_state) or len(init_pauli_state) != 0
+                self.is_float(init_pauli_state) or len(init_pauli_state) != 0
             ):
                 s_init_param = "init_pauli_state"
                 self._print(
@@ -235,9 +235,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     q_init: Any = init_product_state[i_qubit]
                     b_mixed = False
                     b_tuple = isinstance(q_init, tuple)
-                    b_diagonal = self.is_float(q_init) or (
-                        b_tuple and len(q_init) == 1
-                    )
+                    b_diagonal = self.is_float(q_init) or (b_tuple and len(q_init) == 1)
                     if b_diagonal:
                         b = q_init[0] if b_tuple else q_init
                         diagonal = [b, 1.0 - b]
