@@ -158,7 +158,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
             if s_load_files_prefix != "" and (b_cz_pairs or init_len > 0):
                 raise Exception(
-                    "If load_files_prefix is nonempty, no other initialization"
+                    "If load_files_prefix is nonempty, no other initialization "
                     "parameter can be used"
                 )
             if init_len == 0:

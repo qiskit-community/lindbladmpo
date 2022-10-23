@@ -40,7 +40,7 @@ The default value for each parameter is indicated with an equality sign (only th
 
       <img src="https://render.githubusercontent.com/render/math?math=\sigma_i^a\left|\pm a_i\rangle = \pm \right|\pm a_i\rangle." style="vertical-align:bottom">
 
-      If an entry is a float, it should be between 0 and 1, and indicates the population of the "|0>" ("|up>" state, aligned with +z) in a diagonal mixed-state density matrix for the qubit. If an entry is a tuple of two floats (r, theta), it indicates an arbitrary pure-state superposition with the formula "r|0> + sqrt{1 - r^2} exp{i theta}|1>".
+      If an entry is a float, it should be between 0 and 1, and indicates the population of the "|0>" ("|up>" state, aligned with +z) in a diagonal mixed-state density matrix for the qubit. If an entry is a tuple of two floats (theta, phi), it indicates an arbitrary pure-state superposition in Bloch-sphere polar coordinates with the formula "cos(theta/2)|0> + sin(theta/2) exp{i phi}|1>".
 
 	* init_cz_gates = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, after they are initialized according to 'init_product_state'. Currently the CZ gate is only supported on the qubits that are first initialized to a pure state.
     * init_graph_state = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, to generate an initial graph state, after first initializing all along the +x axis. If 'init_graph_state' is used, all other initialization parameters should be left empty. The qubit pairs will represent j and k in the graph state formula;

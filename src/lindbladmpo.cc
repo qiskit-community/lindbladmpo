@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 	unsigned int init_len = init_product_state.size();
 
 	if (load_prefix != "" && (b_cz_pairs || init_len > 0))
-		cout2 << "Error: if load_files_prefix is nonempty, no other initialization" <<
+		cout2 << "Error: if load_files_prefix is nonempty, no other initialization " <<
 			"parameter can be used.\n", exit(1);
 	if (init_len == 0)
 	{
