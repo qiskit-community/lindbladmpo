@@ -134,9 +134,9 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "tau": 0.02,
             "t_final": t_final,
             "N": N,
-            "g_0": [.1, .5, .2],
-            "g_1": .2,
-            "g_2": .1,
+            "g_0": [0.1, 0.5, 0.2],
+            "g_1": 0.2,
+            "g_2": 0.1,
             "h_x": [0.6, 1.2, 0.7],
             "h_y": [-0.6, 0.2, 0.9],
             "h_z": [0.1, -1.2, 0.7],
@@ -159,34 +159,56 @@ class LindbladMPOSolverModel(unittest.TestCase):
         solver_params2.update({"output_files_prefix": s_files_prefix2})
         solver2 = LindbladMatrixSolver(solver_params1)
         solver2.solve()
-        self.assertAlmostEqual(solver1.result["obs-1q"][("x", (0,))][1][-1],
-                               solver2.result["obs-1q"][("x", (0,))][1][-1])
-        self.assertAlmostEqual(solver1.result["obs-2q"][("xz", (1, 2))][1][-1],
-                               solver2.result["obs-2q"][("xz", (1, 2))][1][-1])
-        self.assertAlmostEqual(solver1.result["obs-2q"][("zz", (2, 0))][1][-1],
-                               solver2.result["obs-2q"][("zz", (2, 0))][1][-1])
+        self.assertAlmostEqual(
+            solver1.result["obs-1q"][("x", (0,))][1][-1],
+            solver2.result["obs-1q"][("x", (0,))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xz", (1, 2))][1][-1],
+            solver2.result["obs-2q"][("xz", (1, 2))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("zz", (2, 0))][1][-1],
+            solver2.result["obs-2q"][("zz", (2, 0))][1][-1],
+        )
 
-        load_dict = {"b_save_final_state": False,
-                     "init_product_state": None,
-                     "init_cz_gates": [],
-                     "t_init": t_final,
-                     "t_final": t_final + 2}
+        load_dict = {
+            "b_save_final_state": False,
+            "init_product_state": None,
+            "init_cz_gates": [],
+            "t_init": t_final,
+            "t_final": t_final + 2,
+        }
         solver_params1.update(load_dict)
-        solver_params1.update({"load_files_prefix": s_files_prefix1,
-                               "output_files_prefix": s_files_prefix1 + "B"})
+        solver_params1.update(
+            {
+                "load_files_prefix": s_files_prefix1,
+                "output_files_prefix": s_files_prefix1 + "B",
+            }
+        )
         solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
         solver1.solve()
         solver_params2.update(load_dict)
-        solver_params2.update({"load_files_prefix": s_files_prefix2,
-                               "output_files_prefix": s_files_prefix2 + "B"})
+        solver_params2.update(
+            {
+                "load_files_prefix": s_files_prefix2,
+                "output_files_prefix": s_files_prefix2 + "B",
+            }
+        )
         solver2 = LindbladMatrixSolver(solver_params1)
         solver2.solve()
-        self.assertAlmostEqual(solver1.result["obs-1q"][("y", (1,))][1][-1],
-                               solver2.result["obs-1q"][("y", (1,))][1][-1])
-        self.assertAlmostEqual(solver1.result["obs-1q"][("z", (2,))][1][-1],
-                               solver2.result["obs-1q"][("z", (2,))][1][-1])
-        self.assertAlmostEqual(solver1.result["obs-2q"][("xy", (0, 1))][1][-1],
-                               solver2.result["obs-2q"][("xy", (0, 1))][1][-1])
+        self.assertAlmostEqual(
+            solver1.result["obs-1q"][("y", (1,))][1][-1],
+            solver2.result["obs-1q"][("y", (1,))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-1q"][("z", (2,))][1][-1],
+            solver2.result["obs-1q"][("z", (2,))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xy", (0, 1))][1][-1],
+            solver2.result["obs-2q"][("xy", (0, 1))][1][-1],
+        )
 
 
 if __name__ == "__main__":
