@@ -59,7 +59,7 @@ class PolarState(DynamicalOperator):
     def __init__(self, system_id="", theta: float = 0.0, phi: float = 0.0):
         self._phi = phi
         self._theta = theta
-        super().__init__(system_id, "polar" + str(r) + "_" + str(theta))
+        super().__init__(system_id, "polar" + str(theta) + "_" + str(phi))
 
     def get_operator_matrix(self, dim: int) -> Any:
         """Returns a matrix describing a realization of the operator specified in the parameters.
