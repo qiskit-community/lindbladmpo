@@ -49,7 +49,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
         "g_0": (0.0, "v"),
         "g_1": (0.0, "v"),
         "g_2": (0.0, "v"),
-        "init_pauli_state": ("+z", "v"),
+        "b_quiet": (False, "s"),
         "b_save_final_state": (False, "s"),
         "1q_components": (["z"], "s"),
         "2q_components": (["zz"], "s"),
@@ -90,6 +90,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             self._print(
                 "Creating solver matrices and executing scipy solver using qiskit-dynamics."
             )
+            ts0 = time.time()
             parameters = self.parameters
             n_qubits = parameters.get("N", None)
             t_final = parameters.get("t_final", None)
@@ -99,10 +100,98 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     "The three input parameters 'N', 't_final', and 'tau' must be assigned, "
                     "as they do not have a default value."
                 )
-            init_pauli_state: List = self._get_parameter("init_pauli_state")
-            init_graph_state: List = self._get_parameter("init_graph_state")
             s_load_files_prefix: str = parameters.get("load_files_prefix", "")
-            ts0 = time.time()
+
+            init_graph_state = self._get_parameter("init_graph_state")
+            init_cz_gates = self._get_parameter("init_cz_gates")
+            b_graph_state, b_cz_pairs = False, False
+            s_cz_param = ""
+            if init_graph_state is not None and len(init_graph_state) > 0:
+                b_cz_pairs = True
+                b_graph_state = True
+                s_cz_param = "init_graph_state"
+                if init_cz_gates is None or len(init_cz_gates) == 0:
+                    init_cz_gates = init_graph_state
+                else:
+                    raise Exception(
+                        "The parameter init_cz_gates cannot be used "
+                        "if init_graph_state is nonempty."
+                    )
+            elif init_cz_gates is not None and len(init_cz_gates) > 0:
+                b_cz_pairs = True
+                s_cz_param = "init_cz_gates"
+
+            s_init_param = ""
+            init_pauli_state = self._get_parameter("init_pauli_state")
+            init_product_state: Any = self._get_parameter("init_product_state")
+            if init_pauli_state is not None and (
+                self.is_float(init_pauli_state) or len(init_pauli_state) != 0
+            ):
+                s_init_param = "init_pauli_state"
+                self._print(
+                    "Warning: the init_pauli_state parameter has been deprecated and "
+                    "will be removed in the future. Please use init_product_state instead."
+                )
+                if init_product_state is None or (
+                    not self.is_float(init_product_state)
+                    and len(init_product_state) == 0
+                ):
+                    init_product_state = init_pauli_state
+                else:
+                    raise Exception(
+                        "The parameter init_pauli_state cannot be used "
+                        "if init_product_state is nonempty."
+                    )
+            else:
+                s_init_param = "init_product_state"
+            if init_product_state is None:
+                init_len = 0
+            elif isinstance(init_product_state, str) and len(init_product_state) == 0:
+                init_len = 0
+            else:
+                if (
+                    self.is_float(init_product_state)
+                    or isinstance(init_product_state, str)
+                    or isinstance(init_product_state, tuple)
+                ):
+                    init_product_state = [init_product_state]
+                init_len = len(init_product_state)
+
+            if s_load_files_prefix != "" and (b_cz_pairs or init_len > 0):
+                raise Exception(
+                    "If load_files_prefix is nonempty, no other initialization "
+                    "parameter can be used"
+                )
+            if init_len == 0:
+                if b_graph_state:
+                    init_product_state = ["+x"] * n_qubits
+                else:
+                    init_product_state = ["+z"] * n_qubits
+            else:
+                if b_graph_state:
+                    raise Exception(
+                        "If init_graph_state is nonempty, no other initialization "
+                        "parameter can be used."
+                    )
+                if init_len == 1:
+                    init_product_state = [init_product_state[0]] * n_qubits
+                elif init_len != n_qubits:
+                    raise Exception(
+                        f"The parameter {s_init_param} has {init_len}"
+                        f"value(s) but 0, 1 or {n_qubits} value(s) were expected."
+                    )
+
+            in_cz_gate = np.zeros((n_qubits,))
+            if init_cz_gates is not None:
+                for q_pair in init_cz_gates:
+                    i = q_pair[0]
+                    j = q_pair[1]
+                    if i >= n_qubits or j >= n_qubits:
+                        raise Exception(
+                            f"The parameter {s_cz_param} contains an invalid index pair, ({i}, {j})."
+                        )
+                    in_cz_gate[i] = 1
+                    in_cz_gate[j] = 1
 
             h_x = self._get_parameter("h_x")
             h_y = self._get_parameter("h_y")
@@ -135,14 +224,6 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             H = 0.0 * Id(0)  # just dummy initialization
             rho_0 = Id(0)  # just dummy initialization
 
-            qubit_in_graph = np.zeros((n_qubits,))
-            if init_graph_state is not None:
-                for q_pair in init_graph_state:
-                    i = q_pair[0]
-                    j = q_pair[1]
-                    qubit_in_graph[i] = 1
-                    qubit_in_graph[j] = 1
-
             L_ops = []
             L_sig = []
             obs_1q = []
@@ -152,27 +233,35 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             for i_qubit in r_qubits:
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
-                    q_init = (
-                        init_pauli_state[i_qubit]
-                        if init_pauli_state is not None
-                        else ""
-                    )
-                    if qubit_in_graph[i_qubit]:
-                        # If qubit is in a graph state, verify that it's initialized to '+x',
-                        # in preparing for the CZs applied below
-                        if q_init == "":
-                            q_init = "+x"
-                        elif q_init != "+x":
-                            raise Exception(
-                                "A qubit that appears in init_graph_state must be initialized"
-                                "to '+x' in init_pauli_state if it is nonempty."
-                            )
-                    if self._is_float(q_init):
-                        b = q_init
+                    q_init: Any = init_product_state[i_qubit]
+                    b_mixed = False
+                    b_tuple = isinstance(q_init, tuple)
+                    b_diagonal = self.is_float(q_init) or (b_tuple and len(q_init) == 1)
+                    if b_diagonal:
+                        b = q_init[0] if b_tuple else q_init
                         diagonal = [b, 1.0 - b]
                         rho_0 *= Diagonal(i_qubit, diagonal)
+                        if 0.0 < b < 1.0:
+                            b_mixed = True
+                    elif b_tuple:
+                        if len(q_init) == 2:
+                            phi: float = q_init[1]
+                            theta: float = q_init[0]
+                            rho_0 *= PolarState(i_qubit, theta, phi)
+                        else:
+                            raise Exception(
+                                f"The initial state of site {i_qubit} is defined "
+                                "using a tuple of an unsupported length."
+                            )
                     else:
+                        if q_init == "id":
+                            b_mixed = True
                         rho_0 *= get_operator_from_label(q_init, i_qubit)
+                    if b_mixed and in_cz_gate[i_qubit]:
+                        raise Exception(
+                            f"Site {i_qubit} is indicated for a CZ gate and also"
+                            " initialized to a mixed state, which is currently unsupported."
+                        )
                 if h_x[i_qubit]:
                     H += (0.5 * h_x[i_qubit]) * Sx(i_qubit)
                 if h_y[i_qubit]:
@@ -219,9 +308,9 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 rho_0_mat = np.load(s_load_files_prefix + ".state.npy")
             else:
                 rho_0_mat = build_matrices(rho_0, subsystem_dims)
-                if init_graph_state is not None:
+                if init_cz_gates is not None:
                     # Apply CZ to all qubit tuples in the list
-                    for q_pair in init_graph_state:
+                    for q_pair in init_cz_gates:
                         i = q_pair[0]
                         j = q_pair[1]
                         CZ = 0.5 * (Sz(i) + Sz(j) - Sz(i) * Sz(j) + Id(i) * Id(j))
@@ -321,25 +410,6 @@ class LindbladMatrixSolver(LindbladMPOSolver):
     ) -> Union[None, Sized, Iterable, str, float, list, np.ndarray]:
         val = self.parameters.get(s_key, None)
         def_val = self.DEFAULT_PARAMETERS.get(s_key, None)
-        if (
-            (s_key == "init_pauli_state" or s_key == "init_graph_state")
-            and val is not None
-            and (not isinstance(val, str) or val != "")
-        ):
-            s_load_files_prefix = self.parameters.get("load_files_prefix", "")
-            if s_load_files_prefix != "":
-                raise Exception(
-                    "If the parameter 'load_files_prefix' is not empty, then "
-                    "'init_pauli_state' and 'init_graph_state' must both be empty."
-                )
-
-        if s_key == "init_pauli_state":
-            if val is None or (isinstance(val, str) and val == ""):
-                init_graph_state = self.parameters.get("init_graph_state", None)
-                if init_graph_state is not None:
-                    return None
-                # If user passed the init_graph_state variable together with an empty
-                # value for init_pauli_state, avoid setting it the default vector as done below
 
         if val is None and def_val is not None:
             val = def_val[0]
@@ -439,7 +509,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     )
                     continue
             elif (key == "atol") or (key == "rtol"):
-                if not LindbladMPOSolver._is_float(parameters[key]):
+                if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += (
                         "LindbladMatrixSolver Error 1030: " + key + " is not a float\n"
                     )

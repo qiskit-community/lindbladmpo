@@ -19,13 +19,15 @@
 #include "ModelParameters.h"
 #include "lindbladian.h"
 #include <chrono>
+#include <sstream>
+#include <iostream>
 
 using namespace itensor;
 using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.1.1";
+const string SOLVER_VERSION = "0.2.0";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -143,39 +145,71 @@ int main(int argc, char *argv[])
 	argsRho.add("MaxDim", param.longval("max_dim_rho"));
 	argsRho.add("Cutoff", param.val("cut_off_rho"));
 
-	vector<long> graph_pairs = param.longvec("init_graph_state");
-	if (graph_pairs.size() % 2 == 1)
-		cout2 << "Error: the list of indices given in the parameter `init_graph_state` should " <<
-			"have an even length.\n", exit(1);
-	bool const b_graph_state = (graph_pairs.size() != 0);
-
-	vector<string> a_init = param.stringvec("init_pauli_state");
-	unsigned int a_init_len = a_init.size();
-	if (load_prefix == "" && !b_graph_state && a_init_len != 1 && int(a_init_len) != N)
-		cout2 << "Error: the parameter init_pauli_state has " << a_init_len << " value(s) but 1 or " <<
-		 	N << " value(s) were expected.\n", exit(1);
-	if (load_prefix != "" && b_graph_state)
-		cout2 << "Error: either load_files_prefix or init_graph_state can be nonempty, but not both.\n",
-		exit(1);
-	if (load_prefix != "" && a_init_len > 1)
-		cout2 << "Error: if load_files_prefix is nonempty, " <<
-		"init_pauli_state must be left empty or unspecified.\n", exit(1);
-	if (b_graph_state && a_init_len>0)
-		cout2<<"Warning: the graph state initialization will overwrite the 'init_pauli_state' parameters on the sites involved in the graph.\n";
-	if (a_init_len == 0)
-		a_init = vector<string>(N, "+z");
-	else if (a_init_len == 1)
-		a_init = vector<string>(N, a_init[0]);
-	if (b_graph_state)
+	vector<long> init_graph_state = param.longvec("init_graph_state");
+	vector<long> init_cz_gates = param.longvec("init_cz_gates");
+	bool b_graph_state = false, b_cz_pairs = false;
+	string s_cz_param = "";
+	if (init_graph_state.size() > 0)
 	{
-		validate_2q_list(graph_pairs, N, "init_graph_state");
-		for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
-		{
-			const int i = graph_pairs[n]-1, j = graph_pairs[n + 1]-1;
-			a_init[i] = "+x";
-			a_init[j] = "+x";
-		}
+		b_cz_pairs = true;
+		b_graph_state = true;
+		s_cz_param = "init_graph_state";
+		if (init_cz_gates.size() == 0)
+			init_cz_gates = init_graph_state;
+		else
+			cout2 << "Error: the parameter init_cz_gates cannot be used " <<
+				"if init_graph_state is nonempty.\n", exit(1);
 	}
+	else if (init_cz_gates.size() > 0)
+	{
+		b_cz_pairs = true;
+		s_cz_param = "init_cz_gates";
+	}
+	if (init_cz_gates.size() % 2 == 1)
+		cout2 << "Error: the list of indices given in the parameter " << s_cz_param <<
+			" should have an even length.\n", exit(1);
+
+	vector<string> init_pauli_state = param.stringvec("init_pauli_state");
+	vector<string> init_product_state = param.stringvec("init_product_state");
+	string s_init_param;
+	if (init_pauli_state.size() != 0)
+	{
+		s_init_param = "init_pauli_state";
+		cout2 << "Warning: the init_pauli_state parameter has been deprecated and " <<
+		 	"will be removed in the future. Please use init_product_state instead.\n";
+		if (init_product_state.size() == 0)
+			init_product_state = init_pauli_state;
+		else
+			cout2 << "Error: the parameter init_pauli_state cannot be used " <<
+				"if init_product_state is nonempty.\n", exit(1);
+	}
+	else
+		s_init_param = "init_product_state";
+	unsigned int init_len = init_product_state.size();
+
+	if (load_prefix != "" && (b_cz_pairs || init_len > 0))
+		cout2 << "Error: if load_files_prefix is nonempty, no other initialization " <<
+			"parameter can be used.\n", exit(1);
+	if (init_len == 0)
+	{
+		if (b_graph_state)
+			init_product_state = vector<string>(N, "+x");
+		else
+			init_product_state = vector<string>(N, "+z");
+	}
+	else
+	{
+		if (b_graph_state)
+			cout2 << "Error: If init_graph_state is nonempty, no other initialization " <<
+				"parameter can be used.\n", exit(1);
+		if (init_len == 1)
+			init_product_state = vector<string>(N, init_product_state[0]);
+		else if (int(init_len) != N)
+			cout2 << "Error: the parameter " << s_init_param << " has " << init_len <<
+				" value(s) but 0, 1 or " << N << " value(s) were expected.\n", exit(1);
+	}
+	if (b_cz_pairs)
+		validate_2q_list(init_cz_gates, N, s_cz_param);
 
 	MPS psi;
 	bool psi_defined = false;
@@ -196,12 +230,13 @@ int main(int argc, char *argv[])
 		for (int i = 1; i <= N; ++i) // Start with all spins up
 			initState.set(i, "Up");
 		psi = MPS(initState);
-		vector<double> a_mixed_state = vector<double>(N, 2.);
-		// We set a default value of 2 that will be ignored below, unless overwritten
+		vector<double> a_mixed_state = vector<double>(N, -1.);
+		// We init values outside of the valid range, that will be ignored below unless overwritten
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
-			string s_init = a_init[site_number - 1];
+        	const unsigned int i_site = (unsigned int)site_number - 1;
+			string s_init = init_product_state[i_site];
 			double R0 = .0, I0 = .0, R1 = .0, I1 = .0;
 			if (s_init == "+z")
 				R0 = 1.;
@@ -223,19 +258,73 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				R0 = 1.;  // A valid value must be set to get a regular pure state
-				try
+				if (s_init == "id")
 				{
-				  	double b = stod(s_init);
-				  	if (b < 0. || b > 1.)
-						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial "
-							"mixed state coefficient (should be in the range [0, 1]).\n", exit(1);
-				  	a_mixed_state[(unsigned int)(site_number - 1)] = b;
+					R0 = 1.;  // A valid value must be set to get a regular pure state
+					a_mixed_state[i_site] = .5;
 				}
-				catch (...)
+				else
 				{
-					cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state "
-						"(should be a string in {+x, -x, +y, -y, +z, -z}, or a float).\n", exit(1);
+					string s_type = "";
+					if (s_init.size() > 2)
+					 	s_type = s_init.substr(0, 2);
+					if (s_type == "p ")
+					{
+						double b = 1.;  // Value is not expected to be used.
+						string s_val = s_init.substr(2);
+						try
+						{
+							b = stod(s_val);
+						}
+						catch (...)
+						{
+							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+								"After the prefix \"p \" should follow a valid float value.\n", exit(1);
+						}
+						if (b < 0. || b > 1.)
+							cout2 << "Error: " << s_val << " is an unknown 1-qubit initial "
+								"mixed state coefficient (should be in the range [0, 1]).\n", exit(1);
+						R0 = 1.;  // A valid value must be set to get a regular pure state
+						a_mixed_state[i_site] = b;
+					}
+					else if (s_type == "q ")
+					{
+						string s_val;
+						float val = 0.;
+						vector<double> values;
+						bool b_invalid = false;
+						istringstream s_stream(s_init.substr(2));
+						while (getline(s_stream, s_val, ' '))
+						{
+							try
+							{
+								val = stod(s_val);
+							}
+							catch (...)
+							{
+								b_invalid = true;
+								break;
+							}
+							values.push_back(val);
+						}
+						if (values.size() != 2)
+							b_invalid = true;
+						if (b_invalid)
+							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+								"After the prefix \"q \" should follow two space-separated floats.\n",
+								exit(1);
+						R0 = cos(values[0] / 2.);
+						double r1 = pow(1. - pow(R0, 2), .5);
+						R1 = r1 * cos(values[1]);
+						I1 = r1 * sin(values[1]);
+					}
+					else
+					{
+						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+							"It should be a string in {+x, -x, +y, -y, +z, -z, id}, \"p \" "
+							"followed by a float, or \"q \" followed by two space-separated floats).\n",
+							exit(1);
+					}
 				}
 			}
 
@@ -245,16 +334,20 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, ri = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
-				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ", up) = " <<
+				 	eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ", down) = " <<
+				 	eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
 			}
 			else if (site_number == N)
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
-				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
+				cout2 << "psi(site " << site_number << ", up) = " <<
+				 	eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
+				cout2 << "psi(site " << site_number << ", down) = " <<
+				 	eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
 			}
 			else
 			{
@@ -262,33 +355,45 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, ri = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ",up)=" << eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << "\n";
-				cout2 << "psi(site " << site_number << ",down)=" << eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ", up) = " <<
+				 	eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << "\n";
+				cout2 << "psi(site " << site_number << ", down) = " <<
+				 	eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
 			}
 		}
+		vector<bool> in_cz_gate = vector<bool>(N, false);
 		psi.orthogonalize(Args("Cutoff", 1e-6));
-		if (b_graph_state) {
-			cout2 << "Application of control-Z gates on requested ("<<graph_pairs.size()/2<<") pairs of qubits.";
-			for (unsigned int n = 0; n < graph_pairs.size(); n += 2)
+		if (b_cz_pairs) {
+			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
+			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
 			{
-				const int i = graph_pairs[n], j = graph_pairs[n + 1];
+				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
+				const unsigned int i0 = (unsigned int)(i - 1);
+				const unsigned int j0 = (unsigned int)(j - 1);
+				in_cz_gate[i0] = true;
+				in_cz_gate[j0] = true;
 				ApplyControlZGate(psi,C.sites,i,j);
 			}
 			psi.orthogonalize(Args("Cutoff",0));
-			cout2<<" Done.\n";
-			cout2<<"|psi> MPS max. bond dim.="<< maxLinkDim(psi)<<"\n";
+			cout2 << " Done.\n";
+			cout2 << "|psi> MPS maximal bond dimension = " << maxLinkDim(psi) << "\n";
 			//for (int c=1;c<=N-1;c++)
-			int c=N/2;
-			cout2<<"Half-system von Neumann entropy="<<Entropy(psi,c,2)<<"\n";
+			int c = N / 2;
+			cout2 << "Half-system von-Neumann entropy = " << Entropy(psi,c,2) << "\n";
 		}
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
 		for (int site_number = 1; site_number <= N; site_number++)
         {
-        	double b = a_mixed_state[(unsigned int)(site_number - 1)];
+        	const unsigned int i_site = (unsigned int)(site_number - 1);
+        	double b = a_mixed_state[i_site];
         	if (b >= 0. && b <= 1. )
         	{
+        		if (in_cz_gate[i_site])
+   					cout2 << "Error: Site " << site_number << " is indicated for a CZ gate and also" <<
+   						" initialized to a mixed state, which is currently unsupported.\n", exit(1);
+
 				psi_defined=false;
 				auto pauli_ind = siteIndex(C.rho, site_number);
 				if (site_number == 1) {
@@ -296,13 +401,12 @@ int main(int argc, char *argv[])
 						  int dr=ri.dim();
 						  for (int r=1;r<=dr;r++) {
 								complex<double> trace=0;
-								for (int p=1;p<=4;p+=3) {
-    								trace+=eltC(C.rho.ref(site_number),ri=r,pauli_ind=p);
-								}
-								C.rho.ref(site_number).set(pauli_ind = 1, ri = r, b*trace);// |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, 0);// |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, 0);// |u><d|
-						  		C.rho.ref(site_number).set(pauli_ind = 4, ri = r, (1. - b)*trace);// |d><d|
+								for (int p=1;p<=4;p+=3)
+    								trace+=eltC(C.rho.ref(site_number), ri = r, pauli_ind = p);
+								C.rho.ref(site_number).set(pauli_ind = 1, ri = r, b * trace); // |u><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, 0); // |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, 0); // |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 4, ri = r, (1. - b) * trace); // |d><d|
 				 		   }
 				}
 				else if (site_number == N) {
@@ -407,7 +511,6 @@ int main(int argc, char *argv[])
 	const int n_steps = int(t_total / tau);
 
 	// Open output files
-
 	ofstream file_1q(output_prefix + ".obs-1q.dat");
 	file_1q.precision(15);
 	file_1q << "#time\toperator\tindex\tvalue" << endl;
@@ -416,12 +519,10 @@ int main(int argc, char *argv[])
 	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
 	ofstream file_global(output_prefix + ".global.dat");
 	file_global.precision(15);
-//	file_global << "#time\ttr_rho\tS_2\tOSEE_center\tmax_bond_dim\tduration_ms" << endl;
 	file_global << "#time\tquantity\tvalue" << endl;
 
 	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qubit observables
-
 	auto components = param.stringvec("1q_components");
 	for (auto &s : components)
 	{
@@ -481,6 +582,8 @@ int main(int argc, char *argv[])
 
 	char buf[100];
 	const long force_rho_Hermitian_step = param.longval("force_rho_hermitian_step");
+ 	const bool b_quiet = param.boolval("b_quiet");
+ 	cout2.quiet(b_quiet);
 	for (int n = 0; n <= n_steps; n++)
 	{
 		const double t = t_0 + n * tau;
@@ -507,7 +610,7 @@ int main(int argc, char *argv[])
 				const double S_2 = 1.0 / (1.0 - 2.0) * log(tr2.real());
 				const int bd = BondDim(C.rho, N / 2), bd_max = maxLinkDim(C.rho);
 
-				cout2 << "\tTr{rho}: " << tr << ", Rényi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
+				cout2 << "\tTr{rho}: " << tr << ", Renyi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
 //				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
 				if (!force_rho_Hermitian_step || (n % force_rho_Hermitian_step) != 0)
 				     cout2 << "\n\tMax bond dimension: " << bd_max;
@@ -603,7 +706,8 @@ int main(int argc, char *argv[])
 			cout2.flush();
 		}
 	}
-
+	cout2.quiet(false);
+	
 	bool b_save_state = param.boolval("b_save_final_state");
 	if (b_save_state)
 	{
@@ -710,7 +814,7 @@ void validate_2q_list(vector<long> &vect, int N, string const &list_name)
         if (param.longval("up_init") == 0 && param.longval("down_init") == 0)
         {
           for (int i = 1; i <= N; ++i)
-          { // Start the DMRG from the Néel state (|Néel> = |up|down|up|down|up|...> )
+          { // Start the DMRG from the Neel state (|Neel> = |up|down|up|down|up|...> )
             if (i % 2 == 1)
               initState.set(i, "Dn");
             else

@@ -282,8 +282,8 @@ def prepare_xy_current_data(
                 except ValueError:
                     pass
     s_tex_label = (
-        f"\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}} -"
-        f"\\sigma^{s_obs_name[0]}_{{j}}\\sigma^{s_obs_name[1]}_{{i}}"
+        f"\\frac{{1}}{{2}}\\left(\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{j}} -"
+        f"\\sigma^{s_obs_name[1]}_{{i}}\\sigma^{s_obs_name[0]}_{{j}}\\right)"
     )
     return obs_data, s_tex_label
 
@@ -832,4 +832,80 @@ def plot_global_obs_curve(
     ax.set_xticks(t_tick_labels)
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
     s_file_label = s_obs_name
+    _save_fig(b_save_figures, s_file_prefix, s_file_label)
+
+
+def plot_1d_current_curve(
+    parameters: dict,
+    result: dict,
+    times: Optional[List[float]] = None,
+    qubits: Optional[List[int]] = None,
+    ax=None,
+    fontsize=16,
+    b_save_figures=True,
+    s_file_prefix="",
+    s_title=None,
+    b_legend_labels=True,
+):
+    """
+    Prepare the data and plot the current expectation value at time t, assuming a 1D topology.
+
+    Args:
+            parameters: A dictionary from which the basic time parameters are taken.
+            result: A dictionary from which the observables are taken.
+            times: An optional list of times at which to plot. If None,
+                the final time is used.
+            qubits: An optional list of qubits to take for plotting, assuming a 1D chain
+                topology with their order. If None, all qubits are taken in ordinal order.
+            ax: An optional axis object. If None, a new figure is created.
+            fontsize: The fontsize to use in the figure.
+            b_save_figures: Whether to save the plotted figure to file.
+            s_file_prefix: An optional path and file name prefix for the saved figures.
+            s_title: An optional title for the figure. If empty, a default title is formatted.
+            b_legend_labels: Whether to add labels to the curves and plot a legend.
+    """
+    obs_data_list = []
+    tex_labels = [] if b_legend_labels else None
+    s_obs_name = "xy"
+    if times is None:
+        times = [parameters["t_final"]]
+    if qubits is None:
+        qubits = range(parameters["N"])
+    qubit_pairs = [(qubits[i], qubits[i + 1]) for i in range(len(qubits) - 1)]
+    for t in times:
+        obs_data, _ = prepare_xy_current_data(result, qubit_pairs, t)
+        if obs_data is not None:
+            obs_data_list.append(obs_data)
+            if b_legend_labels:
+                tex_labels.append(f"$t={t}$")
+    if s_title is None:
+        s_title = (
+            f"$\\frac{{1}}{{2}}\\langle\\sigma^{s_obs_name[0]}_{{i}}\\sigma^{s_obs_name[1]}_{{i+1}} -"
+            f"\\sigma^{s_obs_name[1]}_{{i}}\\sigma^{s_obs_name[0]}_{{i+1}}\\rangle(t)$"
+        )
+    if ax is None:
+        _, ax = plt.subplots(figsize=(10, 6))
+    plt.rcParams.update({"font.size": fontsize})
+    line_styles = LINDBLADMPO_LINE_STYLES
+    linewidth = 3
+    n_styles = len(line_styles)
+    x_qubits = qubits[0:-1]
+    for i_curve, obs_data in enumerate(obs_data_list):
+        s_label = tex_labels[i_curve] if tex_labels is not None else None
+        ax.plot(
+            x_qubits,
+            obs_data,
+            label=s_label,
+            linestyle=line_styles[i_curve % n_styles],
+            linewidth=linewidth,
+        )
+    if tex_labels is not None:
+        ax.legend(fontsize=fontsize)
+    ax.set_xlabel("bond $i$", fontsize=fontsize)
+    ax.set_ylabel("", fontsize=fontsize)
+    if s_title != "":
+        ax.set_title(s_title)
+    ax.set_xticks(x_qubits)
+    ax.set_xticklabels(x_qubits, fontsize=fontsize)
+    s_file_label = "current-1d"
     _save_fig(b_save_figures, s_file_prefix, s_file_label)

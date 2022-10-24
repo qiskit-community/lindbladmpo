@@ -13,6 +13,7 @@ Defines the main class of the packages, implementing the interface with the solv
 import collections
 import subprocess
 import uuid
+from math import isfinite
 from typing import Dict, Optional
 import platform
 import os
@@ -199,27 +200,43 @@ class LindbladMPOSolver:
                     )
                     not_first_value = True
                 file.write("\n")
+            elif (
+                key == "init_pauli_state"
+                or key == "init_product_state"
+                or key == "1q_components"
+                or key == "2q_components"
+            ):
+                val = parameters[key]
+                if isinstance(val, (int, float, tuple, str)):
+                    val_list = [val]
+                else:
+                    val_list = val
+                n_indices = len(val_list)
+                file.write(key + " = ")
+                for i_op, op in enumerate(val_list):
+                    b_tuple = isinstance(op, tuple)
+                    if isinstance(op, str):
+                        file.write(str(op).strip("'"))
+                    elif isinstance(op, (int, float)) or (b_tuple and len(op) == 1):
+                        if key == "init_product_state":
+                            file.write("p ")
+                        s_val = op[0] if b_tuple else op
+                        file.write(str(s_val))
+                    elif b_tuple:
+                        if len(op) == 2:
+                            file.write("q " + str(op[0]) + " " + str(op[1]))
+                        else:
+                            file.write(
+                                "r " + str(op[0]) + " " + str(op[1]) + " " + str(op[2])
+                            )
+                    if i_op != n_indices - 1:
+                        file.write(",")
+                file.write("\n")
             elif isinstance(parameters[key], np.ndarray):
                 file.write(key + " = ")
                 for i in range(parameters[key].shape[0]):
                     file.write(str(parameters[key][i]))
                     if i + 1 != parameters[key].shape[0]:
-                        file.write(",")
-                file.write("\n")
-            elif (
-                key == "init_pauli_state"
-                or key == "1q_components"
-                or key == "2q_components"
-            ):
-                if isinstance(parameters[key], (float, str)):
-                    val_list = [parameters[key]]
-                else:
-                    val_list = parameters[key]
-                n_indices = len(val_list)
-                file.write(key + " = ")
-                for i_op, op in enumerate(val_list):
-                    file.write(str(op).strip("'"))
-                    if i_op != n_indices - 1:
                         file.write(",")
                 file.write("\n")
             elif key == "1q_indices":
@@ -231,7 +248,11 @@ class LindbladMPOSolver:
                     if i_site != n_indices - 1:
                         file.write(",")
                 file.write("\n")
-            elif key == "2q_indices" or key == "init_graph_state":
+            elif (
+                key == "2q_indices"
+                or key == "init_graph_state"
+                or key == "init_cz_gates"
+            ):
                 file.write(key + " = ")
                 n_tuples = len(parameters[key])
                 for i_2q_tuple, _2q_tuple in enumerate(parameters[key]):
@@ -373,8 +394,13 @@ class LindbladMPOSolver:
         return isinstance(value, int)
 
     @staticmethod
-    # checks if the value is a float (for cleaner code)
-    def _is_float(value):
+    def is_float(value):
+        """checks if the value is a float (for cleaner code).
+        Args:
+                value : value to test.
+        Returns:
+                True if value is a float or int.
+        """
         # in python terms the value <4> is not float type, in the simulator context float
         # can also be a python int:
         return isinstance(value, (float, int))
@@ -446,7 +472,7 @@ class LindbladMPOSolver:
                     )
                     continue
             elif key == "t_init" or key == "t_final" or key == "tau":
-                if not LindbladMPOSolver._is_float(parameters[key]):
+                if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 140: " + key + " is not a float\n"
                     continue
                 if key != "t_init" and parameters[key] <= 0:
@@ -485,7 +511,7 @@ class LindbladMPOSolver:
                 or (key == "g_1")
                 or (key == "g_2")
             ):
-                if LindbladMPOSolver._is_float(parameters[key]):
+                if LindbladMPOSolver.is_float(parameters[key]):
                     continue
                 number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
                 if number_of_qubits == -1:
@@ -503,7 +529,7 @@ class LindbladMPOSolver:
                         )
                         continue
                     for element in parameters[key]:
-                        if not LindbladMPOSolver._is_float(element):
+                        if not LindbladMPOSolver.is_float(element):
                             check_msg += (
                                 "Error 220: " + key + "is not a float / N-length list "
                                 "/ numpy array (of floats)\n "
@@ -538,7 +564,7 @@ class LindbladMPOSolver:
                     )
                     continue
             elif (key == "J_z") or (key == "J"):
-                if LindbladMPOSolver._is_float(parameters[key]):
+                if LindbladMPOSolver.is_float(parameters[key]):
                     continue
                 number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
                 if number_of_qubits == -1:
@@ -578,7 +604,7 @@ class LindbladMPOSolver:
                             flag_continue = True
                             break
                         for val in lst:
-                            if not LindbladMPOSolver._is_float(val):
+                            if not LindbladMPOSolver.is_float(val):
                                 check_msg += (
                                     "Error 300: "
                                     + key
@@ -632,45 +658,77 @@ class LindbladMPOSolver:
                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     )
                     continue
-            elif key == "init_pauli_state":
+            elif (key == "init_pauli_state") or (key == "init_product_state"):
                 if (
-                    not isinstance(parameters[key], (str, float))
+                    not isinstance(parameters[key], (str, float, tuple))
                     and not isinstance(parameters[key], list)
                     and not isinstance(parameters[key], np.ndarray)
                 ):
                     check_msg += (
                         "Error 350: "
                         + key
-                        + " must be a string, float or a list or array of strings or floats\n"
+                        + " must be a string, float, tuple or a list/ array of strings/floats/tuples\n"
                     )
                     continue
                 init_list = (
                     [parameters[key]]
-                    if isinstance(parameters[key], (str, float))
+                    if isinstance(parameters[key], (str, float, tuple))
                     else parameters[key]
                 )
                 for q_init in init_list:
-                    if isinstance(q_init, float):
-                        if q_init < 0 or q_init > 1:
+                    if isinstance(q_init, (float, int)) or (
+                        isinstance(q_init, tuple) and len(q_init) == 1
+                    ):
+                        val = q_init[0] if isinstance(q_init, tuple) else q_init
+                        if (
+                            not LindbladMPOSolver.is_float(val)
+                            or not isfinite(val)
+                            or val < 0.0
+                            or val > 1.0
+                        ):
                             check_msg += (
-                                "Error 361: a float member of "
+                                "Error 361: a float or a length-1 tuple member of "
                                 + key
-                                + " must be between 0 and 1\n"
+                                + " represents a probability and must be between 0 and 1\n"
+                            )
+                        continue
+                    if isinstance(q_init, tuple):
+                        for val in q_init:
+                            if not LindbladMPOSolver.is_float(val) or not isfinite(val):
+                                check_msg += (
+                                    "Error 362: the values in a tuple member of "
+                                    + key
+                                    + " must be valid numbers\n"
+                                )
+                        if len(q_init) == 2:
+                            if q_init[0] < 0 or q_init[0] > np.pi:
+                                check_msg += (
+                                    "Error 363: the first value in a length-2 tuple of "
+                                    + key
+                                    + " represents a polar angle and must be in the range 0 to pi\n"
+                                )
+                        elif len(q_init) == 3:
+                            pass
+                        else:
+                            check_msg += (
+                                "Error 364: a tuple member of "
+                                + key
+                                + " must be of 1, 2, or 3 elements\n"
                             )
                         continue
                     if not isinstance(q_init, str):
                         check_msg += (
                             "Error 360: each member of "
                             + key
-                            + " must be a string or a float\n"
+                            + " must be a string, a float, or a tuple\n"
                         )
                         continue
-                    allowed_init = ["+x", "-x", "+y", "-y", "+z", "-z"]
+                    allowed_init = ["+x", "-x", "+y", "-y", "+z", "-z", "id"]
                     if q_init.lower() not in allowed_init:
                         check_msg += (
                             "Error 370: "
                             + key
-                            + " can only be one of: +x,-x,+y,-y,+z,-z\n"
+                            + " can only be one of: +x, -x, +y, -y, +z, -z, id\n"
                         )
                         continue
             elif (
@@ -678,6 +736,7 @@ class LindbladMPOSolver:
                 or (key == "b_periodic_y")
                 or (key == "b_force_rho_trace")
                 or (key == "b_unique_id")
+                or (key == "b_quiet")
                 or (key == "b_save_final_state")
                 or (key == "b_initial_rho_compression")
             ):
@@ -707,7 +766,7 @@ class LindbladMPOSolver:
                     )
                     continue
             elif (key == "cut_off") or (key == "cut_off_rho"):
-                if not LindbladMPOSolver._is_float(parameters[key]):
+                if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 420: " + key + " is not a float\n"
                     continue
             elif key == "metadata":
@@ -880,7 +939,9 @@ class LindbladMPOSolver:
                 if flag_continue:
                     continue
             elif (
-                key == "2q_indices" or key == "init_graph_state"
+                key == "2q_indices"
+                or key == "init_graph_state"
+                or key == "init_cz_gates"
             ):  # expecting an integer tuples list
                 if not isinstance(parameters[key], list):
                     check_msg += (
@@ -937,11 +998,7 @@ class LindbladMPOSolver:
                     )
                     continue
                 if not len(set(parameters[key])) == len(parameters[key]):
-                    check_msg += (
-                        "Error 630: "
-                        + key
-                        + " 's List does not contains all unique elements"
-                    )
+                    check_msg += "Error 630: " + key + " contains duplicate elements\n"
                     continue
             elif ignore_params is None or key not in ignore_params:
                 check_msg += "Error: unknown parameter key passed: " + key + "\n"
@@ -949,8 +1006,8 @@ class LindbladMPOSolver:
 
         # More cross-parameter checks:
         if ("t_final" in parameters) and ("tau" in parameters):
-            if (LindbladMPOSolver._is_float(parameters["tau"])) and (
-                LindbladMPOSolver._is_float(parameters["t_final"])
+            if (LindbladMPOSolver.is_float(parameters["tau"])) and (
+                LindbladMPOSolver.is_float(parameters["t_final"])
             ):
                 if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
                     if parameters["tau"] > parameters["t_final"] - parameters.get(

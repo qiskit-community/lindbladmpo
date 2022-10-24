@@ -83,13 +83,13 @@ def solve_simulation(
     # _1q_plot_components = ['x', 'y', 'z']
     # _2q_plot_components = ['zz', 'xx', 'xy']
 
-    init_pauli_state = []
+    init_product_state = []
     _1q_indices = []
     _2q_indices = []
     r_qubits = range(N)
     for i in r_qubits:
         if load_unique_id == "":
-            init_pauli_state.append("+z")  # Initialize all qubits to the ground state
+            init_product_state.append("+z")  # Initialize all qubits to the ground state
         _1q_indices.append(i)  # Request 1Q observables all qubits
     if topology == "chain.M":
         # The qubits to plot at the end of the simulation are by default not all qubits.
@@ -249,7 +249,7 @@ def solve_simulation(
         "g_0": g_0,
         "g_2": g_2,
         "J": J_ij,
-        "init_pauli_state": init_pauli_state,
+        "init_product_state": init_product_state,
         "load_files_prefix": load_files_prefix,
         "1q_components": _1q_components,
         "1q_indices": _1q_indices,
