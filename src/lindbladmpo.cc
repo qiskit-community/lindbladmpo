@@ -38,6 +38,7 @@ const double TRACE_RHO_THRESHOLD = 1e-4;
 //Apply the control-Z gate on some (pure / MPS) state |psi>, at sites (i,j)
 void ApplyControlZGate(MPS &psi, const SiteSet &sites,int i,int j) {
 	AutoMPO initgates(sites);
+	//Remark about normalization: the Sz below (acting on a pure state) refers to 0.5*Pauli matrix
 	initgates += 1., "Sz", i;
 	initgates += 1., "Sz", j;
 	initgates += -2., "Sz", i,"Sz",j;
@@ -47,6 +48,29 @@ void ApplyControlZGate(MPS &psi, const SiteSet &sites,int i,int j) {
 	//cout<<"MPO max bond dim="<< maxLinkDim(initgates_mpo)<<endl;
 	psi=applyMPO(initgates_mpo,psi,Args("Cutoff",0));psi.noPrime("Site");
 	//cout<<"Aplication to psi done."<<endl;
+}
+
+//Apply the control-Z gate on some mixed state rho, at sites (i,j)
+void ApplyControlZGateMixed(MPS &rho, const Pauli &siteops,int i,int j) {
+	//Remark about normalization: the Sz below (acting on a density matrix) refers to the Pauli matrix
+    AutoMPO cz(siteops);
+    cz += 0.5, "Sz", i;
+    cz += 0.5, "Sz", j;
+    cz += -0.5, "Sz", i,"Sz",j;
+    cz += 0.5, "Id", i,"Id",j;
+    	
+	MPO cz_mpo= toMPO(cz,Args("Cutoff",0));
+    rho=applyMPO(cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
+
+    AutoMPO _cz(siteops);
+    _cz += 0.5, "_Sz", i;
+    _cz += 0.5, "_Sz", j;
+    _cz += -0.5, "_Sz", i,"_Sz",j;
+    _cz += 0.5, "Id", i,"Id",j;
+    MPO _cz_mpo= toMPO(_cz,Args("Cutoff",0));
+    rho=applyMPO(_cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
+
+    cout<<"Application of CZ("<<i<<","<<j<<") to rho done."<<endl;
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -361,26 +385,8 @@ int main(int argc, char *argv[])
 				 	eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
 			}
 		}
-		vector<bool> in_cz_gate = vector<bool>(N, false);
 		psi.orthogonalize(Args("Cutoff", 1e-6));
-		if (b_cz_pairs) {
-			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
-			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
-			{
-				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
-				const unsigned int i0 = (unsigned int)(i - 1);
-				const unsigned int j0 = (unsigned int)(j - 1);
-				in_cz_gate[i0] = true;
-				in_cz_gate[j0] = true;
-				ApplyControlZGate(psi,C.sites,i,j);
-			}
-			psi.orthogonalize(Args("Cutoff",0));
-			cout2 << " Done.\n";
-			cout2 << "|psi> MPS maximal bond dimension = " << maxLinkDim(psi) << "\n";
-			//for (int c=1;c<=N-1;c++)
-			int c = N / 2;
-			cout2 << "Half-system von-Neumann entropy = " << Entropy(psi,c,2) << "\n";
-		}
+		
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
@@ -390,10 +396,7 @@ int main(int argc, char *argv[])
         	double b = a_mixed_state[i_site];
         	if (b >= 0. && b <= 1. )
         	{
-        		if (in_cz_gate[i_site])
-   					cout2 << "Error: Site " << site_number << " is indicated for a CZ gate and also" <<
-   						" initialized to a mixed state, which is currently unsupported.\n", exit(1);
-
+        
 				psi_defined=false;
 				auto pauli_ind = siteIndex(C.rho, site_number);
 				if (site_number == 1) {
@@ -443,7 +446,19 @@ int main(int argc, char *argv[])
 		}
 		cout2 << "psi2rho done.\n";
 		cout2.flush();
+		if (b_cz_pairs) {
+			psi_defined=false;
+			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
+			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
+			{
+				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
+				const unsigned int i0 = (unsigned int)(i - 1);
+				const unsigned int j0 = (unsigned int)(j - 1);
+				ApplyControlZGateMixed(C.rho,C.siteops,i,j);
+			}	
+		}
 	}
+
 	if (param.val("b_initial_rho_compression") != 0) {
 
 		cout2 << "C.rho.orthogonalize...";
