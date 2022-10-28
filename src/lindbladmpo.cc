@@ -70,7 +70,7 @@ void ApplyControlZGateMixed(MPS &rho, const Pauli &siteops,int i,int j) {
     MPO _cz_mpo= toMPO(_cz,Args("Cutoff",0));
     rho=applyMPO(_cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
 
-    cout<<"Application of CZ("<<i<<","<<j<<") to rho done."<<endl;
+    cout2<<"Application of CZ("<<i<<","<<j<<") to rho done."<<endl;
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -255,6 +255,9 @@ int main(int argc, char *argv[])
 			initState.set(i, "Up");
 		psi = MPS(initState);
 		vector<double> a_mixed_state = vector<double>(N, -1.);
+		vector<double> dr_mixed_state = vector<double>(N, 0.);
+		vector<double> di_mixed_state = vector<double>(N, 0.);
+		
 		// We init values outside of the valid range, that will be ignored below unless overwritten
 		double sqrt05 = pow(.5, .5);
 		for (int site_number = 1; site_number <= N; site_number++)
@@ -342,6 +345,37 @@ int main(int argc, char *argv[])
 						R1 = r1 * cos(values[1]);
 						I1 = r1 * sin(values[1]);
 					}
+					else if (s_type == "r ")
+					{
+						string s_val;
+						float val = 0.;
+						vector<double> values;
+						bool b_invalid = false;
+						istringstream s_stream(s_init.substr(2));
+						while (getline(s_stream, s_val, ' '))
+						{
+							try
+							{
+								val = stod(s_val);
+							}
+							catch (...)
+							{
+								b_invalid = true;
+								break;
+							}
+							values.push_back(val);
+						}
+						if (values.size() != 3)
+							b_invalid = true;
+						if (b_invalid)
+							cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
+								"After the prefix \"r \" should follow three space-separated floats.\n",
+								exit(1);
+						R0 = 1.;
+						a_mixed_state[i_site]=values[0];
+						dr_mixed_state[i_site]=values[1];
+						di_mixed_state[i_site]=values[2];
+					}
 					else
 					{
 						cout2 << "Error: " << s_init << " is an unknown 1-qubit initial state. "
@@ -390,13 +424,16 @@ int main(int argc, char *argv[])
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		C.psi2rho(psi, argsRho);
+		cout2 << "psi2rho done.\n";
+		cout2.flush();
 		for (int site_number = 1; site_number <= N; site_number++)
         {
         	const unsigned int i_site = (unsigned int)(site_number - 1);
         	double b = a_mixed_state[i_site];
         	if (b >= 0. && b <= 1. )
         	{
-        
+				double d_i=di_mixed_state[i_site];
+				double d_r=dr_mixed_state[i_site];
 				psi_defined=false;
 				auto pauli_ind = siteIndex(C.rho, site_number);
 				if (site_number == 1) {
@@ -407,8 +444,8 @@ int main(int argc, char *argv[])
 								for (int p=1;p<=4;p+=3)
     								trace+=eltC(C.rho.ref(site_number), ri = r, pauli_ind = p);
 								C.rho.ref(site_number).set(pauli_ind = 1, ri = r, b * trace); // |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, 0); // |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, 0); // |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, complex<double>(d_r,d_i)* trace); // |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, complex<double>(d_r,-d_i)* trace); // |u><d|
 						  		C.rho.ref(site_number).set(pauli_ind = 4, ri = r, (1. - b) * trace); // |d><d|
 				 		   }
 				}
@@ -421,8 +458,8 @@ int main(int argc, char *argv[])
     								trace+=eltC(C.rho.ref(site_number),li=l,pauli_ind=p);
 								}
 								C.rho.ref(site_number).set(pauli_ind = 1, li = l, b*trace);// |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, 0);// |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, complex<double>(d_r,d_i)* trace);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, complex<double>(d_r,-d_i)* trace);// |u><d|
 						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, (1. - b)*trace);// |d><d|
 				 		   }
 				}
@@ -437,15 +474,14 @@ int main(int argc, char *argv[])
     								trace+=eltC(C.rho.ref(site_number),li=l,ri=r,pauli_ind=p);
 								}
 								C.rho.ref(site_number).set(pauli_ind = 1, li = l, ri = r, b*trace);// |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, ri = r, 0);// |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, ri = r, 0);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, ri = r, complex<double>(d_r,d_i)* trace);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, ri = r, complex<double>(d_r,-d_i)* trace);// |u><d|
 						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, ri = r, (1. - b)*trace);// |d><d|
 				 			}
 				}
         	}
 		}
-		cout2 << "psi2rho done.\n";
-		cout2.flush();
+		
 		if (b_cz_pairs) {
 			psi_defined=false;
 			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
