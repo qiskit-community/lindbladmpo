@@ -70,7 +70,7 @@ void ApplyControlZGateMixed(MPS &rho, const Pauli &siteops,int i,int j) {
     MPO _cz_mpo= toMPO(_cz,Args("Cutoff",0));
     rho=applyMPO(_cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
 
-    cout2<<"Application of CZ("<<i<<","<<j<<") to rho done."<<endl;
+    cout2<<"Application of CZ("<<i<<","<<j<<") to rho done.\n";
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -444,8 +444,8 @@ int main(int argc, char *argv[])
 								for (int p=1;p<=4;p+=3)
     								trace+=eltC(C.rho.ref(site_number), ri = r, pauli_ind = p);
 								C.rho.ref(site_number).set(pauli_ind = 1, ri = r, b * trace); // |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, complex<double>(d_r,d_i)* trace); // |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, complex<double>(d_r,-d_i)* trace); // |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, ri = r, complex<double>(d_r,-d_i)* trace); // |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, ri = r, complex<double>(d_r,d_i)* trace); // |u><d|
 						  		C.rho.ref(site_number).set(pauli_ind = 4, ri = r, (1. - b) * trace); // |d><d|
 				 		   }
 				}
@@ -458,8 +458,8 @@ int main(int argc, char *argv[])
     								trace+=eltC(C.rho.ref(site_number),li=l,pauli_ind=p);
 								}
 								C.rho.ref(site_number).set(pauli_ind = 1, li = l, b*trace);// |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, complex<double>(d_r,d_i)* trace);// |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, complex<double>(d_r,-d_i)* trace);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, complex<double>(d_r,-d_i)* trace);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, complex<double>(d_r,d_i)* trace);// |u><d|
 						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, (1. - b)*trace);// |d><d|
 				 		   }
 				}
@@ -474,8 +474,8 @@ int main(int argc, char *argv[])
     								trace+=eltC(C.rho.ref(site_number),li=l,ri=r,pauli_ind=p);
 								}
 								C.rho.ref(site_number).set(pauli_ind = 1, li = l, ri = r, b*trace);// |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, ri = r, complex<double>(d_r,d_i)* trace);// |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, ri = r, complex<double>(d_r,-d_i)* trace);// |u><d|
+						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, ri = r, complex<double>(d_r,-d_i)* trace);// |d><u|
+						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, ri = r, complex<double>(d_r,d_i)* trace);// |u><d|
 						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, ri = r, (1. - b)*trace);// |d><d|
 				 			}
 				}
