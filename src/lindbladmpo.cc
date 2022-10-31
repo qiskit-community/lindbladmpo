@@ -27,7 +27,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.2.0";
+const string SOLVER_VERSION = "0.2.1";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -484,7 +484,7 @@ int main(int argc, char *argv[])
 		
 		if (b_cz_pairs) {
 			psi_defined=false;
-			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
+			cout2 << "Application of CZ gates on the requested " << init_cz_gates.size() / 2 << " pairs.\n";
 			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
 			{
 				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];

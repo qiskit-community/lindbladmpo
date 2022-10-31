@@ -84,6 +84,37 @@ class PolarState(DynamicalOperator):
         )
 
 
+class Mixed2LevelState(DynamicalOperator):
+    """A dynamical operator that builds a numpy 2-level mixed-state matrix from 3 coefficients."""
+
+    def __init__(self, system_id="", a: float = 1.0, b: float = 0.0, c: float = 0.0):
+        self._a = a
+        self._b = b
+        self._c = c
+        super().__init__(system_id, "mixed" + str(a) + "_" + str(b) + "_" + str(c))
+
+    def get_operator_matrix(self, dim: int) -> Any:
+        """Returns a matrix describing a realization of the operator specified in the parameters.
+
+        Args:
+                dim: The physical dimension of the matrix to generate.
+        """
+        result = np.zeros((dim, dim), complex)
+        a = self._a
+        b = self._b
+        c = self._c
+        if 0.0 <= a <= 1.0 and 0.0 <= b <= 1.0 and 0.0 <= c <= 1.0:
+            result[0, 0] = a
+            result[1, 1] = 1.0 - a
+            result[0, 1] = b + 1j * c
+            result[1, 0] = b - 1j * c
+            return result
+        raise Exception(
+            "A general two-level mixed state is defined by three real coefficients "
+            "in the range [0, 1]."
+        )
+
+
 class Diagonal(DynamicalOperator):
     """A dynamical operator that builds a numpy diagonal matrix in the standard basis."""
 

@@ -288,6 +288,151 @@ def prepare_xy_current_data(
     return obs_data, s_tex_label
 
 
+def prepare_2q_density_operator(
+    result: dict,
+    qubit_pair: Sequence[int],
+    t_list: Optional[list] = None,
+) -> (np.ndarray, str):
+    """
+    Prepare the reduced density matrix of a qubit pair.
+
+    Args:
+            result: A dictionary from which the observables are taken.
+            qubit_pair: A qubit pair for which the density operator is calculated.
+            t_list: The simulation times for which the data is to be calculated.
+                If None or -1 is passed, the final time is taken.
+                If a nonempty list of floats is passed, the indicated times are used.
+                If an empty list is passed, all times are used.
+
+    Returns:
+            A tuple with the following two entries:
+                rho_list: A list with the density matrices for the qubit pair at requested times.
+                s_tex_label: A formatted tex label describing the data.
+
+    Raises:
+            Exception: If the requested density matrix cannot be successfully reconstructed.
+    """
+    i = qubit_pair[0]
+    j = qubit_pair[1]
+    if i == j:
+        raise Exception(
+            "A reduced two-qubit density matrix cannot be constructed for one qubit."
+        )
+    s_2q_observables = ["xx", "yy", "zz", "xy", "xz", "yz", "xy", "xz", "yz"]
+    i_2q_observables = [
+        (i, j),
+        (i, j),
+        (i, j),
+        (i, j),
+        (i, j),
+        (i, j),
+        (j, i),
+        (j, i),
+        (j, i),
+    ]
+    s_1q_observables = ["x", "y", "z", "x", "y", "z"]
+    s_1q_paulis = ["xi", "yi", "zi", "ix", "iy", "iz"]
+    i_1q_observables = [(i,), (i,), (i,), (j,), (j,), (j,)]
+    paulis = {
+        "i": np.asarray([[1, 0], [0, 1]], dtype=complex),
+        "x": np.asarray([[0, 1], [1, 0]], dtype=complex),
+        "y": np.asarray([[0, -1j], [1j, 0]], dtype=complex),
+        "z": np.asarray([[1, 0], [0, -1]], dtype=complex),
+    }
+    obs_1q_dict = result["obs-1q"]
+    obs_2q_dict = result["obs-2q"]
+    if obs_1q_dict is None or obs_2q_dict is None:
+        raise Exception("Could not find the 'obs-1q' or the 'obs-1q' results.")
+
+    rho_list = []
+    b_failed = False
+    t_index_list = []
+    if t_list is None:
+        t_list = [-1]
+    obs_1 = obs_1q_dict.get(("x", i_1q_observables[0]))
+    if obs_1 is not None:
+        if len(t_list) == 0:
+            t_list = obs_1[0]
+        for i_t, t in enumerate(t_list):
+            rho_list.append(0.25 * np.asarray(np.diag([1, 1, 1, 1]), dtype=complex))
+            if t is None or t == -1:
+                t_index_list.append(len(obs_1[0]))
+            else:
+                try:
+                    t_index_list.append(obs_1[0].index(t))
+                except ValueError:
+                    b_failed = True
+                    break
+    else:
+        b_failed = True
+
+    for i_obs, s_obs_name in enumerate(s_1q_observables):
+        if b_failed:
+            break
+        obs_1 = obs_1q_dict.get((s_obs_name, i_1q_observables[i_obs]))
+        if obs_1 is not None:
+            for i_t, t_index in enumerate(t_index_list):
+                if t_index < len(obs_1[1]):
+                    val = obs_1[1][t_index]
+                    rho_list[i_t] += (
+                        val
+                        * 0.25
+                        * np.kron(paulis[s_1q_paulis[0]], paulis[s_1q_paulis[1]])
+                    )
+                else:
+                    b_failed = True
+                    break
+        else:
+            b_failed = True
+    for i_obs, s_obs_name in enumerate(s_2q_observables):
+        if b_failed:
+            break
+        obs_2 = obs_2q_dict.get((s_obs_name, i_2q_observables[i_obs]))
+        if obs_2 is not None:
+            for i_t, t_index in enumerate(t_index_list):
+                if t_index < len(obs_2[1]):
+                    val = obs_2[1][t_index]
+                    rho_list[i_t] += (
+                        val
+                        * 0.25
+                        * np.kron(paulis[s_obs_name[0]], paulis[s_obs_name[1]])
+                    )
+                else:
+                    b_failed = True
+                    break
+        else:
+            b_failed = True
+    if b_failed:
+        raise Exception(
+            "Could not find all values at the requested times for all 1q "
+            "and 2q observables required for density matrix reconstruction."
+        )
+    s_tex_label = "\\rho_{{ij}}"
+    return rho_list, s_tex_label
+
+
+# def prepare_concurrence(
+#     result: dict, qubit_pair: Sequence[int], t: float
+# ) -> (np.ndarray, str):
+#     """
+#     Prepare the concurrence of a qubit pair.
+#
+#     Args:
+#             result: A dictionary from which the observables are taken.
+#             qubit_pair: A qubit pair for which the concurrence is calculated.
+#             t: The simulation time for which the data is to be calculated.
+#
+#     Returns:
+#             A tuple with the following two entries:
+#                 C: The concurrence of the qubit pair at time `t`.
+#                 s_tex_label: A formatted tex label describing the data.
+#     """
+#     rho, _ = prepare_2q_density_operator(result, qubit_pair, t)
+#     sqrt_rho = sp.linalg.sqrtm(rho)
+#     # rho_R = sp.linalg.sqrtm(sqrt_rho @ (rho) @ sqrt_rho)
+#     qiskit.quantum_info.concurrence
+
+
 def plot_curves(
     obs_data_list: List[Tuple[Any, Any]],
     tex_labels: Optional[List[str]] = None,

@@ -36,13 +36,16 @@ The default value for each parameter is indicated with an equality sign (only th
 * Initial state:
     The initial state of the simulator either takes a predefined default value, is defined explicitly by the parameters, or is loaded from files saved by a previous solver execution. Using the initialization parameters the state can be initialized to a product state as detailed below, and then optional controlled-Z (CZ) gates can be applied to (some) pairs of qubits, which allows creating an initial (possibly nonideal) graph state.
 
-    * init_product_state = "+z": A float (or a one-element float tuple), a tuple of two floats, a two-character string, or a length-N vector of such parameters. A single entry applies to all qubits. The supported strings take either the form "<img src="https://render.githubusercontent.com/render/math?math=\pm a" style="vertical-align:bottom">", or "id". The latter indicates the fully mixed-state (identity) density matrix, and the former indicate an eigenstate of one of the Pauli matrices,
+    * init_product_state = "+z": A float (or a one-element float tuple), a tuple of two or three floats, a two-character string, or a length-N vector of such entries. A single entry applies to all qubits.
+         * The supported strings take either the form "<img src="https://render.githubusercontent.com/render/math?math=\pm a" style="vertical-align:bottom">", or "id". The latter indicates the fully mixed-state (identity) density matrix, and the former indicate an eigenstate of one of the Pauli matrices,
 
-      <img src="https://render.githubusercontent.com/render/math?math=\sigma_i^a\left|\pm a_i\rangle = \pm \right|\pm a_i\rangle." style="vertical-align:bottom">
+           <img src="https://render.githubusercontent.com/render/math?math=\sigma_i^a\left|\pm a_i\rangle = \pm \right|\pm a_i\rangle." style="vertical-align:bottom">
 
-      If an entry is a float, it should be between 0 and 1, and indicates the population of the "|0>" ("|up>" state, aligned with +z) in a diagonal mixed-state density matrix for the qubit. If an entry is a tuple of two floats (theta, phi), it indicates an arbitrary pure-state superposition in Bloch-sphere polar coordinates with the formula "cos(theta/2)|0> + sin(theta/2) exp{i phi}|1>".
+         * If an entry is a float, it should be between 0 and 1, and indicates the population of the "|0>" ("|up>" state, aligned with +z) in a diagonal mixed-state density matrix for the qubit.
+         * If an entry is a tuple of two floats (theta, phi), it indicates an arbitrary pure-state superposition in Bloch-sphere polar coordinates with the formula "cos(theta/2)|0> + sin(theta/2) exp{i phi}|1>".
+         * If an entry is a tuple of three floats (a, b, c), it indicates the density matrix "a|0><0| + (1-a)|1><1| + [(b + ic) |0><1| + H.c.]"
 
-	* init_cz_gates = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, after they are initialized according to 'init_product_state'. Currently the CZ gate is only supported on the qubits that are first initialized to a pure state.
+	* init_cz_gates = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, after they are initialized according to 'init_product_state'.
     * init_graph_state = []. A list of integer tuples that specify the qubit pairs for performing a controlled-Z gate on, to generate an initial graph state, after first initializing all along the +x axis. If 'init_graph_state' is used, all other initialization parameters should be left empty. The qubit pairs will represent j and k in the graph state formula;
 
       <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle=%20\prod_{(j,k)\in%20V}{CZ}[j,k]%20\prod_i%20\right|%2b%20x_i\rangle" style="vertical-align:bottom">.
