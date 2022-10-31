@@ -4,11 +4,7 @@
 
 This step is for Windows users only.
 
-Go to Cygwin's official site:
-
-https://www.cygwin.com
-
-Download the executable and run the installation process, making sure to install the following Cygwin packages:
+Go to Cygwin's [official site](https://www.cygwin.com). Download the executable and run the installation process, making sure to install the following Cygwin packages:
 
     gcc, BLAS, LAPACK.
 
@@ -36,7 +32,7 @@ Execute the following commands in the terminal. This assumes that you have git l
     cd itensor3
     git clone https://github.com/ITensor/ITensor.git .
 
-The above clone command uses https, while you can also clone using ssh if that is how you usually work with github.
+The above clone command uses https, while you can also clone using ssh if that is how you usually work with github (see the [ITensor](https://github.com/ITensor/ITensor) repository).
 
 Now that ITensor is cloned locally, its binaries should be built. The default settings are configured for _Linux_ and _Windows_ (using Cygwin), with the basic BLAS/LAPACK installation.
 
