@@ -411,28 +411,6 @@ def prepare_2q_density_operator(
     return rho_list, s_tex_label
 
 
-# def prepare_concurrence(
-#     result: dict, qubit_pair: Sequence[int], t: float
-# ) -> (np.ndarray, str):
-#     """
-#     Prepare the concurrence of a qubit pair.
-#
-#     Args:
-#             result: A dictionary from which the observables are taken.
-#             qubit_pair: A qubit pair for which the concurrence is calculated.
-#             t: The simulation time for which the data is to be calculated.
-#
-#     Returns:
-#             A tuple with the following two entries:
-#                 C: The concurrence of the qubit pair at time `t`.
-#                 s_tex_label: A formatted tex label describing the data.
-#     """
-#     rho, _ = prepare_2q_density_operator(result, qubit_pair, t)
-#     sqrt_rho = sp.linalg.sqrtm(rho)
-#     # rho_R = sp.linalg.sqrtm(sqrt_rho @ (rho) @ sqrt_rho)
-#     qiskit.quantum_info.concurrence
-
-
 def plot_curves(
     obs_data_list: List[Tuple[Any, Any]],
     tex_labels: Optional[List[str]] = None,
