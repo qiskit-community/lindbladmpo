@@ -22,8 +22,8 @@ if s_system == "windows":
     s_executable = "lindbladmpo.exe"
     s_target_os = "WINDOWS"
     print(
-        "Note: Windows building of the solver is not currently supported."
-        "The installation guide in the pacakge directory contains instructions regarding solver "
+        "Note: Windows building of the solver is not currently supported.\n"
+        "The installation guide in the pacakge directory contains instructions regarding solver\n"
         "building and local installation of cygwin, which is required for solver execution."
     )
 else:
@@ -70,7 +70,7 @@ with open("README.md") as readme_file:
 
 setup(
     name="lindbladmpo",
-    version="0.1.1",
+    version="0.2.1",
     description="A matrix-product-operators solver for the Lindblad master equation",
     long_description=README,
     long_description_content_type="text/markdown",
