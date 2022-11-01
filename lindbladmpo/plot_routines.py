@@ -342,7 +342,7 @@ def prepare_2q_density_operator(
     obs_1q_dict = result["obs-1q"]
     obs_2q_dict = result["obs-2q"]
     if obs_1q_dict is None or obs_2q_dict is None:
-        raise Exception("Could not find the 'obs-1q' or the 'obs-1q' results.")
+        raise Exception("Could not find the 'obs-1q' or the 'obs-2q' results.")
 
     rho_list = []
     b_failed = False
@@ -377,7 +377,8 @@ def prepare_2q_density_operator(
                     rho_list[i_t] += (
                         val
                         * 0.25
-                        * np.kron(paulis[s_1q_paulis[0]], paulis[s_1q_paulis[1]])
+                        * np.kron(paulis[s_1q_paulis[i_obs][0]],
+                                  paulis[s_1q_paulis[i_obs][1]])
                     )
                 else:
                     b_failed = True
