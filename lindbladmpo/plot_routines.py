@@ -377,8 +377,9 @@ def prepare_2q_density_operator(
                     rho_list[i_t] += (
                         val
                         * 0.25
-                        * np.kron(paulis[s_1q_paulis[i_obs][0]],
-                                  paulis[s_1q_paulis[i_obs][1]])
+                        * np.kron(
+                            paulis[s_1q_paulis[i_obs][0]], paulis[s_1q_paulis[i_obs][1]]
+                        )
                     )
                 else:
                     b_failed = True
