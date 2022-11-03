@@ -45,6 +45,8 @@ On _Linux_ or on _Windows_ (in the Cygwin64 Terminal App), there are two options
 - Use the first command as above to copy `options.mk.sample` into `options.mk` but then first edit `options.mk` in a text editor, commenting out the lines configuring the compilation and BLAS/LAPACK platform unsuitable for you platform and uncommenting the ones for your platform (the file is well documented). Save and exit the editor, typing `make` in the command line to build the binaries.
 - Alternatively, within the lindbladmpo repository (see below) there is an `options.mk` file that can also be copied to the ITensor directory, where the choice of operating system is done once by defining the variable `OS_TARGET` at the top of the file, or setting it from the command-line invokation. See the details below and repeat the build of ITensor binaries.
 
+Note that `libblas-dev` and `liblapack-dev` should be installed (e.g. using the command `apt install` or equivalents).
+
 ## Building the lindbladmpo solver
 
 In order to leave the ITensor folder and clone the lindbladmpo repository execute the following commands:
