@@ -36,13 +36,13 @@ The above clone command uses https, while you can also clone using ssh if that i
 
 Now that ITensor is cloned locally, its binaries should be built. The default settings are configured for _Linux_ and _Windows_ (using Cygwin), with the basic BLAS/LAPACK installation.
 
-On _Linux_ execute:
+On _Mac OS_ execute:
 
     cp options.mk.sample options.mk
     make
 
-On _Mac OS_ or on _Windows_ (in the Cygwin64 Terminal App), there are two options:
-- Use the first command as above to copy `options.mk.sample` into `options.mk` but then first edit `options.mk` in a text editor, commenting out the lines configuring the compilation and BLAS/LAPACK platform for Linux and uncommenting the ones for your platform (the file is well documented). Save and exit the editor, typing `make` in the command line to build the binaries.
+On _Linux_ or on _Windows_ (in the Cygwin64 Terminal App), there are two options:
+- Use the first command as above to copy `options.mk.sample` into `options.mk` but then first edit `options.mk` in a text editor, commenting out the lines configuring the compilation and BLAS/LAPACK platform unsuitable for you platform and uncommenting the ones for your platform (the file is well documented). Save and exit the editor, typing `make` in the command line to build the binaries.
 - Alternatively, within the lindbladmpo repository (see below) there is an `options.mk` file that can also be copied to the ITensor directory, where the choice of operating system is done once by defining the variable `OS_TARGET` at the top of the file, or setting it from the command-line invokation. See the details below and repeat the build of ITensor binaries.
 
 ## Building the lindbladmpo solver
@@ -61,9 +61,9 @@ In order to build the solver binaries from the sources directory type:
 
 The above script will work for the default locations, and on _Linux_ only (see below for _Mac OS_ and _Windows_). In order to override where ITensor has been built, use:
 
-    make ITENSOR3_DIR="..."
+    make ITENSOR3_DIR="<path>"
 
-where above, replace the three dots with the path to the ITensor library, for example "/cygdrive/c/Users/Goran/itensor3".
+where above, replace <path> with the path to the ITensor library, for example "/cygdrive/c/Users/Goran/itensor3".
 
 In order to build on _Mac OS_ execute:
 
