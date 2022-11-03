@@ -34,7 +34,7 @@ Execute the following commands in the terminal. This assumes that you have git l
 
 The above clone command uses https, while you can also clone using ssh if that is how you usually work with github (see the [ITensor](https://github.com/ITensor/ITensor) repository).
 
-Now that ITensor is cloned locally, its binaries should be built. The default settings are configured for _Linux_ and _Windows_ (using Cygwin), with the basic BLAS/LAPACK installation.
+Now that ITensor is cloned locally, its binaries should be built. The default settings are configured for _Mac OS_, with the basic BLAS/LAPACK installation.
 
 On _Mac OS_ execute:
 
