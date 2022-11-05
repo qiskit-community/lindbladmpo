@@ -10,11 +10,12 @@
 Routines for basic plotting of simulation results, with both general and more specialized functions.
 """
 
-from typing import Optional, Tuple, List, Union, Any, Sequence
+from typing import Optional, Tuple, List, Union, Any, Sequence, Dict
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 
 
 LINDBLADMPO_TEX_LABELS = {
@@ -291,22 +292,23 @@ def prepare_xy_current_data(
 def prepare_2q_density_operator(
     result: dict,
     qubit_pair: Sequence[int],
-    t_list: Optional[list] = None,
-) -> (np.ndarray, str):
+    t_indices: Optional[Sequence[int]] = None,
+) -> ((List, List), str):
     """
     Prepare the reduced density matrix of a qubit pair.
 
     Args:
             result: A dictionary from which the observables are taken.
             qubit_pair: A qubit pair for which the density operator is calculated.
-            t_list: The simulation times for which the data is to be calculated.
-                If None or -1 is passed, the final time is taken.
-                If a nonempty list of floats is passed, the indicated times are used.
+            t_indices: The simulation time indices for which the data is to be calculated.
+                If None or [-1] is passed, the final time is taken.
+                If a nonempty list of ints is passed, the indicated time indices are used.
                 If an empty list is passed, all times are used.
 
     Returns:
             A tuple with the following two entries:
-                rho_list: A list with the density matrices for the qubit pair at requested times.
+                data: A tuple of two lists, the first being the time points, the second being
+                        the data.
                 s_tex_label: A formatted tex label describing the data.
 
     Raises:
@@ -319,6 +321,7 @@ def prepare_2q_density_operator(
             "A reduced two-qubit density matrix cannot be constructed for one qubit."
         )
     s_2q_observables = ["xx", "yy", "zz", "xy", "xz", "yz", "xy", "xz", "yz"]
+    s_2q_paulis = ["xx", "yy", "zz", "xy", "xz", "yz", "yx", "zx", "zy"]
     i_2q_observables = [
         (i, j),
         (i, j),
@@ -345,24 +348,17 @@ def prepare_2q_density_operator(
         raise Exception("Could not find the 'obs-1q' or the 'obs-2q' results.")
 
     rho_list = []
+    t_list = []
     b_failed = False
-    t_index_list = []
-    if t_list is None:
-        t_list = [-1]
+    if t_indices is None:
+        t_indices = [-1]
     obs_1 = obs_1q_dict.get(("x", i_1q_observables[0]))
     if obs_1 is not None:
-        if len(t_list) == 0:
-            t_list = obs_1[0]
-        for i_t, t in enumerate(t_list):
+        if len(t_indices) == 0:
+            t_indices = range(0, len(obs_1[0]))
+        for t_index in t_indices:
+            t_list.append(obs_1[0][t_index])
             rho_list.append(0.25 * np.asarray(np.diag([1, 1, 1, 1]), dtype=complex))
-            if t is None or t == -1:
-                t_index_list.append(len(obs_1[0]))
-            else:
-                try:
-                    t_index_list.append(obs_1[0].index(t))
-                except ValueError:
-                    b_failed = True
-                    break
     else:
         b_failed = True
 
@@ -371,7 +367,7 @@ def prepare_2q_density_operator(
             break
         obs_1 = obs_1q_dict.get((s_obs_name, i_1q_observables[i_obs]))
         if obs_1 is not None:
-            for i_t, t_index in enumerate(t_index_list):
+            for i_t, t_index in enumerate(t_indices):
                 if t_index < len(obs_1[1]):
                     val = obs_1[1][t_index]
                     rho_list[i_t] += (
@@ -391,13 +387,15 @@ def prepare_2q_density_operator(
             break
         obs_2 = obs_2q_dict.get((s_obs_name, i_2q_observables[i_obs]))
         if obs_2 is not None:
-            for i_t, t_index in enumerate(t_index_list):
+            for i_t, t_index in enumerate(t_indices):
                 if t_index < len(obs_2[1]):
                     val = obs_2[1][t_index]
                     rho_list[i_t] += (
                         val
                         * 0.25
-                        * np.kron(paulis[s_obs_name[0]], paulis[s_obs_name[1]])
+                        * np.kron(
+                            paulis[s_2q_paulis[i_obs][0]], paulis[s_2q_paulis[i_obs][1]]
+                        )
                     )
                 else:
                     b_failed = True
@@ -410,7 +408,38 @@ def prepare_2q_density_operator(
             "and 2q observables required for density matrix reconstruction."
         )
     s_tex_label = "\\rho_{{ij}}"
-    return rho_list, s_tex_label
+    return (t_list, rho_list), s_tex_label
+
+
+def prepare_concurrence_data(
+    result: Dict,
+    q_pair: Tuple[int, int],
+) -> ((Sequence, Sequence), str):
+    """
+    Prepare the data used for plotting one concurrence curve between a pair of qubits.
+
+    Args:
+            result: A dictionary from which the observables are taken.
+            q_pair: A tuple with the indices of the qubits identifying the pair.
+
+    Returns:
+            A tuple with the following two entries:
+                    data: A tuple of two lists, the first being the time points, the second being
+                        the data.
+                    s_tex_label: A formatted tex label for the data.
+    """
+    data = None
+    s_tex_label = f"C_{{{q_pair[0]},{q_pair[1]}}}"
+    (t_list, rho_list), _ = prepare_2q_density_operator(result, q_pair, [])
+    if rho_list is not None:
+        data = np.full((len(rho_list),), dtype=float, fill_value=np.nan)
+        for t_i, rho in enumerate(rho_list):
+            y = np.fliplr(np.diag([-1.0, 1.0, 1.0, -1.0]))
+            s = rho.dot(y).dot(rho.conj()).dot(y)
+            w = np.sqrt(np.maximum(0.0, np.sort(np.real(scipy.linalg.eigvals(s)))))
+            C = max(0.0, w[-1] - np.sum(w[0:-1]))
+            data[t_i] = C
+    return (t_list, data), s_tex_label
 
 
 def plot_curves(

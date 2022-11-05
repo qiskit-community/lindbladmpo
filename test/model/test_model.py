@@ -18,6 +18,10 @@ from lindbladmpo.LindbladMPOSolver import LindbladMPOSolver
 from lindbladmpo.examples.simulation_building.LindbladMatrixSolver import (
     LindbladMatrixSolver,
 )
+from lindbladmpo.plot_routines import (
+    prepare_2q_density_operator,
+    prepare_concurrence_data,
+)
 
 s_output_path = (
     os.path.abspath("./output") + "/"
@@ -458,6 +462,64 @@ class LindbladMPOSolverModel(unittest.TestCase):
             solver1A.result["obs-2q"][("xy", (0, 1))][1][-1],
             solver2B.result["obs-2q"][("xy", (0, 1))][1][-1],
             6,
+        )
+
+    def test_dm(self):
+        """Test density matrix reconstruction."""
+        N = 2
+        t_final = 1
+        solver_params1 = {
+            "tau": 0.1,
+            "t_final": t_final,
+            "N": N,
+            "init_product_state": [
+                "+x",
+                "id",
+            ],
+            "init_cz_gates": [(0, 1)],
+            "1q_components": ["x", "y", "z"],
+            "2q_components": ["xx", "yy", "zz", "xy", "xz", "yz"],
+            "b_quiet": True,
+        }
+        s_files_prefix1 = s_output_path + "test_dm"
+        solver_params1.update({"output_files_prefix": s_files_prefix1})
+        solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
+        solver1.solve()
+        (_, rho_list), _ = prepare_2q_density_operator(solver1.result, (0, 1), [-1])
+
+        expected_rho = 0.25 * np.asarray(
+            np.diag([1, 1, 1, 1]), dtype=complex
+        ) + 0.25 * np.kron(
+            np.asarray([[0, 1], [1, 0]], dtype=complex),
+            np.asarray([[1, 0], [0, -1]], dtype=complex),
+        )
+        self.assertAlmostEqual(
+            np.linalg.norm(rho_list[0] - expected_rho),
+            0.0,
+        )
+
+    def test_graph_state_concurrence(self):
+        """Test concurrence calculation."""
+        N = 2
+        t_final = 1
+        solver_params1 = {
+            "tau": 0.1,
+            "t_final": t_final,
+            "N": N,
+            "init_graph_state": [(0, 1)],
+            "1q_components": ["x", "y", "z"],
+            "2q_components": ["xx", "yy", "zz", "xy", "xz", "yz"],
+            "b_quiet": True,
+        }
+        s_files_prefix1 = s_output_path + "test_graph_state_concurrence"
+        solver_params1.update({"output_files_prefix": s_files_prefix1})
+        solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
+        solver1.solve()
+        (_, c_data), _ = prepare_concurrence_data(solver1.result, (0, 1))
+        print(c_data)
+        self.assertAlmostEqual(
+            c_data[0],
+            1.0,
         )
 
 
