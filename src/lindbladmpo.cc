@@ -35,42 +35,75 @@ const double IMAGINARY_THRESHOLD = 1e-4;
 const double TRACE_RHO_THRESHOLD = 1e-4;
 // Threshold for the deviation of the density matrix trace from 1, to issue a warning
 
-//Apply the control-Z gate on some (pure / MPS) state |psi>, at sites (i,j)
-void ApplyControlZGate(MPS &psi, const SiteSet &sites,int i,int j) {
-	AutoMPO initgates(sites);
-	//Remark about normalization: the Sz below (acting on a pure state) refers to 0.5*Pauli matrix
-	initgates += 1., "Sz", i;
-	initgates += 1., "Sz", j;
-	initgates += -2., "Sz", i,"Sz",j;
-	initgates += 0.5, "Id", i,"Id",j;
-	MPO initgates_mpo= toMPO(initgates,Args("Cutoff",0));
-	//cout<<"MPO initgates_mpo done."<<endl;
-	//cout<<"MPO max bond dim="<< maxLinkDim(initgates_mpo)<<endl;
-	psi=applyMPO(initgates_mpo,psi,Args("Cutoff",0));psi.noPrime("Site");
-	//cout<<"Aplication to psi done."<<endl;
-}
-
 //Apply the control-Z gate on some mixed state rho, at sites (i,j)
 void ApplyControlZGateMixed(MPS &rho, const Pauli &siteops,int i,int j) {
-	//Remark about normalization: the Sz below (acting on a density matrix) refers to the Pauli matrix
-    AutoMPO cz(siteops);
-    cz += 0.5, "Sz", i;
-    cz += 0.5, "Sz", j;
-    cz += -0.5, "Sz", i,"Sz",j;
-    cz += 0.5, "Id", i,"Id",j;
-    	
-	MPO cz_mpo= toMPO(cz,Args("Cutoff",0));
-    rho=applyMPO(cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
-
-    AutoMPO _cz(siteops);
-    _cz += 0.5, "_Sz", i;
-    _cz += 0.5, "_Sz", j;
-    _cz += -0.5, "_Sz", i,"_Sz",j;
-    _cz += 0.5, "Id", i,"Id",j;
-    MPO _cz_mpo= toMPO(_cz,Args("Cutoff",0));
-    rho=applyMPO(_cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
-
-    cout2<<"Application of CZ("<<i<<","<<j<<") to rho done.\n";
+	if (i==j) return;//CZ(i,i)=identitity => nothing to do
+	cout2<<"\nApplication of CZ("<<i<<","<<j<<") to rho...";
+	const int N=length(rho);	
+    if (i>j) {int tmp=i;i=j;j=tmp;}	//Swap i and j if necessary, to insure i<j
+	for (int braket=0;braket<=1;braket++) {
+		MPO cz_mpo(siteops);
+		string projUp=(braket==0)?("projUp"):("_projUp");//acting on |ket> or on <bra|
+		string projDn=(braket==0)?("projDn"):("_projDn");
+		//Construct the link indices
+		vector<Index> links(N);
+		for(int n = 1; n < N; ++n) {
+			if (n<i) {//Bond dim. = 1
+				links.at(n) = Index(1,format("Link,l=%d",n));
+			}
+			if (n>=i && n<j) {//Bond dim. = 2
+				links.at(n) = Index(2,format("Link,l=%d",n));
+			}
+			if (n>=j) {//Bond dim. = 1
+				links.at(n) = Index(1,format("Link,l=%d",n));
+			}
+		}
+		//Construct 'manually' the tensors of the MPO
+		for(int n = 1; n <= N; ++n) {
+			auto& W = cz_mpo.ref(n);
+			if (n==1) {
+				Index right=links.at(n);
+				W = ITensor(siteops(n),prime(siteops(n)),right);
+				if (n==i) {
+					W+=siteops.op(projUp,n)  * setElt(right(1));
+					W+=siteops.op(projDn,n)  * setElt(right(2));
+				} else
+				W += siteops.op("Id",n) * setElt(right(1)) ;
+			}
+			if (n>1 && n<N) {
+				Index right=links.at(n);
+				Index left=links.at(n-1);
+				W = ITensor(siteops(n),prime(siteops(n)),right,left);
+				if (n==i) {
+					W+=siteops.op(projUp,n)  * setElt(left(1)) * setElt(right(1));
+					W+=siteops.op(projDn,n)  * setElt(left(1)) * setElt(right(2));
+				} else if (n>i && n<j) {
+					W+=siteops.op("Id",n) * setElt(right(1)) * setElt(left(1)) ;
+					W+=siteops.op("Id",n) * setElt(right(2)) * setElt(left(2)) ;
+				} else if (n==j) {
+					W+= siteops.op(projUp,n) * setElt(left(1)) * setElt(right(1)) ;			//up(j)-up(i)
+					W+= siteops.op(projUp,n) * setElt(left(2)) * setElt(right(1)) ;			//up(j)-dn(i)
+					W+= siteops.op(projDn,n) * setElt(left(1)) * setElt(right(1)) ;			//dn(j)-up(i)
+					W+= siteops.op(projDn,n) * setElt(left(2)) * setElt(right(1)) *(-1.0) ;//dn(j)-dn(i)
+				} else {
+					W+=siteops.op("Id",n) * setElt(right(1)) * setElt(left(1)) ;
+				}
+			}
+			if (n==N) {
+				Index left=links.at(n-1);
+				W = ITensor(siteops(n),prime(siteops(n)),left);
+				if (n==j) {
+					W+= siteops.op(projUp,n) * setElt(left(1)) ;		//up(j)-up(i)
+					W+= siteops.op(projUp,n) * setElt(left(2)) ;		//up(j)-dn(i)
+					W+= siteops.op(projDn,n) * setElt(left(1)) ;		//dn(j)-up(i)
+					W+= siteops.op(projDn,n) * setElt(left(2)) *(-1.0) ;//dn(j)-dn(i)
+				} else
+				W += siteops.op("Id",n) * setElt(left(1)) ;	
+			}
+		}
+		rho=applyMPO(cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
+	}
+   	cout2 << "...done. New bond dimension of rho:" << maxLinkDim(rho);
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
