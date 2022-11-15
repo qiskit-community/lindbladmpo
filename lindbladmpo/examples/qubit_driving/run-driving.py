@@ -15,7 +15,7 @@ The problem is simulated in the frame rotating with the driven qubit's frequency
 wave approximation), with the qubits initialized along the z axis of the Bloch sphere
 (the pure product ground state), and subject to energy relaxation and decoherence. 
 The research results obtained using this code are presented in detail in arXiv:2203.05871.
-This paper also exaplains in detail how to construct and verify numerical results with multiqubit simulations.
+This paper also explains in detail how to construct and verify numerical results with multiqubit simulations.
 
 Note that both qiskit and qiskit-dynamics packages must be installed if the scipy solver is used
 in the following (and invoking scipy with numpy arrays). Some Qiskit code is used also for plotting

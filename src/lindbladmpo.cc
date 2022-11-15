@@ -27,7 +27,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.2.0";
+const string SOLVER_VERSION = "0.2.1";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -483,18 +483,18 @@ int main(int argc, char *argv[])
 				 		   }
 				}
 				else if (site_number == N) {
-						  Index li = leftLinkIndex(C.rho, site_number);
-						  int dl=li.dim();
-						  for (int l=1;l<=dl;l++) {
-								complex<double> trace=0;
-								for (int p=1;p<=4;p+=3) {
-    								trace+=eltC(C.rho.ref(site_number),li=l,pauli_ind=p);
-								}
-								C.rho.ref(site_number).set(pauli_ind = 1, li = l, b*trace);// |u><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 2, li = l, complex<double>(d_r,-d_i)* trace);// |d><u|
-						  		C.rho.ref(site_number).set(pauli_ind = 3, li = l, complex<double>(d_r,d_i)* trace);// |u><d|
-						  		C.rho.ref(site_number).set(pauli_ind = 4, li = l, (1. - b)*trace);// |d><d|
-				 		   }
+  					  Index li = leftLinkIndex(C.rho, site_number);
+					  int dl=li.dim();
+					  for (int l=1;l<=dl;l++) {
+							complex<double> trace=0;
+							for (int p=1;p<=4;p+=3) {
+								trace+=eltC(C.rho.ref(site_number),li=l,pauli_ind=p);
+							}
+							C.rho.ref(site_number).set(pauli_ind = 1, li = l, b*trace);// |u><u|
+							C.rho.ref(site_number).set(pauli_ind = 2, li = l, complex<double>(d_r,-d_i)* trace);// |d><u|
+							C.rho.ref(site_number).set(pauli_ind = 3, li = l, complex<double>(d_r,d_i)* trace);// |u><d|
+							C.rho.ref(site_number).set(pauli_ind = 4, li = l, (1. - b)*trace);// |d><d|
+					   }
 				}
 				else {
 						  Index li = leftLinkIndex(C.rho, site_number);
@@ -517,7 +517,7 @@ int main(int argc, char *argv[])
 		
 		if (b_cz_pairs) {
 			psi_defined=false;
-			cout2 << "Application of CZ gates on the requested (" << init_cz_gates.size() / 2 << ") pairs.";
+			cout2 << "Application of CZ gates on the requested " << init_cz_gates.size() / 2 << " pairs.\n"; cout2.flush();
 			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
 			{
 				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
@@ -539,15 +539,14 @@ int main(int argc, char *argv[])
 	}
 
 	Cplx tr = C.trace_rho();
-	cout2 << "\nTr{rho} before re-normalization: " << tr << "\n";
+	cout2 << "Tr{rho} before re-normalization: " << tr << "\n"; cout2.flush();
 	C.rho /= tr; //Normalize rho so that Tr[rho]=1
 	tr = C.trace_rho();
-	cout2 << "Tr{rho} after re-normalization: " << tr << "\n";
+	cout2 << "Tr{rho} after re-normalization: " << tr << "\n"; cout2.flush();
 
-	cout2 << "Tr{rho^2} =";
-	cout2.flush();
+	cout2 << "Tr{rho^2} ="; cout2.flush();
 	const Cplx tr2 = C.trace_rho2();
-	cout2 << tr2 << "\n";
+	cout2 << tr2 << "\n"; cout2.flush();
 
 	if (psi_defined)
 	{

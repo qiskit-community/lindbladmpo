@@ -74,7 +74,7 @@ def solve_simulation(
     # -------------------------------------------------------------------------
     # The following parameters are fixed for the project and kept hard-coded.
     _1q_components = ["x", "y", "z"]
-    _2q_components = ["xy"]
+    _2q_components = ["xx", "yy", "zz", "xy", "xz", "yz"]
     _1q_plot_components = ["x", "z"]
     _2q_plot_components = ["xy"]
 

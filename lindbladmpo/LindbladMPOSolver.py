@@ -708,10 +708,20 @@ class LindbladMPOSolver:
                                     + " represents a polar angle and must be in the range 0 to pi\n"
                                 )
                         elif len(q_init) == 3:
-                            pass
+                            if not (
+                                0 <= q_init[0] <= 1
+                                and -1 <= q_init[1] <= 1
+                                and -1 <= q_init[2] <= 1
+                            ):
+                                check_msg += (
+                                    "Error 364: a tuple member of "
+                                    + key
+                                    + " with three elements must contain valid entries of a"
+                                    " density matrix\n"
+                                )
                         else:
                             check_msg += (
-                                "Error 364: a tuple member of "
+                                "Error 365: a tuple member of "
                                 + key
                                 + " must be of 1, 2, or 3 elements\n"
                             )
@@ -900,7 +910,7 @@ class LindbladMPOSolver:
                         + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
                     )
                     continue
-                check_me = [0, 0, 0, 0, 0, 0]
+                check_me = [0, 0, 0, 0, 0, 0, 0, 0, 0]
                 for val in parameters[key]:
                     val = str.lower(val)
                     if val == "xx":
@@ -909,12 +919,18 @@ class LindbladMPOSolver:
                         check_me[1] += 1
                     elif val == "zz":
                         check_me[2] += 1
-                    elif (val == "xy") or (val == "yx"):
+                    elif val == "xy":
                         check_me[3] += 1
-                    elif (val == "xz") or (val == "zx"):
+                    elif val == "xz":
                         check_me[4] += 1
-                    elif (val == "yz") or (val == "zy"):
+                    elif val == "yz":
                         check_me[5] += 1
+                    elif val == "yx":
+                        check_me[6] += 1
+                    elif val == "zx":
+                        check_me[7] += 1
+                    elif val == "zy":
+                        check_me[8] += 1
                     else:
                         check_msg += (
                             "Error 550: "
@@ -931,7 +947,7 @@ class LindbladMPOSolver:
                         check_msg += (
                             "Error 550: "
                             + key
-                            + " only accepts string from xx, yy, zz, xy, "
+                            + " only accepts strings from xx, yy, zz, xy, "
                             "xz, yz (or a permutation thereof)\n"
                         )
                         flag_continue = True

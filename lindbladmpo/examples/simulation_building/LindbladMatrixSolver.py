@@ -234,34 +234,29 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
                     q_init: Any = init_product_state[i_qubit]
-                    b_mixed = False
                     b_tuple = isinstance(q_init, tuple)
                     b_diagonal = self.is_float(q_init) or (b_tuple and len(q_init) == 1)
                     if b_diagonal:
                         b = q_init[0] if b_tuple else q_init
                         diagonal = [b, 1.0 - b]
                         rho_0 *= Diagonal(i_qubit, diagonal)
-                        if 0.0 < b < 1.0:
-                            b_mixed = True
                     elif b_tuple:
                         if len(q_init) == 2:
-                            phi: float = q_init[1]
                             theta: float = q_init[0]
+                            phi: float = q_init[1]
                             rho_0 *= PolarState(i_qubit, theta, phi)
+                        elif len(q_init) == 3:
+                            a: float = q_init[0]
+                            b: float = q_init[1]
+                            c: float = q_init[2]
+                            rho_0 *= Mixed2LevelState(i_qubit, a, b, c)
                         else:
                             raise Exception(
                                 f"The initial state of site {i_qubit} is defined "
                                 "using a tuple of an unsupported length."
                             )
                     else:
-                        if q_init == "id":
-                            b_mixed = True
                         rho_0 *= get_operator_from_label(q_init, i_qubit)
-                    if b_mixed and in_cz_gate[i_qubit]:
-                        raise Exception(
-                            f"Site {i_qubit} is indicated for a CZ gate and also"
-                            " initialized to a mixed state, which is currently unsupported."
-                        )
                 if h_x[i_qubit]:
                     H += (0.5 * h_x[i_qubit]) * Sx(i_qubit)
                 if h_y[i_qubit]:
@@ -316,7 +311,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                         CZ = 0.5 * (Sz(i) + Sz(j) - Sz(i) * Sz(j) + Id(i) * Id(j))
                         CZ_matrix = build_matrices(CZ, subsystem_dims)
                         rho_0_mat = CZ_matrix @ rho_0_mat @ CZ_matrix
-                        # Taking a dagger above is meaningless as CZ is real and diagonal.
+                        # No dagger required as CZ is real diagonal.
 
             obs_1q_mat = build_matrices(obs_1q, subsystem_dims)
             obs_2q_mat = build_matrices(obs_2q, subsystem_dims)
