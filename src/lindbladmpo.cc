@@ -539,7 +539,7 @@ int main(int argc, char *argv[])
 	}
 
 	Cplx tr = C.trace_rho();
-	cout2 << "Tr{rho} before re-normalization: " << tr << "\n";
+	cout2 << "\nTr{rho} before re-normalization: " << tr << "\n";
 	C.rho /= tr; //Normalize rho so that Tr[rho]=1
 	tr = C.trace_rho();
 	cout2 << "Tr{rho} after re-normalization: " << tr << "\n";
