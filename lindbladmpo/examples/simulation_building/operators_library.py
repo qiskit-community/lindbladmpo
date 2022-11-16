@@ -103,15 +103,15 @@ class Mixed2LevelState(DynamicalOperator):
         a = self._a
         b = self._b
         c = self._c
-        if 0.0 <= a <= 1.0 and 0.0 <= b <= 1.0 and 0.0 <= c <= 1.0:
+        if 0.0 <= a <= 1.0 and -1.0 <= b <= 1.0 and -1.0 <= c <= 1.0:
             result[0, 0] = a
             result[1, 1] = 1.0 - a
             result[0, 1] = b + 1j * c
             result[1, 0] = b - 1j * c
             return result
         raise Exception(
-            "A general two-level mixed state is defined by three real coefficients "
-            "in the range [0, 1]."
+            "A general two-level mixed state is defined by three real coefficients (a, b, c),"
+            "with a in the range [0, 1], and b, c in the range [-1, 1]."
         )
 
 

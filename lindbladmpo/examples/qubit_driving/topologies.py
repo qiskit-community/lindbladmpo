@@ -270,6 +270,26 @@ qubit_coordinates["27.falcon"] = [
 h_z_patterns["27.falcon"] = [0] * 27
 
 
+coupling_maps["7.falcon"] = [
+    [0, 1],
+    [1, 2],
+    [1, 3],
+    [3, 5],
+    [4, 5],
+    [5, 6],
+]
+qubit_coordinates["7.falcon"] = [
+    [1, 0],
+    [1, 1],
+    [1, 2],
+    [2, 1],
+    [3, 0],
+    [3, 1],
+    [3, 2],
+]
+h_z_patterns["7.falcon"] = [0] * 7
+
+
 def plot_topology(
     N: int,
     topology: str,

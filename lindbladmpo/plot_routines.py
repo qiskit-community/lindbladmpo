@@ -450,6 +450,7 @@ def plot_curves(
     fontsize=16,
     line_styles: Optional[Sequence] = None,
     linewidth=3,
+    figsize=(10, 6)
 ):
     """
     Plot multiple curves of simulation observables.
@@ -463,12 +464,13 @@ def plot_curves(
             line_styles: A list with line styles iterated (periodically) for the curves. If None,
                     the default file-level member LINDBLADMPO_LINE_STYLES is used.
             linewidth: The plot line widths.
+            figsize: The figure size.
 
     Returns:
             An axis object (either the one passed as an argument, or a newly created one).
     """
     if ax is None:
-        _, ax = plt.subplots(figsize=(10, 6))
+        _, ax = plt.subplots(figsize=figsize)
     plt.rcParams.update({"font.size": fontsize})
     if line_styles is None:
         line_styles = LINDBLADMPO_LINE_STYLES
