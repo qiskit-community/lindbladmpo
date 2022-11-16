@@ -450,7 +450,7 @@ def plot_curves(
     fontsize=16,
     line_styles: Optional[Sequence] = None,
     linewidth=3,
-    figsize=(10, 6)
+    figsize=(10, 6),
 ):
     """
     Plot multiple curves of simulation observables.
