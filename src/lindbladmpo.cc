@@ -759,7 +759,8 @@ int main(int argc, char *argv[])
 		cout2 << " Total run duration: " << buf << "\n";
 		cout2.flush();
 
-		///If the time corresponds a a step where some gates should be applied:
+		//If the time corresponds a step where some gates should be applied:
+		//note: if several gates are associated to the same time, the application will follow the order of the arguments of 'apply_gate'
 		for (unsigned int k=0;k<gate_times.size();k++) {
 			if (gate_times[k]==t) {
 				
@@ -768,8 +769,8 @@ int main(int argc, char *argv[])
 					ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
 				else {
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<")\n";
-					if (gate_names[k]=="X") ApplyZGate(C.rho,C.siteops,gate_i[k]);
-					if (gate_names[k]=="Y") ApplyZGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
 				}
 			}
