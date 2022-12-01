@@ -58,6 +58,7 @@ public:
         	// pairs is expected, indicating all pairs to which a CZ gate is applied, after all
         	// qubits have been initialized arbitrarily according to the init_product_state
         	// parameter.
+        operator[]("apply_gates") = "";  // Apply single and two-qubit gates.
 
         operator[]("load_files_prefix") = "";	// If not an empty string, the initial state
          	// (density matrix rho) is to be read from the file system. Three files are being used,

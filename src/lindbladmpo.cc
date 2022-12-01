@@ -27,7 +27,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.2.1";
+const string SOLVER_VERSION = "0.2.2";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -35,10 +35,29 @@ const double IMAGINARY_THRESHOLD = 1e-4;
 const double TRACE_RHO_THRESHOLD = 1e-4;
 // Threshold for the deviation of the density matrix trace from 1, to issue a warning
 
-//Apply the control-Z gate on some mixed state rho, at sites (i,j)
-void ApplyControlZGateMixed(MPS &rho, const Pauli &siteops,int i,int j) {
+//Apply the X gate (qubit i) on a mixed state rho
+void ApplyXGate(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"Sx",i);
+	rho.ref(i)*=op(siteops,"_Sx",i);
+	rho.ref(i).noPrime("Site");
+}
+//Apply the Y gate (qubit i) on a mixed state rho
+void ApplyYGate(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"Sy",i);
+	rho.ref(i)*=op(siteops,"_Sy",i);
+	rho.ref(i).noPrime("Site");
+}
+//Apply the X gate (qubit i) on a mixed state rho
+void ApplyZGate(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"Sz",i);
+	rho.ref(i)*=op(siteops,"_Sz",i);
+	rho.ref(i).noPrime("Site");
+}
+
+//Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
+void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
 	if (i==j) return;//CZ(i,i)=identitity => nothing to do
-	cout2<<"\nApplication of CZ("<<i<<","<<j<<") to rho...";
+	//cout2<<"\nApplication of CZ("<<i<<","<<j<<") to rho...";
 	const int N=length(rho);	
     if (i>j) {int tmp=i;i=j;j=tmp;}	//Swap i and j if necessary, to insure i<j
 	for (int braket=0;braket<=1;braket++) {
@@ -103,7 +122,7 @@ void ApplyControlZGateMixed(MPS &rho, const Pauli &siteops,int i,int j) {
 		}
 		rho=applyMPO(cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
 	}
-   	cout2 << "...done. New bond dimension of rho:" << maxLinkDim(rho);
+   	//cout2 << "...done. New bond dimension of rho:" << maxLinkDim(rho);
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -268,6 +287,10 @@ int main(int argc, char *argv[])
 	if (b_cz_pairs)
 		validate_2q_list(init_cz_gates, N, s_cz_param);
 
+	const double t_0 = param.val("t_init");
+	const double tau = param.val("tau");
+	const double t_f = param.val("t_final");
+	const double t_total = t_f - t_0;
 	MPS psi;
 	bool psi_defined = false;
 	if (load_prefix != "")
@@ -515,7 +538,9 @@ int main(int argc, char *argv[])
         	}
 		}
 		
-		if (b_cz_pairs) {
+	}
+	
+	if (b_cz_pairs) {
 			psi_defined=false;
 			cout2 << "Application of CZ gates on the requested " << init_cz_gates.size() / 2 << " pairs.\n"; cout2.flush();
 			for (unsigned int n = 0; n < init_cz_gates.size(); n += 2)
@@ -523,9 +548,72 @@ int main(int argc, char *argv[])
 				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
 				const unsigned int i0 = (unsigned int)(i - 1);
 				const unsigned int j0 = (unsigned int)(j - 1);
-				ApplyControlZGateMixed(C.rho,C.siteops,i,j);
+				ApplyControlledZGate(C.rho,C.siteops,i,j);
 			}	
+	}
+	// If required, finish the initial state construction by applying some single-qubit gates
+	vector<double> gate_times;
+	vector<string> gate_names;
+	vector<unsigned int> gate_i;
+	vector<unsigned int> gate_j;
+	vector<string> apply_gates = param.stringvec("apply_gates");
+	for (unsigned int n=0;n<apply_gates.size();n++) {
+		vector<string> vs=split(apply_gates[n],' ');
+		if (vs.size()!=3 && vs.size()!=4)
+			cout2 << "Error: expecting time gate qubit1 (qubit2) but got '" << apply_gates[n] << "'.\n", exit(1);
+		double time=0;
+		int i=0,j=0;
+		try {
+			time=stod(vs[0]);
 		}
+		catch (...) {
+			cout2 << "Error: " << vs[0] << " is not a double (expecting a time value) in '"<<apply_gates[n] << "'.\n", exit(1);
+		}
+		if (time < t_0 || time > t_f)
+			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not between t_init and t_final.\n", exit(1);
+		if (fmod(abs(time / tau), 1.) > 0.1 || fmod(abs(time / tau), 1.) < 0.9)
+			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not close to an integer multiple of tau.\n", exit(1);
+		string sgate = vs[1];
+		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
+		if (sgate=="X" || sgate=="Y" || sgate=="Z") {
+				try {
+					i=stod(vs[2]);
+					if (i<1 || i>N) cout2 << "Error: qubit index "<<i<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
+				}
+				catch (...) {
+					cout2 << "Error: " << vs[2] << " is not a valid integer (expecting a qubit number) in '"<<apply_gates[n] << "'.\n", exit(1);
+				}
+				if (vs.size()==4)
+					cout2 << "Error: too many arguments for gate " << sgate <<" in '"<<apply_gates[n] << "'.\n", exit(1);
+				gate_times.push_back(time);
+				gate_names.push_back(sgate);
+				gate_i.push_back(i);
+				gate_j.push_back(-1);
+		} else if (sgate=="CZ") {
+				if (vs.size()==3)
+					cout2 << "Error: missing argument for gate " << sgate <<" in '"<<apply_gates[n] << "'.\n", exit(1);
+				try {
+					i=stod(vs[2]);	
+					if (i<1 || i>N) cout2 << "Error: qubit index "<<i<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
+				}
+				catch (...) {
+					cout2 << "Error: " << vs[2] << " is not a valid integer (expecting a qubit number) in '"<<apply_gates[n] << "'.\n", exit(1);
+				}
+				try {
+					j=stod(vs[3]);
+					if (j<1 || j>N) cout2 << "Error: qubit index "<<j<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
+				}
+				catch (...) {
+					cout2 << "Error: " << vs[3] << " is not a valid integer (expecting a qubit number) in '"<<apply_gates[n] << "'.\n", exit(1);
+				}
+				gate_times.push_back(time);
+				gate_names.push_back(sgate);
+				gate_i.push_back(i);
+				gate_j.push_back(j);
+		} else {
+			cout2 << "Error: "<<sgate<<" is not a valid gate name.\n", exit(1);
+		}
+		
 	}
 
 	if (param.val("b_initial_rho_compression") != 0) {
@@ -572,6 +660,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
 	//-----------------------------------------------------
 	//Construct the Lindbladian from the parameters (unitary and dissipative terms)
 
@@ -581,10 +670,6 @@ int main(int argc, char *argv[])
 	cout2 << "Compute exp(i*tau*L) as an MPO... ";
 	cout2.flush();
 
-	const double t_0 = param.val("t_init");
-	const double tau = param.val("tau");
-	const double t_f = param.val("t_final");
-	const double t_total = t_f - t_0;
 	const int o = param.val("trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
 	TE.init(tau, C.Lindbladian, argsRho, o);
@@ -677,6 +762,29 @@ int main(int argc, char *argv[])
 		cout2 << "\nSolution time t = " << t << " ----------------------";
 		cout2 << " Total run duration: " << buf << "\n";
 		cout2.flush();
+
+		//If the time corresponds a step where some gates should be applied:
+		//note: if several gates are associated to the same time, the application will follow
+		// the order of the arguments of 'apply_gate'
+		for (unsigned int k=0;k<gate_times.size();k++) {
+			if (abs(gate_times[k] - t) < (tau / 2.)) {
+				// This will make the gate execute at t nearest to the requested time.
+				// Earlier there is a validation making sure this is unique (raising an error
+				// if the requested time is not close enough to an integer multiple of tau).
+				if (gate_names[k]=="CZ")
+					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n",
+					ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+				else {
+					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<")\n";
+					if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
+				}
+			}
+		}
+
+
+
 		if (force_rho_Hermitian_step && (n % force_rho_Hermitian_step) == 0)
 			C.MakeRhoHermitian(argsRho);
 		if (output_step > 0)

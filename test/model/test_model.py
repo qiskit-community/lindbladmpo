@@ -522,6 +522,92 @@ class LindbladMPOSolverModel(unittest.TestCase):
             1.0,
         )
 
+    def test_apply_gates_1(self):
+        """Compare the application of gates at intermediate times."""
+        N = 2
+        t_final = 2
+        solver_params1 = {
+            "tau": 0.02,
+            "t_final": t_final,
+            "N": N,
+            "h_z": 0.38,
+            "J_z": 2 * np.pi / t_final,
+            "1q_components": ["X", "Y"],
+            "2q_components": ["XZ", "ZZ"],
+            "b_quiet": True,
+            "init_product_state": ["-x", "+y"],
+            "apply_gates": [(t_final / 2.0, "x", 0), (t_final / 2.0, "y", 1)],
+        }
+        s_files_prefix1 = s_output_path + "test_apply_gates_1A"
+        solver_params1.update({"output_files_prefix": s_files_prefix1})
+        solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
+        solver1.solve()
+
+        # The qubits should disentangle (since the time is exactly a period of J_z),
+        # and return to their initial state since the x and y gates are applied at half
+        # the simulation time, doing a hahn echo that cancels the h_z rotation
+        self.assertAlmostEqual(solver1.result["obs-1q"][("x", (0,))][1][-1], -1.0)
+        self.assertAlmostEqual(solver1.result["obs-1q"][("y", (1,))][1][-1], 1.0)
+        self.assertAlmostEqual(solver1.result["obs-2q"][("xz", (0, 1))][1][-1], 0.0)
+        self.assertAlmostEqual(solver1.result["obs-2q"][("xz", (1, 0))][1][-1], 0.0)
+
+    def test_apply_gates_2(self):
+        """Compare the application of gates at intermediate times."""
+        N = 2
+        t_final = 1
+        solver_params1 = {
+            "tau": 0.02,
+            "t_final": t_final,
+            "N": N,
+            "g_2": 0.1,
+            "h_z": -0.2,
+            "J_z": -0.8,
+            "1q_components": ["X", "Y"],
+            "2q_components": ["XZ", "ZZ"],
+            "b_quiet": True,
+        }
+        solver_params2 = copy.deepcopy(solver_params1)
+        solver_params1.update(
+            {
+                "init_product_state": ["-x", "+y"],
+                "init_cz_gates": [(0, 1)],
+                "apply_gates": [(0.601, "x", 1), (0.601, "cz", 1, 0)],
+            }
+        )
+        solver_params2.update(
+            {
+                "init_product_state": ["+x", "-y"],
+                "apply_gates": [
+                    (0.0, "y", 0),
+                    (0.0, "z", 1),
+                    (0.0, "cz", 0, 1),
+                    (0.60, "x", 1),
+                    (0.60, "cz", 1, 0),
+                ],
+            }
+        )
+        s_files_prefix1 = s_output_path + "test_apply_gates_2A"
+        solver_params1.update({"output_files_prefix": s_files_prefix1})
+        solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
+        solver1.solve()
+
+        s_files_prefix2 = s_output_path + "test_apply_gates_2B"
+        solver_params2.update({"output_files_prefix": s_files_prefix2})
+        solver2 = LindbladMPOSolver(solver_params2, s_cygwin_path, s_solver_path)
+        solver2.solve()
+        self.assertAlmostEqual(
+            solver1.result["obs-1q"][("x", (0,))][1][-1],
+            solver2.result["obs-1q"][("x", (0,))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xz", (0, 1))][1][-1],
+            solver2.result["obs-2q"][("xz", (0, 1))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xz", (1, 0))][1][-1],
+            solver2.result["obs-2q"][("xz", (1, 0))][1][-1],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

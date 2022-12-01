@@ -203,6 +203,7 @@ class LindbladMPOSolver:
             elif (
                 key == "init_pauli_state"
                 or key == "init_product_state"
+                or key == "apply_gates"
                 or key == "1q_components"
                 or key == "2q_components"
             ):
@@ -223,12 +224,24 @@ class LindbladMPOSolver:
                         s_val = op[0] if b_tuple else op
                         file.write(str(s_val))
                     elif b_tuple:
-                        if len(op) == 2:
-                            file.write("q " + str(op[0]) + " " + str(op[1]))
-                        else:
-                            file.write(
-                                "r " + str(op[0]) + " " + str(op[1]) + " " + str(op[2])
-                            )
+                        if key == "init_product_state":
+                            if len(op) == 2:
+                                file.write("q " + str(op[0]) + " " + str(op[1]))
+                            else:
+                                file.write(
+                                    "r "
+                                    + str(op[0])
+                                    + " "
+                                    + str(op[1])
+                                    + " "
+                                    + str(op[2])
+                                )
+                        elif key == "apply_gates":
+                            file.write(str(op[0]) + " " + str(op[1]))
+                            for j_op in range(
+                                2, len(op)
+                            ):  # qubit indices, 1-based in the file.
+                                file.write(" " + str(op[j_op] + 1))
                     if i_op != n_indices - 1:
                         file.write(",")
                 file.write("\n")
@@ -455,6 +468,7 @@ class LindbladMPOSolver:
                 "values\n"
             )
             return check_msg
+        N = LindbladMPOSolver._get_number_of_qubits(parameters)
         for key in dict.keys(parameters):
             if parameters[key] is None or (
                 isinstance(parameters[key], str) and "" == parameters[key]
@@ -491,7 +505,7 @@ class LindbladMPOSolver:
                     check_msg += (
                         "Error 170: "
                         + key
-                        + " should be equal or larger than 1 (integer)\n"
+                        + " should be equal to or larger than 0 (integer)\n"
                     )
                     continue
             elif key == "output_step" or key == "force_rho_hermitian_step":
@@ -500,7 +514,9 @@ class LindbladMPOSolver:
                     continue
                 if parameters[key] < 0:
                     check_msg += (
-                        "Error 190: " + key + " should be bigger/equal to 0 (integer)\n"
+                        "Error 190: "
+                        + key
+                        + " should be equal to or larger than 0 (integer)\n"
                     )
                     continue
             elif (
@@ -513,8 +529,7 @@ class LindbladMPOSolver:
             ):
                 if LindbladMPOSolver.is_float(parameters[key]):
                     continue
-                number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
-                if number_of_qubits == -1:
+                if N == -1:
                     check_msg += (
                         "Error 200: " + key + " could not be validated because 'N' "
                         "(or alternatively l_x, l_y) are not "
@@ -522,7 +537,7 @@ class LindbladMPOSolver:
                     )
                     continue
                 if isinstance(parameters[key], list):
-                    if len(parameters[key]) != number_of_qubits:
+                    if len(parameters[key]) != N:
                         check_msg += (
                             "Error 210: " + key + " is not a float / N-length list / "
                             "numpy array (of floats)\n"
@@ -549,7 +564,7 @@ class LindbladMPOSolver:
                         continue
                     if parameters[key].size == 1:
                         continue
-                    if (parameters[key].shape[0] != number_of_qubits) or (
+                    if (parameters[key].shape[0] != N) or (
                         parameters[key].shape[0] != parameters[key].size
                     ):
                         check_msg += (
@@ -566,8 +581,7 @@ class LindbladMPOSolver:
             elif (key == "J_z") or (key == "J"):
                 if LindbladMPOSolver.is_float(parameters[key]):
                     continue
-                number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
-                if number_of_qubits == -1:
+                if N == -1:
                     check_msg += (
                         "Error 260: " + key + " could not be validated because 'N' "
                         "(or alternatively l_x, l_y) are not "
@@ -575,7 +589,7 @@ class LindbladMPOSolver:
                     )
                     continue
                 if isinstance(parameters[key], list):
-                    if len(parameters[key]) != number_of_qubits:
+                    if len(parameters[key]) != N:
                         check_msg += (
                             "Error 270: "
                             + key
@@ -594,7 +608,7 @@ class LindbladMPOSolver:
                             )
                             flag_continue = True
                             break
-                        if len(lst) != number_of_qubits:
+                        if len(lst) != N:
                             check_msg += (
                                 "Error 290: "
                                 + key
@@ -632,7 +646,7 @@ class LindbladMPOSolver:
                         continue
                     if parameters[key].size == 1:
                         continue
-                    if parameters[key].shape[0] != number_of_qubits:
+                    if parameters[key].shape[0] != N:
                         check_msg += (
                             "Error 320: "
                             + key
@@ -658,6 +672,46 @@ class LindbladMPOSolver:
                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     )
                     continue
+            elif key == "apply_gates":
+                if (
+                    not isinstance(parameters[key], tuple)
+                    and not isinstance(parameters[key], list)
+                    and not isinstance(parameters[key], np.ndarray)
+                ):
+                    check_msg += (
+                        "Error 345: "
+                        + key
+                        + " must be a tuple or a list/ array of tuples\n"
+                    )
+                    continue
+                gate_list = (
+                    [parameters[key]]
+                    if isinstance(parameters[key], tuple)
+                    else parameters[key]
+                )
+                for g_tuple in gate_list:
+                    tuple_len = len(g_tuple)
+                    if tuple_len < 3 or tuple_len > 4:
+                        check_msg += (
+                            "Error 346: every member of "
+                            + key
+                            + " must be of 3 or 4 elements\n"
+                        )
+                        continue
+                    if (
+                        not LindbladMPOSolver.is_float(g_tuple[0])
+                        or not isinstance(g_tuple[1], str)
+                        or not LindbladMPOSolver._is_int(g_tuple[2])
+                        or (tuple_len > 3 and not LindbladMPOSolver._is_int(g_tuple[3]))
+                    ):
+                        check_msg += (
+                            "Error 347: each member of "
+                            + key
+                            + " must be a tuple of the form"
+                            " (time, gate name, qubit, [qubit])\n"
+                        )
+                        continue
+
             elif (key == "init_pauli_state") or (key == "init_product_state"):
                 if (
                     not isinstance(parameters[key], (str, float, tuple))
@@ -848,10 +902,7 @@ class LindbladMPOSolver:
                             + " should be an integer list (1,2,3,4..)\n"
                         )
                         continue
-                    number_of_qubits = LindbladMPOSolver._get_number_of_qubits(
-                        parameters
-                    )
-                    if number_of_qubits == -1:
+                    if N == -1:
                         check_msg += (
                             "Error 480: " + key + "could not be validated because 'N'"
                             " (or alternatively l_x,"
@@ -867,7 +918,7 @@ class LindbladMPOSolver:
                             )
                             flag_continue = True
                             break
-                        if element >= number_of_qubits:
+                        if element >= N:
                             check_msg += (
                                 "Error 500: "
                                 + key
@@ -879,7 +930,7 @@ class LindbladMPOSolver:
                             break
                     if flag_continue:
                         continue
-                    if len(parameters[key]) > number_of_qubits:
+                    if len(parameters[key]) > N:
                         check_msg += (
                             "Error 510: "
                             + key
@@ -965,8 +1016,7 @@ class LindbladMPOSolver:
                         " containing integers\n"
                     )
                     continue
-                number_of_qubits = LindbladMPOSolver._get_number_of_qubits(parameters)
-                if number_of_qubits == -1:
+                if N == -1:
                     check_msg += (
                         "Error 580: " + key + " could not be validated because 'N' "
                         "(or alternatively l_x, "
@@ -996,7 +1046,7 @@ class LindbladMPOSolver:
                         )
                         flag_continue = True
                         break
-                    if (tup[0] >= number_of_qubits) or (tup[1] >= number_of_qubits):
+                    if (tup[0] >= N) or (tup[1] >= N):
                         check_msg += (
                             "Error 610: "
                             + key
@@ -1008,7 +1058,7 @@ class LindbladMPOSolver:
                         break
                 if flag_continue:
                     continue
-                if len(parameters[key]) > number_of_qubits**2:
+                if len(parameters[key]) > N**2:
                     check_msg += (
                         "Error 620: " + key + " 's length should be smaller than N^2\n"
                     )
