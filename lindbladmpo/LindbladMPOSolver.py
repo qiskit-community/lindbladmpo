@@ -229,11 +229,18 @@ class LindbladMPOSolver:
                                 file.write("q " + str(op[0]) + " " + str(op[1]))
                             else:
                                 file.write(
-                                    "r " + str(op[0]) + " " + str(op[1]) + " " + str(op[2])
+                                    "r "
+                                    + str(op[0])
+                                    + " "
+                                    + str(op[1])
+                                    + " "
+                                    + str(op[2])
                                 )
                         elif key == "apply_gates":
                             file.write(str(op[0]) + " " + str(op[1]))
-                            for j_op in range(2, len(op)):  # qubit indices, 1-based in the file.
+                            for j_op in range(
+                                2, len(op)
+                            ):  # qubit indices, 1-based in the file.
                                 file.write(" " + str(op[j_op] + 1))
                     if i_op != n_indices - 1:
                         file.write(",")
@@ -667,14 +674,14 @@ class LindbladMPOSolver:
                     continue
             elif key == "apply_gates":
                 if (
-                        not isinstance(parameters[key], tuple)
-                        and not isinstance(parameters[key], list)
-                        and not isinstance(parameters[key], np.ndarray)
+                    not isinstance(parameters[key], tuple)
+                    and not isinstance(parameters[key], list)
+                    and not isinstance(parameters[key], np.ndarray)
                 ):
                     check_msg += (
-                            "Error 345: "
-                            + key
-                            + " must be a tuple or a list/ array of tuples\n"
+                        "Error 345: "
+                        + key
+                        + " must be a tuple or a list/ array of tuples\n"
                     )
                     continue
                 gate_list = (
@@ -686,22 +693,22 @@ class LindbladMPOSolver:
                     tuple_len = len(g_tuple)
                     if tuple_len < 3 or tuple_len > 4:
                         check_msg += (
-                                "Error 346: every member of "
-                                + key
-                                + " must be of 3 or 4 elements\n"
+                            "Error 346: every member of "
+                            + key
+                            + " must be of 3 or 4 elements\n"
                         )
                         continue
                     if (
-                        not LindbladMPOSolver.is_float(g_tuple[0]) or
-                        not isinstance(g_tuple[1], str) or
-                        not LindbladMPOSolver._is_int(g_tuple[2]) or
-                        (tuple_len > 3 and not LindbladMPOSolver._is_int(g_tuple[3]))
+                        not LindbladMPOSolver.is_float(g_tuple[0])
+                        or not isinstance(g_tuple[1], str)
+                        or not LindbladMPOSolver._is_int(g_tuple[2])
+                        or (tuple_len > 3 and not LindbladMPOSolver._is_int(g_tuple[3]))
                     ):
                         check_msg += (
                             "Error 347: each member of "
                             + key
                             + " must be a tuple of the form"
-                              " (time, gate name, qubit, [qubit])\n"
+                            " (time, gate name, qubit, [qubit])\n"
                         )
                         continue
 
