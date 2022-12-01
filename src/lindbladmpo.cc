@@ -563,7 +563,7 @@ int main(int argc, char *argv[])
 			time=stod(vs[0]);
 		}
 		catch (...) {
-			cout2 << "Error: " << stime << " is not a double (expecting a time value) in '"<<apply_gates[n] << "'.\n", exit(1);
+			cout2 << "Error: " << vs[0] << " is not a double (expecting a time value) in '"<<apply_gates[n] << "'.\n", exit(1);
 		}
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
