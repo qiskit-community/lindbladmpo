@@ -287,6 +287,10 @@ int main(int argc, char *argv[])
 	if (b_cz_pairs)
 		validate_2q_list(init_cz_gates, N, s_cz_param);
 
+	const double t_0 = param.val("t_init");
+	const double tau = param.val("tau");
+	const double t_f = param.val("t_final");
+	const double t_total = t_f - t_0;
 	MPS psi;
 	bool psi_defined = false;
 	if (load_prefix != "")
@@ -565,6 +569,10 @@ int main(int argc, char *argv[])
 		catch (...) {
 			cout2 << "Error: " << vs[0] << " is not a double (expecting a time value) in '"<<apply_gates[n] << "'.\n", exit(1);
 		}
+		if (time < t_0 || time > t_f)
+			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not between t_init and t_final.\n", exit(1);
+		if (fmod(abs(time / tau), 1.) > 0.1 || fmod(abs(time / tau), 1.) < 0.9)
+			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not close to an integer multiple of tau.\n", exit(1);
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
 		if (sgate=="X" || sgate=="Y" || sgate=="Z") {
@@ -662,10 +670,6 @@ int main(int argc, char *argv[])
 	cout2 << "Compute exp(i*tau*L) as an MPO... ";
 	cout2.flush();
 
-	const double t_0 = param.val("t_init");
-	const double tau = param.val("tau");
-	const double t_f = param.val("t_final");
-	const double t_total = t_f - t_0;
 	const int o = param.val("trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
 	TE.init(tau, C.Lindbladian, argsRho, o);
@@ -760,10 +764,13 @@ int main(int argc, char *argv[])
 		cout2.flush();
 
 		//If the time corresponds a step where some gates should be applied:
-		//note: if several gates are associated to the same time, the application will follow the order of the arguments of 'apply_gate'
+		//note: if several gates are associated to the same time, the application will follow
+		// the order of the arguments of 'apply_gate'
 		for (unsigned int k=0;k<gate_times.size();k++) {
 			if (abs(gate_times[k] - t) < (tau / 2.)) {
-				
+				// This will make the gate execute at t nearest to the requested time.
+				// Earlier there is a validation making sure this is unique (raising an error
+				// if the requested time is not close enough to an integer multiple of tau).
 				if (gate_names[k]=="CZ")
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n",
 					ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
