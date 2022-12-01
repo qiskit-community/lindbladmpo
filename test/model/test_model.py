@@ -571,7 +571,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
             {
                 "init_product_state": ["-x", "+y"],
                 "init_cz_gates": [(0, 1)],
-                "apply_gates": [(0.601, "x", 1), (0.601, "cz", 1, 0)],
+                "apply_gates": [(0.6001, "x", 1), (0.599, "cz", 1, 0)],
             }
         )
         solver_params2.update(

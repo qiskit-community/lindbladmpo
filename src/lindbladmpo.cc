@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
 		}
 		if (time < t_0 || time > t_f)
 			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not between t_init and t_final.\n", exit(1);
-		if (fmod(abs(time / tau), 1.) > 0.1 || fmod(abs(time / tau), 1.) < 0.9)
+		if (fmod(abs(time / tau), 1.) > 0.1 && fmod(abs(time / tau), 1.) < 0.9)
 			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not close to an integer multiple of tau.\n", exit(1);
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
