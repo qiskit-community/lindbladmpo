@@ -27,7 +27,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.2.1";
+const string SOLVER_VERSION = "0.2.2";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -762,7 +762,7 @@ int main(int argc, char *argv[])
 		//If the time corresponds a step where some gates should be applied:
 		//note: if several gates are associated to the same time, the application will follow the order of the arguments of 'apply_gate'
 		for (unsigned int k=0;k<gate_times.size();k++) {
-			if (gate_times[k]==t) {
+			if (abs(gate_times[k] - t) < (tau / 2.)) {
 				
 				if (gate_names[k]=="CZ")
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n",
