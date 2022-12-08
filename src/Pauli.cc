@@ -197,6 +197,32 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(uu, du_, 0.5*(1.+Cplx_i));
     Op.set(ud, dd_, 0.5*(1.+Cplx_i)); 
   }
+  else if (opname == "H")
+  {
+    //SqrtX = sqrt(0.5)*[ Sx + Sz ]
+    double sqrt05 = pow(.5, .5);
+    Op.set(ud_, uu, sqrt05);
+    Op.set(dd_, du, sqrt05);
+    Op.set(du_, dd, sqrt05);
+    Op.set(uu_, ud, sqrt05);
+    Op.set(dd_, dd, -sqrt05);
+    Op.set(du_, du, +sqrt05);
+    Op.set(ud_, ud, -sqrt05);
+    Op.set(uu_, uu, +sqrt05);
+
+  }
+  else if (opname == "_H")
+  {
+    double sqrt05 = pow(.5, .5);
+    Op.set(dd, dd_, -sqrt05);
+    Op.set(du, du_, -sqrt05);
+    Op.set(ud, ud_, sqrt05);
+    Op.set(uu, uu_, sqrt05);
+    Op.set(dd, ud_, sqrt05);
+    Op.set(du, uu_, sqrt05);
+    Op.set(uu, du_, sqrt05);
+    Op.set(ud, dd_, sqrt05);
+  }
   else if (opname == "Id")
   {
     Op.set(dd_, dd, 1.0);

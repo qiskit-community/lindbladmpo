@@ -59,6 +59,11 @@ void ApplySqrtXGate(MPS &rho, const Pauli &siteops,int i) {
 	rho.ref(i)*=op(siteops,"_SqrtX",i);
 	rho.ref(i).noPrime("Site");
 }
+void ApplyHGate(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"H",i);
+	rho.ref(i)*=op(siteops,"_H",i);
+	rho.ref(i).noPrime("Site");
+}
 //Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
 void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
 	if (i==j) return;//CZ(i,i)=identitity => nothing to do
@@ -580,7 +585,7 @@ int main(int argc, char *argv[])
 			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not close to an integer multiple of tau.\n", exit(1);
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
-		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SQRTX") {
+		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SQRTX" || sgate=="H") {
 				try {
 					i=stod(vs[2]);
 					if (i<1 || i>N) cout2 << "Error: qubit index "<<i<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
@@ -785,6 +790,7 @@ int main(int argc, char *argv[])
 					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="SQRTX") ApplySqrtXGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="H") ApplyHGate(C.rho,C.siteops,gate_i[k]);
 				}
 			}
 		}
