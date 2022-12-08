@@ -178,6 +178,7 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(du_, du, 0.5*(1.+Cplx_i));
     Op.set(ud_, ud, 0.5*(1.+Cplx_i));
     Op.set(uu_, uu, 0.5*(1.+Cplx_i));
+
     Op.set(ud_, uu, 0.5*(1.-Cplx_i));
     Op.set(dd_, du, 0.5*(1.-Cplx_i));
     Op.set(du_, dd, 0.5*(1.-Cplx_i));
@@ -186,17 +187,15 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "_SqrtX")
   {
-    //_SqrtX = 0.5*[ (1+i)*Id + (1-i)*_Sx ]
-    Op = ITensor(s, sP);
-    Op.set(dd_, dd, 0.5*(1.+Cplx_i));
-    Op.set(du_, du, 0.5*(1.+Cplx_i));
-    Op.set(ud_, ud, 0.5*(1.+Cplx_i));
-    Op.set(uu_, uu, 0.5*(1.+Cplx_i));
-    Op.set(dd, ud_, 0.5*(1.-Cplx_i));
-    Op.set(du, uu_, 0.5*(1.-Cplx_i));
-    Op.set(uu, du_, 0.5*(1.-Cplx_i));
-    Op.set(ud, dd_, 0.5*(1.-Cplx_i));
-
+    Op.set(dd_, dd, 0.5*(1.-Cplx_i));
+    Op.set(du_, du, 0.5*(1.-Cplx_i));
+    Op.set(ud_, ud, 0.5*(1.-Cplx_i));
+    Op.set(uu_, uu, 0.5*(1.-Cplx_i));
+    
+    Op.set(dd, ud_, 0.5*(1.+Cplx_i));
+    Op.set(du, uu_, 0.5*(1.+Cplx_i));
+    Op.set(uu, du_, 0.5*(1.+Cplx_i));
+    Op.set(ud, dd_, 0.5*(1.+Cplx_i)); 
   }
   else if (opname == "Id")
   {

@@ -789,8 +789,6 @@ int main(int argc, char *argv[])
 			}
 		}
 
-
-
 		if (force_rho_Hermitian_step && (n % force_rho_Hermitian_step) == 0)
 			C.MakeRhoHermitian(argsRho);
 		if (output_step > 0)
