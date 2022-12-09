@@ -197,7 +197,8 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "H")
   {
-    //SqrtX = sqrt(0.5)*[ Sx + Sz ]
+    //Hadamard gate
+    //H = sqrt(0.5)*[ Sx + Sz ]
     const double sqrt05 = pow(.5, .5);
     Op.set(ud_, uu, sqrt05);
     Op.set(dd_, du, sqrt05);
