@@ -64,11 +64,7 @@ void ApplyHGate(MPS &rho, const Pauli &siteops,int i) {
 	rho.ref(i)*=op(siteops,"_H",i);
 	rho.ref(i).noPrime("Site");
 }
-<<<<<<< HEAD
 void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int target,string opname,Args args=Args("Cutoff",0)) {
-=======
-void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int target,string opname) {
->>>>>>> f47f7faaed37d946f050dc62bcf3521dddde4005
 	if (control==target) cerr << "Error, ApplyControlledXYZGate was called with control=target="<<control<<".\n", exit(1);
 	const int i=min(target,control),j=max(target,control);
 	const int N=length(rho);	
@@ -141,7 +137,6 @@ void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int targe
 					W += siteops.op("Id",n) * setElt(left(1)) ;	
 			}
 		}
-<<<<<<< HEAD
 		rho=applyMPO(gate_mpo,rho,args);rho.noPrime("Site");
 	}
 }
@@ -153,21 +148,6 @@ void ApplyCNOTGate(MPS &rho, const Pauli &siteops,int control,int target,Args ar
 //Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
 void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j,Args args=Args("Cutoff",0)) {
 	ApplyControlledXYZGate(rho, siteops,i,j,"Sz",args);
-=======
-		rho=applyMPO(gate_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
-	}
-}
-//Apply the CNOT gate on some mixed state rho, at sites (control,target)
-void ApplyCNOTGate(MPS &rho, const Pauli &siteops,int control,int target) {
-	ApplyControlledXYZGate(rho, siteops,control,target,"Sx");
-}
-
-
-
-//Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
-void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
-	ApplyControlledXYZGate(rho, siteops,i,j,"Sz");
->>>>>>> f47f7faaed37d946f050dc62bcf3521dddde4005
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
