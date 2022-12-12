@@ -64,7 +64,7 @@ void ApplyHGate(MPS &rho, const Pauli &siteops,int i) {
 	rho.ref(i)*=op(siteops,"_H",i);
 	rho.ref(i).noPrime("Site");
 }
-void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int target,string opname) {
+void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int target,string opname,Args args=Args("Cutoff",0)) {
 	if (control==target) cerr << "Error, ApplyControlledXYZGate was called with control=target="<<control<<".\n", exit(1);
 	const int i=min(target,control),j=max(target,control);
 	const int N=length(rho);	
@@ -137,17 +137,17 @@ void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int targe
 					W += siteops.op("Id",n) * setElt(left(1)) ;	
 			}
 		}
-		rho=applyMPO(gate_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
+		rho=applyMPO(gate_mpo,rho,args);rho.noPrime("Site");
 	}
 }
 //Apply the CNOT gate on some mixed state rho, at sites (control,target)
-void ApplyCNOTGate(MPS &rho, const Pauli &siteops,int control,int target) {
-	ApplyControlledXYZGate(rho, siteops,control,target,"Sx");
+void ApplyCNOTGate(MPS &rho, const Pauli &siteops,int control,int target,Args args=Args("Cutoff",0)) {
+	ApplyControlledXYZGate(rho, siteops,control,target,"Sx",args);
 }
 
 //Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
-void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
-	ApplyControlledXYZGate(rho, siteops,i,j,"Sz");
+void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j,Args args=Args("Cutoff",0)) {
+	ApplyControlledXYZGate(rho, siteops,i,j,"Sz",args);
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -796,13 +796,20 @@ int main(int argc, char *argv[])
 				// This will make the gate execute at t nearest to the requested time.
 				// Earlier there is a validation making sure this is unique (raising an error
 				// if the requested time is not close enough to an integer multiple of tau).
-				if (gate_names[k]=="CZ")
-					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n",
-					ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
-				else if (gate_names[k]=="CNOT")
-					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n",
-					ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
-				else {
+				if (gate_names[k]=="CZ") {
+					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
+					if (param.boolval("compression_after_gate"))
+						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
+					else
+						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+				}
+				else if (gate_names[k]=="CNOT") {
+					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
+					if (param.boolval("compression_after_gate"))
+						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
+					else
+						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+				} else {
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<")\n";
 					if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
