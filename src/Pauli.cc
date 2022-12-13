@@ -67,8 +67,8 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   // Note: dag(...) returns a copy of the Index, with its arrow direction reversed.
   auto Op = ITensor(dag(s), sP);
   // About the notations below:
-  // no- prefix indicates that the operator acts on the right of the density matrix
-  // A prefix _ indicate that the operator acts on the left of the density matrix
+  // no "_" prefix in the operator name indicates that the operator acts on the right of the density matrix
+  // A prefix "_" indicate that the operator acts on the left of the density matrix
   if (opname == "Sz")
   {
     Op.set(dd_, dd, -1.0);
@@ -120,7 +120,7 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "_Sx")
   {
-    Op = ITensor(s, sP); //itensor v3
+    Op = ITensor(s, sP);
     Op.set(dd, ud_, 1.0);
     Op.set(du, uu_, 1.0);
     Op.set(uu, du_, 1.0);
@@ -143,12 +143,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "_S-S+")
   {
-    //Op.set(uu, dd_, 1.0);
     Op.set(dd_, uu, 1.0);
   }
   else if (opname == "_S+S-")
   {
-    //Op.set(dd, uu_, 1.0);
     Op.set(uu_, dd, 1.0);
   }
   else if (opname == "projUp")
@@ -170,6 +168,59 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   {
     Op.set(dd_, dd, 1.0);
     Op.set(du_, du, 1.0);
+  }
+  else if (opname == "SqrtX")
+  {
+    //SqrtX = 0.5*[ (1+i)*Id + (1-i)*Sx ]
+    Op.set(dd_, dd, 0.5*(1.+Cplx_i));
+    Op.set(du_, du, 0.5*(1.+Cplx_i));
+    Op.set(ud_, ud, 0.5*(1.+Cplx_i));
+    Op.set(uu_, uu, 0.5*(1.+Cplx_i));
+
+    Op.set(ud_, uu, 0.5*(1.-Cplx_i));
+    Op.set(dd_, du, 0.5*(1.-Cplx_i));
+    Op.set(du_, dd, 0.5*(1.-Cplx_i));
+    Op.set(uu_, ud, 0.5*(1.-Cplx_i));
+
+  }
+  else if (opname == "_SqrtX")
+  {
+    Op.set(dd_, dd, 0.5*(1.-Cplx_i));
+    Op.set(du_, du, 0.5*(1.-Cplx_i));
+    Op.set(ud_, ud, 0.5*(1.-Cplx_i));
+    Op.set(uu_, uu, 0.5*(1.-Cplx_i));
+    
+    Op.set(dd, ud_, 0.5*(1.+Cplx_i));
+    Op.set(du, uu_, 0.5*(1.+Cplx_i));
+    Op.set(uu, du_, 0.5*(1.+Cplx_i));
+    Op.set(ud, dd_, 0.5*(1.+Cplx_i)); 
+  }
+  else if (opname == "H")
+  {
+    //Hadamard gate
+    //H = sqrt(0.5)*[ Sx + Sz ]
+    const double sqrt05 = pow(.5, .5);
+    Op.set(ud_, uu, sqrt05);
+    Op.set(dd_, du, sqrt05);
+    Op.set(du_, dd, sqrt05);
+    Op.set(uu_, ud, sqrt05);
+    Op.set(dd_, dd, -sqrt05);
+    Op.set(du_, du, +sqrt05);
+    Op.set(ud_, ud, -sqrt05);
+    Op.set(uu_, uu, +sqrt05);
+
+  }
+  else if (opname == "_H")
+  {
+    const double sqrt05 = pow(.5, .5);
+    Op.set(dd, dd_, -sqrt05);
+    Op.set(du, du_, -sqrt05);
+    Op.set(ud, ud_, sqrt05);
+    Op.set(uu, uu_, sqrt05);
+    Op.set(dd, ud_, sqrt05);
+    Op.set(du, uu_, sqrt05);
+    Op.set(uu, du_, sqrt05);
+    Op.set(ud, dd_, sqrt05);
   }
   else if (opname == "Id")
   {

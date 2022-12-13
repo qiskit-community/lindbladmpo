@@ -53,17 +53,26 @@ void ApplyZGate(MPS &rho, const Pauli &siteops,int i) {
 	rho.ref(i)*=op(siteops,"_Sz",i);
 	rho.ref(i).noPrime("Site");
 }
-
-//Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
-void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
-	if (i==j) return;//CZ(i,i)=identitity => nothing to do
-	//cout2<<"\nApplication of CZ("<<i<<","<<j<<") to rho...";
+//Apply the SqrtX gate (qubit i) on a mixed state rho
+void ApplySqrtXGate(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"SqrtX",i);
+	rho.ref(i)*=op(siteops,"_SqrtX",i);
+	rho.ref(i).noPrime("Site");
+}
+void ApplyHGate(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"H",i);
+	rho.ref(i)*=op(siteops,"_H",i);
+	rho.ref(i).noPrime("Site");
+}
+void ApplyControlledXYZGate(MPS &rho, const Pauli &siteops,int control,int target,string opname,Args args=Args("Cutoff",0)) {
+	if (control==target) cerr << "Error, ApplyControlledXYZGate was called with control=target="<<control<<".\n", exit(1);
+	const int i=min(target,control),j=max(target,control);
 	const int N=length(rho);	
-    if (i>j) {int tmp=i;i=j;j=tmp;}	//Swap i and j if necessary, to insure i<j
 	for (int braket=0;braket<=1;braket++) {
-		MPO cz_mpo(siteops);
+		MPO gate_mpo(siteops);
 		string projUp=(braket==0)?("projUp"):("_projUp");//acting on |ket> or on <bra|
 		string projDn=(braket==0)?("projDn"):("_projDn");
+		string s=(braket==0)?(opname):("_"+opname);
 		//Construct the link indices
 		vector<Index> links(N);
 		for(int n = 1; n < N; ++n) {
@@ -77,15 +86,19 @@ void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
 				links.at(n) = Index(1,format("Link,l=%d",n));
 			}
 		}
-		//Construct 'manually' the tensors of the MPO
+		//Construct 'manually' the tensors of the MPO for the CNOT gate
 		for(int n = 1; n <= N; ++n) {
-			auto& W = cz_mpo.ref(n);
+			auto& W = gate_mpo.ref(n);
 			if (n==1) {
 				Index right=links.at(n);
 				W = ITensor(siteops(n),prime(siteops(n)),right);
-				if (n==i) {
-					W+=siteops.op(projUp,n)  * setElt(right(1));
-					W+=siteops.op(projDn,n)  * setElt(right(2));
+				if (n==control) {
+					// the bond index of the mpo encodes the information about the satet of the control qubit
+					W+=siteops.op(projUp,n)  * setElt(right(1)); // |control> = |0> = |up>
+					W+=siteops.op(projDn,n)  * setElt(right(2)); // |control> = |1> = |dn>
+				} else if (n==target) {
+					W+=siteops.op("Id",n)  * setElt(right(1));// control> = |0>
+					W+=siteops.op(s,n)  * setElt(right(2));  // Flip the target bit if |control> = |1>
 				} else
 				W += siteops.op("Id",n) * setElt(right(1)) ;
 			}
@@ -93,36 +106,48 @@ void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j) {
 				Index right=links.at(n);
 				Index left=links.at(n-1);
 				W = ITensor(siteops(n),prime(siteops(n)),right,left);
-				if (n==i) {
+				if (n==i && n==control) {
 					W+=siteops.op(projUp,n)  * setElt(left(1)) * setElt(right(1));
 					W+=siteops.op(projDn,n)  * setElt(left(1)) * setElt(right(2));
+				} else 	if (n==i && n==target) {
+					W+=siteops.op("Id",n)  * setElt(left(1)) * setElt(right(1));
+					W+=siteops.op(s,n)  * setElt(left(1)) * setElt(right(2));// Flip the target bit if |control> = |1>
 				} else if (n>i && n<j) {
 					W+=siteops.op("Id",n) * setElt(right(1)) * setElt(left(1)) ;
 					W+=siteops.op("Id",n) * setElt(right(2)) * setElt(left(2)) ;
-				} else if (n==j) {
-					W+= siteops.op(projUp,n) * setElt(left(1)) * setElt(right(1)) ;			//up(j)-up(i)
-					W+= siteops.op(projUp,n) * setElt(left(2)) * setElt(right(1)) ;			//up(j)-dn(i)
-					W+= siteops.op(projDn,n) * setElt(left(1)) * setElt(right(1)) ;			//dn(j)-up(i)
-					W+= siteops.op(projDn,n) * setElt(left(2)) * setElt(right(1)) *(-1.0) ;//dn(j)-dn(i)
-				} else {
+				} else if (n==j && n==control) {
+					W+=siteops.op(projUp,n)  * setElt(left(1)) * setElt(right(1));
+					W+=siteops.op(projDn,n)  * setElt(left(2)) * setElt(right(1));
+				} else if (n==j && n==target) {
+					W+=siteops.op("Id",n)  * setElt(left(1)) * setElt(right(1));
+					W+=siteops.op(s,n)  * setElt(left(2)) * setElt(right(1));// Flip the target bit if |control> = |1>
+				} else
 					W+=siteops.op("Id",n) * setElt(right(1)) * setElt(left(1)) ;
-				}
 			}
 			if (n==N) {
 				Index left=links.at(n-1);
 				W = ITensor(siteops(n),prime(siteops(n)),left);
-				if (n==j) {
-					W+= siteops.op(projUp,n) * setElt(left(1)) ;		//up(j)-up(i)
-					W+= siteops.op(projUp,n) * setElt(left(2)) ;		//up(j)-dn(i)
-					W+= siteops.op(projDn,n) * setElt(left(1)) ;		//dn(j)-up(i)
-					W+= siteops.op(projDn,n) * setElt(left(2)) *(-1.0) ;//dn(j)-dn(i)
+				if (n==control) {
+					W+=siteops.op(projUp,n)  * setElt(left(1)) ;
+					W+=siteops.op(projDn,n)  * setElt(left(2)) ;
+				} else if (n==target) {
+					W+=siteops.op("Id",n)  * setElt(left(1)) ;
+					W+=siteops.op(s,n)  * setElt(left(2)) ;// Flip the target bit if |control> = |1>
 				} else
-				W += siteops.op("Id",n) * setElt(left(1)) ;	
+					W += siteops.op("Id",n) * setElt(left(1)) ;	
 			}
 		}
-		rho=applyMPO(cz_mpo,rho,Args("Cutoff",0));rho.noPrime("Site");
+		rho=applyMPO(gate_mpo,rho,args);rho.noPrime("Site");
 	}
-   	//cout2 << "...done. New bond dimension of rho:" << maxLinkDim(rho);
+}
+//Apply the CNOT gate on some mixed state rho, at sites (control,target)
+void ApplyCNOTGate(MPS &rho, const Pauli &siteops,int control,int target,Args args=Args("Cutoff",0)) {
+	ApplyControlledXYZGate(rho, siteops,control,target,"Sx",args);
+}
+
+//Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
+void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j,Args args=Args("Cutoff",0)) {
+	ApplyControlledXYZGate(rho, siteops,i,j,"Sz",args);
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -579,7 +604,7 @@ int main(int argc, char *argv[])
 
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
-		if (sgate=="X" || sgate=="Y" || sgate=="Z") {
+		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SQRTX" || sgate=="H") {
 				try {
 					i=stod(vs[2]);
 					if (i<1 || i>N) cout2 << "Error: qubit index "<<i<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
@@ -593,7 +618,7 @@ int main(int argc, char *argv[])
 				gate_names.push_back(sgate);
 				gate_i.push_back(i);
 				gate_j.push_back(-1);
-		} else if (sgate=="CZ") {
+		} else if (sgate=="CZ" || sgate=="CNOT") {
 				if (vs.size()==3)
 					cout2 << "Error: missing argument for gate " << sgate <<" in '"<<apply_gates[n] << "'.\n", exit(1);
 				try {
@@ -774,19 +799,29 @@ int main(int argc, char *argv[])
 			if (abs(gate_times[k] - t) < (tau / 2.)) {
 				// This will make the gate execute at t nearest to the requested time.
 				// Earlier there is a validation making sure this is unique.
-				if (gate_names[k]=="CZ")
-					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n",
-					ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
-				else {
+				if (gate_names[k]=="CZ") {
+					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
+					if (param.boolval("compression_after_gate"))
+						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
+					else
+						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+				}
+				else if (gate_names[k]=="CNOT") {
+					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
+					if (param.boolval("compression_after_gate"))
+						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
+					else
+						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+				} else {
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<")\n";
 					if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="SQRTX") ApplySqrtXGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="H") ApplyHGate(C.rho,C.siteops,gate_i[k]);
 				}
 			}
 		}
-
-
 
 		if (force_rho_Hermitian_step && (n % force_rho_Hermitian_step) == 0)
 			C.MakeRhoHermitian(argsRho);
