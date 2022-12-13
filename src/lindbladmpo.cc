@@ -596,8 +596,12 @@ int main(int argc, char *argv[])
 		}
 		if (time < t_0 || time > t_f)
 			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not between t_init and t_final.\n", exit(1);
-		if (fmod(abs(time / tau), 1.) > 0.1 && fmod(abs(time / tau), 1.) < 0.9)
-			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not close to an integer multiple of tau.\n", exit(1);
+//		if (fmod(abs(time / tau), 1.) > 0.1 && fmod(abs(time / tau), 1.) < 0.9)
+//			cout2 << "Error: time " << vs[0] << " defined in parameter apply_gates is not close to an integer multiple of tau.\n", exit(1);
+		if (fmod(abs(time / tau), 1.) == 0.5)
+			time += 0.01 * tau; // if requested time is exactly at 0.5 between two tau steps,
+			// shift it a bit up in order for the simple rounding below to result in a unique gate application
+
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
 		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SQRTX" || sgate=="H") {
@@ -794,8 +798,7 @@ int main(int argc, char *argv[])
 		for (unsigned int k=0;k<gate_times.size();k++) {
 			if (abs(gate_times[k] - t) < (tau / 2.)) {
 				// This will make the gate execute at t nearest to the requested time.
-				// Earlier there is a validation making sure this is unique (raising an error
-				// if the requested time is not close enough to an integer multiple of tau).
+				// Earlier there is a validation making sure this is unique.
 				if (gate_names[k]=="CZ") {
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
 					if (param.boolval("compression_after_gate"))
