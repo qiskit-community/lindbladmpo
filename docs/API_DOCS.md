@@ -51,6 +51,9 @@ The default value for each parameter is indicated with an equality sign (only th
       <img src="https://render.githubusercontent.com/render/math?math=\left|\psi_0\rangle=%20\prod_{(j,k)\in%20V}{CZ}[j,k]%20\prod_i%20\right|%2b%20x_i\rangle" style="vertical-align:bottom">.
 	* init_pauli_state = "": This initialization parameter is deprecated, use 'init_product_state' instead.
     * load_files_prefix = "" (str): The prefix of files as previously saved using the simulator, which the initial state has to be loaded from. An empty string indicates that the initial state is not loaded. If 'load_files_prefix' is used, all other initialization parameters should be left empty. See the parameter 'b_save_final_state' for more details on the saved files.
+* Additional operations:
+    * apply_gates = []. A list of tuples of the form `(time: float, gate: str, q0: int, q1: Optional[int])` that specify one-qubit or two-qubit instantaneous gates that will be applied at the specified times, on the indicated qubits. At each time, the order of application of the gates is according to their order in the list. The supported gate strings are the three Paulis ("X", "Y", "Z"), Hadamard ("H"), Sqrt-X ("SX") Controlled-X (CNOT, "CX") and Controlled-Z ("CZ").
+    * b_apply_gate_compression = True (bool): Whether to do a state truncation with parameter `cut_off_rho` after each two-qubit gate.
 * Lattice specification:
     * l_x = 0 (float): The length of the lattice along the x dimension. In case of value 0, the number of qubits <img src="https://render.githubusercontent.com/render/math?math=N" style="vertical-align:bottom"> is used, and parameter l_y must be 1.
     * l_y = 1 (float): The length of the lattice along the y dimension.
