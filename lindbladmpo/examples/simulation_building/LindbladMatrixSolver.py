@@ -472,6 +472,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             "force_rho_hermitian_step",
             "trotter_order",
             "b_initial_rho_compression",
+            "b_apply_gate_compression",
             "max_dim_rho",
             "cut_off",
             "cut_off_rho",
