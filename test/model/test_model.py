@@ -516,7 +516,6 @@ class LindbladMPOSolverModel(unittest.TestCase):
         solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
         solver1.solve()
         (_, c_data), _ = prepare_concurrence_data(solver1.result, (0, 1))
-        print(c_data)
         self.assertAlmostEqual(
             c_data[0],
             1.0,
@@ -607,6 +606,73 @@ class LindbladMPOSolverModel(unittest.TestCase):
             solver1.result["obs-2q"][("xz", (1, 0))][1][-1],
             solver2.result["obs-2q"][("xz", (1, 0))][1][-1],
         )
+
+    def test_apply_gates_cx_sx_h(self):
+        """Compare the application of gates at intermediate times."""
+        N = 8
+        t_final = 1
+        solver_params1 = {
+            "tau": 0.02,
+            "t_final": t_final,
+            "N": N,
+            "h_z": 0.43,
+            "1q_components": ["x", "y", "z"],
+            "2q_components": ["xx", "yy", "zz", "xy", "xz", "yz"],
+            "b_quiet": True,
+            "init_product_state": ["+x", "+x", "+z", "+z", "+z", "+z", "-z", "-z"],
+            "apply_gates": [
+                (0.0, "cz", 0, 1),
+                (0.0, "h", 2),
+                (0.0, "h", 3),
+                (0.0, "cz", 2, 3),
+                (0.0, "h", 4),
+                (0.0, "h", 5),
+                (0.0, "h", 5),
+                (0.0, "cx", 4, 5),
+                (0.0, "h", 5),
+                (0.0, "sx", 6),
+                (0.0, "sx", 7),
+                (0.0, "cz", 6, 7),
+            ],
+        }
+        s_files_prefix1 = s_output_path + "test_apply_gates_cx_sx_h"
+        solver_params1.update({"output_files_prefix": s_files_prefix1})
+        solver1 = LindbladMPOSolver(solver_params1, s_cygwin_path, s_solver_path)
+        solver1.solve()
+
+        # Below we test exact equality of 2Q observables of the first three pairs -
+        # which should all have identical states, and we test that the fourth pair
+        # has a concurrence equal to the first pair's (would be 1), since it's not
+        # identical to it (being prepared with an sx gate rather than h).
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xz", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("xz", (2, 3))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xx", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("xx", (2, 3))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xy", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("xy", (2, 3))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xz", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("xz", (4, 5))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xx", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("xx", (4, 5))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-2q"][("xy", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("xy", (4, 5))][1][-1],
+        )
+
+        (_, c_data1), _ = prepare_concurrence_data(solver1.result, (0, 1))
+        (_, c_data2), _ = prepare_concurrence_data(solver1.result, (6, 7))
+        self.assertAlmostEqual(c_data1[-1], 1.0)
+        self.assertAlmostEqual(c_data1[-1], c_data2[-1])
 
 
 if __name__ == "__main__":

@@ -803,6 +803,7 @@ class LindbladMPOSolver:
                 or (key == "b_quiet")
                 or (key == "b_save_final_state")
                 or (key == "b_initial_rho_compression")
+                or (key == "b_apply_gate_compression")
             ):
                 if not isinstance(parameters[key], bool):
                     check_msg += (

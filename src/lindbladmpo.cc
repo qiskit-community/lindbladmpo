@@ -27,7 +27,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.2.2";
+const string SOLVER_VERSION = "0.2.3";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -604,7 +604,7 @@ int main(int argc, char *argv[])
 
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
-		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SQRTX" || sgate=="H") {
+		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SX" || sgate=="H") {
 				try {
 					i=stod(vs[2]);
 					if (i<1 || i>N) cout2 << "Error: qubit index "<<i<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
@@ -618,7 +618,7 @@ int main(int argc, char *argv[])
 				gate_names.push_back(sgate);
 				gate_i.push_back(i);
 				gate_j.push_back(-1);
-		} else if (sgate=="CZ" || sgate=="CNOT") {
+		} else if (sgate=="CZ" || sgate=="CX") {
 				if (vs.size()==3)
 					cout2 << "Error: missing argument for gate " << sgate <<" in '"<<apply_gates[n] << "'.\n", exit(1);
 				try {
@@ -801,14 +801,14 @@ int main(int argc, char *argv[])
 				// Earlier there is a validation making sure this is unique.
 				if (gate_names[k]=="CZ") {
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
-					if (param.boolval("compression_after_gate"))
+					if (param.boolval("b_apply_gate_compression"))
 						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
 					else
 						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
 				}
-				else if (gate_names[k]=="CNOT") {
+				else if (gate_names[k]=="CX") {
 					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
-					if (param.boolval("compression_after_gate"))
+					if (param.boolval("b_apply_gate_compression"))
 						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
 					else
 						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
@@ -817,7 +817,7 @@ int main(int argc, char *argv[])
 					if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
-					if (gate_names[k]=="SQRTX") ApplySqrtXGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="SX") ApplySqrtXGate(C.rho,C.siteops,gate_i[k]);
 					if (gate_names[k]=="H") ApplyHGate(C.rho,C.siteops,gate_i[k]);
 				}
 			}

@@ -30,10 +30,8 @@ public:
         operator[]("force_rho_hermitian_step") = "4";	// Determines every how many tau time steps
         	// to substitute rho = 0.5 * (rho + rho^dagger). This may reduce certain errors, but is
         	// computationally expensive.
-        
-        operator[]("compression_after_gate") = "1"; //Whether to do a state truncation with parameter cut_off_rho
-            // after each two-qubit gate
-        
+        operator[]("b_apply_gate_compression") = "1"; //Whether to do a state truncation with parameter
+            // cut_off_rho after each two-qubit gate
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from
          	// a saved file, perform a re-gauging/compression using ITensor's method orthogonalize().
         operator[]("b_quiet") = "0";	// If nonzero, after initialization of the simulation
