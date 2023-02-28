@@ -206,6 +206,7 @@ class LindbladMPOSolver:
                 or key == "apply_gates"
                 or key == "1q_components"
                 or key == "2q_components"
+                or key == "3q_components"
             ):
                 val = parameters[key]
                 if isinstance(val, (int, float, tuple, str)):
@@ -272,6 +273,21 @@ class LindbladMPOSolver:
                     file.write(str(_2q_tuple[0] + 1) + "," + str(_2q_tuple[1] + 1))
                     # +1 because Python indices are 0-based, while iTensor's are 1-based
                     if i_2q_tuple != n_tuples - 1:
+                        file.write(",")
+                file.write("\n")
+            elif key == "3q_indices":
+                file.write(key + " = ")
+                n_tuples = len(parameters[key])
+                for i_3q_tuple, _3q_tuple in enumerate(parameters[key]):
+                    file.write(
+                        str(_3q_tuple[0] + 1)
+                        + ","
+                        + str(_3q_tuple[1] + 1)
+                        + ","
+                        + str(_3q_tuple[2] + 1)
+                    )
+                    # +1 because Python indices are 0-based, while iTensor's are 1-based
+                    if i_3q_tuple != n_tuples - 1:
                         file.write(",")
                 file.write("\n")
             else:
@@ -951,7 +967,7 @@ class LindbladMPOSolver:
                     check_msg += (
                         "Error 530: "
                         + key
-                        + "only receives xx,yy,zz,xy,xz,yz (or a subset) "
+                        + "only accepts xx,yy,zz,xy,xz,yz (or a subset) "
                         "as a strings list\n"
                     )
                     continue
@@ -959,7 +975,7 @@ class LindbladMPOSolver:
                     check_msg += (
                         "Error 540: "
                         + key
-                        + " only receives xx,yy,zz,xy,xz,yz (or a subset)\n"
+                        + " only accepts xx,yy,zz,xy,xz,yz (or a subset)\n"
                     )
                     continue
                 check_me = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -1006,14 +1022,44 @@ class LindbladMPOSolver:
                         break
                 if flag_continue:
                     continue
+            elif key == "3q_components":
+                if not isinstance(parameters[key], list):
+                    check_msg += (
+                        "Error 530: "
+                        + key
+                        + "only accepts xx,yy,zz,xy,xz,yz (or a subset) "
+                        "as a strings list\n"
+                    )
+                    continue
+                for val in parameters[key]:
+                    val = str.lower(val)
+                    b_ok = True
+                    if len(val) != 3:
+                        b_ok = False
+                    else:
+                        for c in val:
+                            if c not in "xyz":
+                                b_ok = False
+                                break
+                    if not b_ok:
+                        check_msg += (
+                            "Error 531: "
+                            + key
+                            + "only accepts length-3 Pauli strings\n"
+                        )
+                        flag_continue = True
+                        break
+                if flag_continue:
+                    continue
             elif (
                 key == "2q_indices"
+                or key == "3q_indices"
                 or key == "init_graph_state"
                 or key == "init_cz_gates"
             ):  # expecting an integer tuples list
                 if not isinstance(parameters[key], list):
                     check_msg += (
-                        "Error 570: " + key + " should be a list of tuples of size 2,"
+                        "Error 570: " + key + " should be a list of tuples"
                         " containing integers\n"
                     )
                     continue
@@ -1024,45 +1070,41 @@ class LindbladMPOSolver:
                         "l_y) are not defined properly\n"
                     )
                     continue
+                tup_len = 3 if key == "3q_indices" else 2
                 for tup in parameters[key]:
                     if not isinstance(tup, tuple):
                         check_msg += (
                             "Error 590: "
                             + key
-                            + " should be a list of tuples of size 2, "
-                            "containing integers\n "
+                            + " should be a list of tuples containing integers\n "
                         )
                         flag_continue = True
                         break
                     if (
-                        (not LindbladMPOSolver._is_int(tup[0]))
+                        (len(tup) != tup_len)
+                        or (not LindbladMPOSolver._is_int(tup[0]))
                         or (not LindbladMPOSolver._is_int(tup[1]))
-                        or (len(tup) != 2)
+                        or (tup_len == 3 and not LindbladMPOSolver._is_int(tup[2]))
                     ):
                         check_msg += (
                             "Error 600: "
                             + key
-                            + " should be a list of tuples of size 2, "
+                            + f" should be a list of tuples of size {tup_len}, "
                             "containing integers\n "
                         )
                         flag_continue = True
                         break
-                    if (tup[0] >= N) or (tup[1] >= N):
+                    if (tup[0] >= N) or (tup[1] >= N) or (tup_len == 3 and tup[2] >= N):
                         check_msg += (
                             "Error 610: "
                             + key
-                            + " should be a list of tuples of size 2, "
-                            "containing integers equal/smaller than "
+                            + f" should be a list of tuples of size {tup_len}, "
+                            "containing integers equal to or smaller than "
                             "the total number of qubits\n "
                         )
                         flag_continue = True
                         break
                 if flag_continue:
-                    continue
-                if len(parameters[key]) > N**2:
-                    check_msg += (
-                        "Error 620: " + key + " 's length should be smaller than N^2\n"
-                    )
                     continue
                 if not len(set(parameters[key])) == len(parameters[key]):
                     check_msg += "Error 630: " + key + " contains duplicate elements\n"
