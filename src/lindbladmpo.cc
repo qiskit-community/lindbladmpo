@@ -980,16 +980,6 @@ int main(int argc, char *argv[])
 					duration_ms = duration_cast<milliseconds>(t_3q_end - t_3q_end);
 					cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
-				//zzz
-				/*
-				vector<string> Ops;vector<int> indices;
-				Ops.push_back("Sx");indices.push_back(2);
-				Ops.push_back("Sx");indices.push_back(3);
-				//Ops.push_back("Sz");indices.push_back(3);
-				//Ops.push_back("Sz");indices.push_back(4);
-				Cplx ex=C.Expect(Ops,indices);
-				cout<<"\nex="<<ex<<endl;
-				*/
 
 				cout2 << "\n";
 				cout2.flush();
