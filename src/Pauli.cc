@@ -449,6 +449,38 @@ Cplx SpinHalfSystem::Expect(const string &opname1, int i1, const string &opname2
   return (re);
 }
 
+//Expectation value of some three-points correlator
+Cplx SpinHalfSystem::Expect(const string &opname1, int i1, const string &opname2, int i2, const string &opname3, int i3) const
+{
+  MPS rho_tmp(rho); //Could we avoid making this copy ?
+  const auto &Op1 = siteops.op(opname1, i1);
+  rho_tmp.ref(i1) *= Op1;
+  rho_tmp.ref(i1).noPrime();
+  const auto &Op2 = siteops.op(opname2, i2);
+  rho_tmp.ref(i2) *= Op2;
+  rho_tmp.ref(i2).noPrime();
+  const auto &Op3 = siteops.op(opname3, i3);
+  rho_tmp.ref(i3) *= Op3;
+  rho_tmp.ref(i3).noPrime();
+
+  Cplx re = innerC(Identity, rho_tmp);
+  return (re);
+}
+
+Cplx SpinHalfSystem::Expect(const vector <string>& opnames, const vector <int>& indices) const
+{
+  if (opnames.size()!=indices.size()) cout2<<"Error in SpinHalfSystem::Expect, openames and indices should have the same size.\n",exit(1); 
+  MPS rho_tmp(rho); //Could we avoid making this copy ?
+  for (unsigned int n=0;n<opnames.size();n++) {
+    int i=indices[n];
+    const auto &Op = siteops.op(opnames[n], i);
+    rho_tmp.ref(i) *= Op;
+    rho_tmp.ref(i).noPrime();
+  }
+  Cplx re = innerC(Identity, rho_tmp);
+  return (re);
+}
+
 void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site)
 {
   // TODO possibly worth if'ing over 0 rates

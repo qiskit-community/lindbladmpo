@@ -151,6 +151,7 @@ void ApplyControlledZGate(MPS &rho, const Pauli &siteops,int i,int j,Args args=A
 }
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
+void validate_3q_list(vector<long> &vect, int N, string const &list_name);
 
 int main(int argc, char *argv[])
 {
@@ -573,7 +574,10 @@ int main(int argc, char *argv[])
 				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
 				const unsigned int i0 = (unsigned int)(i - 1);
 				const unsigned int j0 = (unsigned int)(j - 1);
-				ApplyControlledZGate(C.rho,C.siteops,i,j);
+				if (param.boolval("b_apply_gate_compression"))
+						ApplyControlledZGate(C.rho,C.siteops,i,j,argsRho);
+					else
+						ApplyControlledZGate(C.rho,C.siteops,i,j);
 			}	
 	}
 	// If required, finish the initial state construction by applying some single-qubit gates
@@ -714,6 +718,9 @@ int main(int argc, char *argv[])
 	ofstream file_2q(output_prefix + ".obs-2q.dat");
 	file_2q.precision(15);
 	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
+	ofstream file_3q(output_prefix + ".obs-3q.dat");
+	file_3q.precision(15);
+	file_3q << "#time\toperator\tindex_1\tindex_2\tindex_3\tvalue" << endl;
 	ofstream file_global(output_prefix + ".global.dat");
 	file_global.precision(15);
 	file_global << "#time\tquantity\tvalue" << endl;
@@ -767,6 +774,37 @@ int main(int argc, char *argv[])
 			char c = toupper(s[n]);
 			if (c != 'X' && c != 'Y' && c != 'Z')
 				cout2 << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
+		}
+	}
+	
+	//-----------------------------------------------------
+	// Some preparation/checks for the 3-qubit observables
+	vector<long> sit3 = param.longvec("3q_indices");
+	if (sit3.size() % 3 > 0)
+		cout2 << "Error: the list of indices given in the parameter `3q_indices` should be multiple of three.\n", exit(1);
+
+	if (sit3.size() == 0)
+	{ //If no sites are given explicitly we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
+		for (int i = 1; i <= N; i++)
+			for (int j = 1; j <= N; j++)
+				for (int k = 1; k <= N; k++)
+				{
+					if (i != j && i != k && j != k)
+						sit3.push_back(i), sit3.push_back(j), sit3.push_back(k);
+				}
+	}
+	validate_3q_list(sit3, N, "q3_indices");
+
+	auto components3 = param.stringvec("3q_components");
+	for (auto &s : components3)
+	{
+		if (s.length() != 3)
+			cout2 << "Error: " << s << " is an unknown 3-qubit component (should be a triplet in (x,y,z)*(x,y,z)*(x,y,z)).\n", exit(1);
+		for (int n = 0; n <= 2; n++)
+		{
+			char c = toupper(s[n]);
+			if (c != 'X' && c != 'Y' && c != 'Z')
+				cout2 << "Error: " << s << " is an unknown component (should be a triplet in (x,y,z)*(x,y,z)*(x,y,z)).\n", exit(1);
 		}
 	}
 
@@ -911,6 +949,48 @@ int main(int argc, char *argv[])
 					duration_ms = duration_cast<milliseconds>(t_2q_end - t_1q_end);
 					cout2 << "\n\t" << count << " 2-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
+				// --------------------------------------------------
+				// Compute 3-qubit observables and write them to file
+				count = 0;
+				for (unsigned int n = 0; n < sit3.size(); n += 3)
+				{
+					const int i = sit3[n], j = sit3[n + 1], k = sit3[n + 2];
+					//Loop over components
+					for (auto &s : components3)
+					{
+						string c1("S"), c2("S"),c3("S");
+						c1 += char(tolower(s[0]));
+						c2 += char(tolower(s[1]));
+						c3 += char(tolower(s[2]));
+						Cplx expectation_value = C.Expect(c1, i, c2, j,c3,k);
+						if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
+							cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
+								")"<< c3 << "(" << k <<")" << expectation_value <<
+								"; it should be real, but has an imaginary part > " <<
+								IMAGINARY_THRESHOLD << ".\n";
+						file_3q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << char(toupper(s[2]))
+						<< "\t" << i << "\t" << j << "\t" << k <<"\t" << expectation_value.real() << endl;
+						count++;
+					}
+				}
+				file_3q << endl; //Skip a line between time steps
+				auto t_3q_end = steady_clock::now();
+				if (count)
+				{
+					duration_ms = duration_cast<milliseconds>(t_3q_end - t_3q_end);
+					cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+				}
+				//zzz
+				/*
+				vector<string> Ops;vector<int> indices;
+				Ops.push_back("Sx");indices.push_back(2);
+				Ops.push_back("Sx");indices.push_back(3);
+				//Ops.push_back("Sz");indices.push_back(3);
+				//Ops.push_back("Sz");indices.push_back(4);
+				Cplx ex=C.Expect(Ops,indices);
+				cout<<"\nex="<<ex<<endl;
+				*/
+
 				cout2 << "\n";
 				cout2.flush();
 
@@ -976,6 +1056,27 @@ void validate_2q_list(vector<long> &vect, int N, string const &list_name)
 				list_name << "`. Two-qubit operators must involve two distinct qubits.\n", exit(1);
 	}
 }
+
+void validate_3q_list(vector<long> &vect, int N, string const &list_name)
+{
+	for (unsigned int n = 0; n < vect.size(); n += 3)
+	{
+		const int i = vect[n], j = vect[n + 1], k=vect[n+2];
+		if (i < 1 || i > N)
+			cout2 << "Error: invalid index i =" << i << " found in list `" << list_name <<
+				"`.\n", exit(1);
+		if (j < 1 || j > N)
+			cout2 << "Error: invalid index j =" << j << " found in list `" << list_name <<
+				"`.\n", exit(1);
+		if (k < 1 || k > N)
+			cout2 << "Error: invalid index k =" << k << " found in list `" << list_name <<
+				"`.\n", exit(1);
+		if (i == j || i == k || k == j)
+			cout2 << "Error: an invalid identical index pair (" << i << ") found in list `" <<
+				list_name << "`. Two-qubit operators must involve two distinct qubits.\n", exit(1);
+	}
+}
+
 
 // Old initialization code
 /*

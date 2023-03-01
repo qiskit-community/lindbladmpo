@@ -83,6 +83,12 @@ class SpinHalfSystem {
   Cplx Expect(const string& opname,int i) const;
   //Expectation value of some two-site operator
   Cplx Expect(const string& opname1,int i1,const string& opname2,int i2) const;
+  //Expectation value of some three-site operator
+  Cplx Expect(const string& opname1,int i1,const string& opname2,int i2,const string& opname3,int i3) const;
+  
+  //Expectation value of some product of Pauli operators
+  Cplx Expect(const vector <string>& opnames,const vector <int>& indices) const;
+  
   void MakeRhoHermitian(Args args = Args::global()); 
 
 };
