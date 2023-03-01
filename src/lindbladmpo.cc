@@ -1072,8 +1072,8 @@ void validate_3q_list(vector<long> &vect, int N, string const &list_name)
 			cout2 << "Error: invalid index k =" << k << " found in list `" << list_name <<
 				"`.\n", exit(1);
 		if (i == j || i == k || k == j)
-			cout2 << "Error: an invalid identical index pair (" << i << ") found in list `" <<
-				list_name << "`. Two-qubit operators must involve two distinct qubits.\n", exit(1);
+			cout2 << "Error: invalid index triplet (" << i <<","<< j <<","<< k << ") found in list `" <<
+				list_name << "`. 3-qubit operators must involve 3 distinct qubits.\n", exit(1);
 	}
 }
 
