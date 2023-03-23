@@ -977,7 +977,7 @@ int main(int argc, char *argv[])
 				auto t_3q_end = steady_clock::now();
 				if (count)
 				{
-					duration_ms = duration_cast<milliseconds>(t_3q_end - t_3q_end);
+					duration_ms = duration_cast<milliseconds>(t_3q_end - t_2q_end);
 					cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 				}
 
