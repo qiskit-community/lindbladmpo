@@ -8,7 +8,7 @@
 
 import math
 import time
-from collections import Sized, Iterable, Container
+from typing import Sized, Iterable, Container
 import scipy
 
 from lindbladmpo.LindbladMPOSolver import *
