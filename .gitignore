@@ -1,6 +1,7 @@
 # editor files
 .vscode/
 .idea/
+*__pycache__*
 
 # standard ignores
 *~

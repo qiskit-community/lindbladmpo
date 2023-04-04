@@ -122,6 +122,12 @@ def prepare_curve_data(
                 f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} "
                 f"\\sigma^{s_obs_name[1]}_{{{q_indices[1]}}}"
             )
+        elif s_output_type == "obs-3q":
+            s_tex_label = (
+                f"\\sigma^{s_obs_name[0]}_{{{q_indices[0]}}} "
+                f"\\sigma^{s_obs_name[1]}_{{{q_indices[1]}}} "
+                f"\\sigma^{s_obs_name[2]}_{{{q_indices[2]}}}"
+            )
         elif s_output_type == "global":
             s_tex_label = LINDBLADMPO_TEX_LABELS[s_obs_name]
     return obs_data, s_tex_label
@@ -909,6 +915,59 @@ def plot_2q_obs_curves(
     ax.set_xticks(t_tick_labels)
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
     s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}"
+    _save_fig(b_save_figures, s_file_prefix, s_file_label)
+
+
+def plot_3q_obs_curves(
+    parameters: dict,
+    result: dict,
+    s_obs_name: str,
+    qubit_tuples: Optional[List[Tuple[int, int, int]]] = None,
+    ax=None,
+    fontsize=16,
+    b_save_figures=True,
+    s_file_prefix="",
+    s_title=None,
+    b_legend_labels=True,
+):
+    """
+    Prepare the data and plot a two-qubit observable vs. time for multiple qubits.
+
+    Args:
+            parameters: A dictionary from which the basic time parameters are taken.
+            result: A dictionary from which the observables are taken.
+            s_obs_name: The name of the observable, used to obtain the data, and in formatting
+                    the descriptive tex label of the data and the saved file name.
+            qubit_tuples: The qubit triplets to take for plotting.
+            ax: An optional axis object. If None, a new figure is created.
+            fontsize: The fontsize to use in the figure.
+            b_save_figures: Whether to save the plotted figure to file.
+            s_file_prefix: An optional path and file name prefix for the saved figures.
+            s_title: An optional title for the figure. If empty, a default title is formatted.
+            b_legend_labels: Whether to add labels to the curves and plot a legend.
+    """
+    obs_data_list = []
+    tex_labels = [] if b_legend_labels else None
+    s_obs_name = s_obs_name.lower()
+    for q_tuple in qubit_tuples:
+        obs_data, s_tex_label = prepare_curve_data(
+            result, "obs-3q", s_obs_name, q_tuple
+        )
+        if obs_data is not None:
+            obs_data_list.append(obs_data)
+            if b_legend_labels:
+                tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
+    if s_title is None:
+        s_title = (
+            f"$\\langle\\sigma^{s_obs_name[0]}_i"
+            f"\\sigma^{s_obs_name[1]}_j\\sigma^{s_obs_name[2]}_k(t)\\rangle$"
+        )
+    ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
+    _, _, t_tick_labels, _ = prepare_time_data(parameters)
+    # ax.set_xticks(t_tick_indices)
+    ax.set_xticks(t_tick_labels)
+    ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
+    s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}.sigma_{s_obs_name[2]}"
     _save_fig(b_save_figures, s_file_prefix, s_file_label)
 
 
