@@ -950,7 +950,9 @@ def plot_3q_obs_curves(
     tex_labels = [] if b_legend_labels else None
     s_obs_name = s_obs_name.lower()
     for q_tuple in qubit_tuples:
-        obs_data, s_tex_label = prepare_curve_data(result, "obs-3q", s_obs_name, q_tuple)
+        obs_data, s_tex_label = prepare_curve_data(
+            result, "obs-3q", s_obs_name, q_tuple
+        )
         if obs_data is not None:
             obs_data_list.append(obs_data)
             if b_legend_labels:
