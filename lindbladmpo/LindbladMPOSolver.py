@@ -358,6 +358,10 @@ class LindbladMPOSolver:
         result[s_output_type] = LindbladMPOSolver._read_data_file(
             s_output_path, s_output_type
         )
+        s_output_type = "obs-3q"
+        result[s_output_type] = LindbladMPOSolver._read_data_file(
+            s_output_path, s_output_type
+        )
         s_output_type = "global"
         result[s_output_type] = LindbladMPOSolver._read_data_file(
             s_output_path, s_output_type
@@ -402,6 +406,12 @@ class LindbladMPOSolver:
             # data files are storing 1-based indices because of iTensor, while we use 0-based indices
             q_index2 = int(words[3]) - 1
             q_indices = (q_index1, q_index2)
+        elif s_output_type == "obs-3q":
+            q_index1 = int(words[2]) - 1
+            # data files are storing 1-based indices because of iTensor, while we use 0-based indices
+            q_index2 = int(words[3]) - 1
+            q_index3 = int(words[4]) - 1
+            q_indices = (q_index1, q_index2, q_index3)
         elif s_output_type == "global":
             q_indices = ()
         else:
