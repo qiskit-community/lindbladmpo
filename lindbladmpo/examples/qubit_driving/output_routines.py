@@ -70,8 +70,7 @@ def save_to_db(s_db_path: str, sim_metadata: dict):
     db_line = {}
     for key in sim_metadata.keys():
         db_line[key] = [sim_metadata[key]]
-    db_data = pd.DataFrame(db_line)
-    df = df.append(db_data)
+    df = pd.concat([df, pd.DataFrame(db_line)])
     df.to_csv(s_db_path, index=False)
 
 
