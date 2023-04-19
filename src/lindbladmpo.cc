@@ -1018,9 +1018,10 @@ int main(int argc, char *argv[])
 		writeToFile(f3, C.sites);
 		cout2 << "The final state was saved to disk, using 3 files:\n" << f1 << "\n" << f2 << "\n" << f3 << "\n";
 	}
-	file_global.close();
 	file_1q.close();
 	file_2q.close();
+	file_3q.close();
+	file_global.close();
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
