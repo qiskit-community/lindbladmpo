@@ -12,7 +12,10 @@ The solver supports various initial states and observables, with the Hamiltonian
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{D}[\rho] = \sum_i g_{0,i}\left(\sigma_i^%2b \rho\sigma_i^- - \frac{1}{2} \{\sigma_i^- \sigma_i^%2b,\rho\}\right) %2b \sum_i g_{1,i}\left( \sigma_i^-\rho \sigma_i^{%2b}-\frac{1}{2}\left\{\sigma_i^{%2b}\sigma_i^-,\rho\right\}\right) %2b \sum_i g_{2,i} \left(\sigma_i^z \rho\sigma_i^z - \rho\right)." style="vertical-align:bottom">
 
-**How to cite:** A paper introducing the solver and presenting a research performed using this solver is currently available as a preprint at [arXiv:2203.05871](https://arxiv.org/abs/2203.05871).
+**How to cite:** The following paper introduces the solver and presents a research performed using this solver:
+
+H. Landa and G. Misguich, *Nonlocal correlations in noisy multiqubit systems simulated using matrix product operators*,
+[SciPost Phys. Core **6**, 037 (2023)](https://scipost.org/SciPostPhysCore.6.2.037).
 
 **Verifying numerical simulations:** The above paper also explains in detail how to construct and verify numerical results with multiqubit simulations. We recommend users of the package to familiarize themselves with different approaches to verify their numerical simulations, such as those explained in this paper. The sources used to perform this research are included in the detailed [examples](docs/examples.md).
 
