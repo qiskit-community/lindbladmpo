@@ -409,17 +409,17 @@ class LindbladMPOSolverModel(unittest.TestCase):
         self.assertAlmostEqual(
             solver1.result["obs-3q"][("xyz", (0, 1, 2))][1][-1],
             solver2.result["obs-3q"][("xyz", (0, 1, 2))][1][-1],
-            places=5
+            places=5,
         )
         self.assertAlmostEqual(
             solver1.result["obs-3q"][("zyx", (0, 1, 2))][1][-1],
             solver2.result["obs-3q"][("zyx", (0, 1, 2))][1][-1],
-            places=5
+            places=5,
         )
         self.assertAlmostEqual(
             solver1.result["obs-3q"][("xzx", (0, 1, 2))][1][-1],
             solver2.result["obs-3q"][("xzx", (0, 1, 2))][1][-1],
-            places=5
+            places=5,
         )
         solver_params1A = solver_params1.copy()
         solver_params1A.update(
