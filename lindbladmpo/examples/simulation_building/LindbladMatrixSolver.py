@@ -221,6 +221,9 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             _3q_indices = parameters.get("3q_indices", None)
             if _3q_indices is None:  # No observables are added
                 _3q_indices = []
+            custom_observables = parameters.get("custom_observables", None)
+            if custom_observables is None:  # No observables are added
+                custom_observables = []
 
             t_init = self._get_parameter("t_init")
             method = self._get_parameter("method")

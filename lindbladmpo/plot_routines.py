@@ -90,7 +90,7 @@ def prepare_curve_data(
     s_output_type: str,
     s_obs_name: str,
     q_indices: Union[Tuple, Tuple[int]],
-) -> ((list, list), str):
+) -> ((List, List), str):
     """
     Prepare the data used for plotting one curve of simulation observables.
 
@@ -135,7 +135,7 @@ def prepare_curve_data(
 
 def prepare_2q_correlation_data(
     result: dict, s_obs_name: str, q_indices: Tuple[int]
-) -> ((list, list), str):
+) -> ((List, List), str):
     """
     Prepare the data used for plotting one curve of a two-qubit connected correlation function.
     The connected correlation is defined as a 2Q observable from which the product of the two
@@ -929,7 +929,7 @@ def plot_3q_obs_curves(
     s_file_prefix="",
     s_title=None,
     b_legend_labels=True,
-) -> (Any, list[(list, list)]):
+) -> (Any, List[(List, List)]):
     """
     Prepare the data and plot a two-qubit observable vs. time for multiple qubits.
 
