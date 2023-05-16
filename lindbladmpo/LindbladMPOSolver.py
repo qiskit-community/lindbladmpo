@@ -800,7 +800,7 @@ class LindbladMPOSolver:
                                     " (gate_name, q0, q1, ...)\n"
                                 )
                                 continue
-                            elif obs_type == "p" and (
+                            if obs_type == "p" and (
                                 not isinstance(o_tuple[0], str)
                                 or not LindbladMPOSolver.is_float(o_tuple[1])
                             ):
