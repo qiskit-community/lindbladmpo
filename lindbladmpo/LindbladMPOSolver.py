@@ -246,6 +246,25 @@ class LindbladMPOSolver:
                     if i_op != n_indices - 1:
                         file.write(",")
                 file.write("\n")
+            elif key == "custom_observables":
+                file.write(key + " = ")
+                observables: list = parameters[key]
+                n_observables = len(observables)
+                for i_obs, (obs_def, obs_components) in enumerate(observables):
+                    file.write(obs_def[0])
+                    file.write(" ")
+                    file.write(obs_def[1])
+                    file.write(":")
+                    n_components = len(obs_components)
+                    for i_component, obs_component in enumerate(obs_components):
+                        for element in obs_component:
+                            file.write(element)
+                            file.write(" ")
+                        if i_component < n_components - 1:
+                            file.write(",")
+                    if i_obs < n_observables - 1:
+                        file.write(";")
+                file.write("\n")
             elif isinstance(parameters[key], np.ndarray):
                 file.write(key + " = ")
                 for i in range(parameters[key].shape[0]):
@@ -698,7 +717,7 @@ class LindbladMPOSolver:
                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     )
                     continue
-            elif key == "apply_gates":
+            elif key == "apply_gates" or key == "custom_observables":
                 if (
                     not isinstance(parameters[key], tuple)
                     and not isinstance(parameters[key], list)
@@ -710,33 +729,88 @@ class LindbladMPOSolver:
                         + " must be a tuple or a list/ array of tuples\n"
                     )
                     continue
-                gate_list = (
+                custom_list = (
                     [parameters[key]]
                     if isinstance(parameters[key], tuple)
                     else parameters[key]
                 )
-                for g_tuple in gate_list:
-                    tuple_len = len(g_tuple)
-                    if tuple_len < 3 or tuple_len > 4:
-                        check_msg += (
-                            "Error 346: every member of "
-                            + key
-                            + " must be of 3 or 4 elements\n"
-                        )
-                        continue
-                    if (
-                        not LindbladMPOSolver.is_float(g_tuple[0])
-                        or not isinstance(g_tuple[1], str)
-                        or not LindbladMPOSolver._is_int(g_tuple[2])
-                        or (tuple_len > 3 and not LindbladMPOSolver._is_int(g_tuple[3]))
-                    ):
-                        check_msg += (
-                            "Error 347: each member of "
-                            + key
-                            + " must be a tuple of the form"
-                            " (time, gate name, qubit, [qubit])\n"
-                        )
-                        continue
+                if key == "apply_gates":
+                    for g_tuple in custom_list:
+                        tuple_len = len(g_tuple)
+                        if tuple_len < 3 or tuple_len > 4:
+                            check_msg += (
+                                "Error 346: every member of "
+                                + key
+                                + " must be of 3 or 4 elements\n"
+                            )
+                            continue
+                        if (
+                            not LindbladMPOSolver.is_float(g_tuple[0])
+                            or not isinstance(g_tuple[1], str)
+                            or not LindbladMPOSolver._is_int(g_tuple[2])
+                            or (
+                                tuple_len > 3
+                                and not LindbladMPOSolver._is_int(g_tuple[3])
+                            )
+                        ):
+                            check_msg += (
+                                "Error 347: each member of "
+                                + key
+                                + " must be a tuple of the form"
+                                " (time, gate name, qubit, [qubit])\n"
+                            )
+                            continue
+                else:  # Hence key == "custom_observables"
+                    for g_tuple in custom_list:
+                        tuple_len = len(g_tuple)
+                        if (
+                            tuple_len != 2
+                            or not isinstance(g_tuple[0], tuple)
+                            or len(g_tuple[0]) != 2
+                            or not isinstance(g_tuple[1], list)
+                        ):
+                            check_msg += (
+                                "Error 341: every member of "
+                                + key
+                                + " must be a 2-tuple of a 2-tuple and a list\n"
+                            )
+                            continue
+                        obs_type = g_tuple[0][1]
+                        if not isinstance(g_tuple[0][0], str) or (
+                            obs_type != "g" and obs_type != "p"
+                        ):
+                            check_msg += (
+                                "Error 342: each member of the first element of"
+                                + key
+                                + " must be a tuple of the form"
+                                " (obs_name, obs_type), with obs_type being either 'g' or"
+                                " 'p' to indicate a gate-based observable or a Pauli expansion\n"
+                            )
+                            continue
+                        for o_tuple in g_tuple[1]:
+                            # tuple_len = len(o_tuple)
+                            if obs_type == "g" and (
+                                not isinstance(o_tuple[0], str)
+                                or not LindbladMPOSolver._is_int(o_tuple[1])
+                            ):
+                                check_msg += (
+                                    "Error 343: each member of gate-based component of"
+                                    + key
+                                    + " must be a tuple of the form"
+                                    " (gate_name, q0, q1, ...)\n"
+                                )
+                                continue
+                            if obs_type == "p" and (
+                                not isinstance(o_tuple[0], str)
+                                or not LindbladMPOSolver.is_float(o_tuple[1])
+                            ):
+                                check_msg += (
+                                    "Error 343: each member of Pauli-based component of"
+                                    + key
+                                    + " must be a tuple of the form"
+                                    " (pauli-string, weight)\n"
+                                )
+                                continue
 
             elif (key == "init_pauli_state") or (key == "init_product_state"):
                 if (

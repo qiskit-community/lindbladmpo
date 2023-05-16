@@ -90,7 +90,7 @@ def prepare_curve_data(
     s_output_type: str,
     s_obs_name: str,
     q_indices: Union[Tuple, Tuple[int]],
-) -> ((list, list), str):
+) -> ((List, List), str):
     """
     Prepare the data used for plotting one curve of simulation observables.
 
@@ -135,7 +135,7 @@ def prepare_curve_data(
 
 def prepare_2q_correlation_data(
     result: dict, s_obs_name: str, q_indices: Tuple[int]
-) -> ((list, list), str):
+) -> ((List, List), str):
     """
     Prepare the data used for plotting one curve of a two-qubit connected correlation function.
     The connected correlation is defined as a 2Q observable from which the product of the two
@@ -929,7 +929,7 @@ def plot_3q_obs_curves(
     s_file_prefix="",
     s_title=None,
     b_legend_labels=True,
-):
+) -> (Any, List[(List, List)]):
     """
     Prepare the data and plot a two-qubit observable vs. time for multiple qubits.
 
@@ -945,6 +945,11 @@ def plot_3q_obs_curves(
             s_file_prefix: An optional path and file name prefix for the saved figures.
             s_title: An optional title for the figure. If empty, a default title is formatted.
             b_legend_labels: Whether to add labels to the curves and plot a legend.
+    Returns:
+            A tuple of two members:
+                ax: The axis object.
+                obs_data_list: A list describing each of the plotted curves' data, consisting of tuples
+                        of two lists, the first being the time points, the second being the data.
     """
     obs_data_list = []
     tex_labels = [] if b_legend_labels else None
@@ -969,6 +974,7 @@ def plot_3q_obs_curves(
     ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
     s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}.sigma_{s_obs_name[2]}"
     _save_fig(b_save_figures, s_file_prefix, s_file_label)
+    return ax, obs_data_list
 
 
 def plot_2q_correlation_curves(

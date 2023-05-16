@@ -378,6 +378,8 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "init_cz_gates": [(1, 2)],
             "1q_components": ["X", "Y", "Z"],
             "2q_components": ["XY", "YX", "XX"],
+            "3q_components": ["XYZ", "ZYX", "XZX"],
+            "3q_indices": [(0, 1, 2)],
             "b_save_final_state": True,
             "b_quiet": True,
         }
@@ -403,6 +405,21 @@ class LindbladMPOSolverModel(unittest.TestCase):
         self.assertAlmostEqual(
             solver1.result["obs-2q"][("xy", (2, 0))][1][-1],
             solver2.result["obs-2q"][("yx", (0, 2))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-3q"][("xyz", (0, 1, 2))][1][-1],
+            solver2.result["obs-3q"][("xyz", (0, 1, 2))][1][-1],
+            places=5,
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-3q"][("zyx", (0, 1, 2))][1][-1],
+            solver2.result["obs-3q"][("zyx", (0, 1, 2))][1][-1],
+            places=5,
+        )
+        self.assertAlmostEqual(
+            solver1.result["obs-3q"][("xzx", (0, 1, 2))][1][-1],
+            solver2.result["obs-3q"][("xzx", (0, 1, 2))][1][-1],
+            places=5,
         )
         solver_params1A = solver_params1.copy()
         solver_params1A.update(
