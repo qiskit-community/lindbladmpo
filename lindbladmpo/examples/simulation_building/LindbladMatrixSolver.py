@@ -214,6 +214,14 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     for j in range(0, n_qubits):
                         if i != j:
                             _2q_indices.append((i, j))
+
+            _3q_components = parameters.get("3q_components", None)
+            if _3q_components is None:  # No observables are added
+                _3q_components = []
+            _3q_indices = parameters.get("3q_indices", None)
+            if _3q_indices is None:  # No observables are added
+                _3q_indices = []
+
             t_init = self._get_parameter("t_init")
             method = self._get_parameter("method")
             atol = self._get_parameter("atol")
@@ -228,8 +236,10 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             L_sig = []
             obs_1q = []
             obs_2q = []
+            obs_3q = []
             obs_1q_key = []
             obs_2q_key = []
+            obs_3q_key = []
             for i_qubit in r_qubits:
                 subsystem_dims[i_qubit] = 2
                 if s_load_files_prefix == "":
@@ -290,6 +300,14 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                         * get_operator_from_label(s_op[1], _2q[1])
                     )
                     obs_2q_key.append((s_op, _2q[0], _2q[1]))
+            for _3q in _3q_indices:
+                for s_op in _3q_components:
+                    obs_3q.append(
+                        get_operator_from_label(s_op[0], _3q[0])
+                        * get_operator_from_label(s_op[1], _3q[1])
+                        * get_operator_from_label(s_op[2], _3q[2])
+                    )
+                    obs_3q_key.append((s_op, _3q[0], _3q[1], _3q[2]))
 
             H_matrix = build_matrices(H, subsystem_dims)
             L_matrices = build_matrices(L_ops, subsystem_dims)
@@ -315,6 +333,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
             obs_1q_mat = build_matrices(obs_1q, subsystem_dims)
             obs_2q_mat = build_matrices(obs_2q, subsystem_dims)
+            obs_3q_mat = build_matrices(obs_3q, subsystem_dims)
             y0 = rho_0_mat / np.trace(rho_0_mat)
             t_eval = np.arange(t_init, t_final, tau)
             if t_final not in t_eval:
@@ -334,9 +353,11 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
             file_1q = open(self.s_output_path + ".obs-1q.dat", "w")
             file_2q = open(self.s_output_path + ".obs-2q.dat", "w")
+            file_3q = open(self.s_output_path + ".obs-3q.dat", "w")
             file_gl = open(self.s_output_path + ".global.dat", "w")
             file_1q.write("#time\toperator\tindex\tvalue\n")
             file_2q.write("#time\toperator\tindex_1\tindex_2\tvalue\n")
+            file_3q.write("#time\toperator\tindex_1\tindex_2\tindex_3\tvalue\n")
             file_gl.write("#time\tquantity\tvalue\n")
 
             n_times = len(sol.y)
@@ -355,6 +376,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     file_1q.write(f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{val.real}\n")
                 file_1q.write("\n")
                 file_1q.flush()
+
                 for i_obs, obs in enumerate(obs_2q):
                     val = rho_t.expectation_value(obs_2q_mat[i_obs])
                     key = obs_2q_key[i_obs]
@@ -368,6 +390,22 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     )
                 file_2q.write("\n")
                 file_2q.flush()
+
+                for i_obs, obs in enumerate(obs_3q):
+                    val = rho_t.expectation_value(obs_3q_mat[i_obs])
+                    key = obs_3q_key[i_obs]
+                    if abs(val.imag) > self.IMAGINARY_THRESHOLD:
+                        self._print(
+                            f"Warning: imaginary component {val.imag} in observable "
+                            f"{key[0].upper()}, qubits ({key[1] + 1}, {key[2] + 1}, "
+                            f"{key[3] + 1}).\n"
+                        )
+                    file_3q.write(
+                        f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{key[2] + 1}\t{key[3] + 1}\t{val.real}\n"
+                    )
+                file_3q.write("\n")
+                file_3q.flush()
+
                 rho = rho_t.data
                 tr_rho = np.trace(rho).real
                 if abs(tr_rho - 1) > self.TRACE_RHO_THRESHOLD:
