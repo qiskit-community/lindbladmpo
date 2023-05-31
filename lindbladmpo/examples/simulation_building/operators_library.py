@@ -315,6 +315,23 @@ class PlusY(DynamicalOperator):
 
 
 class MinusY(DynamicalOperator):
+    """A dynamical operator that builds a numpy operator matrix for a Hadamard gate."""
+
+    def __init__(self, system_id=""):
+        super().__init__(system_id, "h")
+
+    def get_operator_matrix(self, dim: int) -> Any:
+        """Returns a matrix describing a realization of the operator specified in the parameters.
+
+        Args:
+                dim: The physical dimension of the matrix to generate.
+        """
+        if dim == 2 and self.s_type == "l":
+            return (0.5**0.5) * np.asarray([[1.0, 1.0], [1.0, -1.0]], complex)
+        super().get_operator_matrix(dim)
+
+
+class Hadamard(DynamicalOperator):
     """A dynamical operator that builds a numpy density matrix for left y (|-i><-i|)."""
 
     def __init__(self, system_id=""):
@@ -473,5 +490,7 @@ def get_operator_from_label(s_op: str, system_id=""):
         return PlusX(system_id)
     elif s_op == "-x":
         return MinusX(system_id)
+    elif s_op == "h":
+        return Hadamard(system_id)
     else:
         raise Exception(f"Unsupported operator label: {s_op}.")
