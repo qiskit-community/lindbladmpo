@@ -90,7 +90,7 @@ def prepare_curve_data(
     s_output_type: str,
     s_obs_name: str,
     q_indices: Union[Tuple, Tuple[int]],
-) -> ((List, List), str):
+) -> (Tuple[List, List], str):
     """
     Prepare the data used for plotting one curve of simulation observables.
 
@@ -135,7 +135,7 @@ def prepare_curve_data(
 
 def prepare_2q_correlation_data(
     result: dict, s_obs_name: str, q_indices: Tuple[int]
-) -> ((List, List), str):
+) -> (Tuple[List, List], str):
     """
     Prepare the data used for plotting one curve of a two-qubit connected correlation function.
     The connected correlation is defined as a 2Q observable from which the product of the two
@@ -299,7 +299,7 @@ def prepare_2q_density_operator(
     result: dict,
     qubit_pair: Sequence[int],
     t_indices: Optional[Sequence[int]] = None,
-) -> ((List, List), str):
+) -> (Tuple[List, List], str):
     """
     Prepare the reduced density matrix of a qubit pair.
 
@@ -826,6 +826,7 @@ def plot_1q_obs_curves(
     qubits: Optional[List[int]] = None,
     ax=None,
     fontsize=16,
+    line_styles: Optional[Sequence] = None,
     b_save_figures=True,
     s_file_prefix="",
     s_title=None,
@@ -842,6 +843,8 @@ def plot_1q_obs_curves(
             qubits: The qubits to take for plotting.
             ax: An optional axis object. If None, a new figure is created.
             fontsize: The fontsize to use in the figure.
+            line_styles: A list with line styles iterated (periodically) for the curves. If None,
+                    the default file-level member LINDBLADMPO_LINE_STYLES is used.
             b_save_figures: Whether to save the plotted figure to file.
             s_file_prefix: An optional path and file name prefix for the saved figures.
             s_title: An optional title for the figure. If empty, a default title is formatted.
@@ -859,7 +862,8 @@ def plot_1q_obs_curves(
             tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
     if s_title is None:
         s_title = f"$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$"
-    ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize)
+    ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize,
+                     line_styles=line_styles)
     _, _, t_tick_labels, _ = prepare_time_data(parameters)
     # ax.set_xticks(t_tick_indices)
     ax.set_xticks(t_tick_labels)
@@ -929,7 +933,7 @@ def plot_3q_obs_curves(
     s_file_prefix="",
     s_title=None,
     b_legend_labels=True,
-) -> (Any, List[(List, List)]):
+) -> (Any, List[Tuple[List, List]]):
     """
     Prepare the data and plot a two-qubit observable vs. time for multiple qubits.
 

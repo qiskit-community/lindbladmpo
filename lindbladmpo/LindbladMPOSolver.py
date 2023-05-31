@@ -258,7 +258,7 @@ class LindbladMPOSolver:
                     n_components = len(obs_components)
                     for i_component, obs_component in enumerate(obs_components):
                         for element in obs_component:
-                            file.write(element)
+                            file.write(str(element))
                             file.write(" ")
                         if i_component < n_components - 1:
                             file.write(",")

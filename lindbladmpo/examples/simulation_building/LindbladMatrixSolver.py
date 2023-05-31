@@ -76,6 +76,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
         file_1q = None
         file_2q = None
+        file_3q = None
+        file_cu = None
         file_gl = None
         self._log_file = open(self.s_output_path + ".log.txt", "w")
         try:
@@ -234,6 +236,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             subsystem_dims = OrderedDict()
             H = 0.0 * Id(0)  # just dummy initialization
             rho_0 = Id(0)  # just dummy initialization
+            gs = Id(0)  # just dummy initialization
+            id_op = Id(0)  # just dummy initialization
 
             L_ops = []
             L_sig = []
@@ -243,8 +247,12 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             obs_1q_key = []
             obs_2q_key = []
             obs_3q_key = []
+            obs_cu_mat = []
+            obs_cu_key = []
             for i_qubit in r_qubits:
                 subsystem_dims[i_qubit] = 2
+                gs *= PlusZ(i_qubit)
+                id_op *= Id(i_qubit)
                 if s_load_files_prefix == "":
                     q_init: Any = init_product_state[i_qubit]
                     b_tuple = isinstance(q_init, tuple)
@@ -311,6 +319,22 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                         * get_operator_from_label(s_op[2], _3q[2])
                     )
                     obs_3q_key.append((s_op, _3q[0], _3q[1], _3q[2]))
+            for obs in custom_observables:
+                gs_mat = build_matrices(gs, subsystem_dims)
+                gate_matrix = build_matrices(id_op, subsystem_dims)
+                if obs[0][1] == 'g':
+                    for obs_gate in obs[1]:  # Matrices are reversed w.r.t gates
+                        gate_name = obs_gate[0]
+                        if gate_name == "cz":
+                            i = obs_gate[1]
+                            j = obs_gate[2]
+                            gate = 0.5 * (Sz(i) + Sz(j) - Sz(i) * Sz(j) + Id(i) * Id(j))
+                        else:
+                            gate = get_operator_from_label(gate_name, obs_gate[1])
+                        gate_matrix = build_matrices(gate, subsystem_dims) @ gate_matrix
+                    obs_mat = gate_matrix @ gs_mat @ gate_matrix.conj().T
+                    obs_cu_mat.append(obs_mat)
+                    obs_cu_key.append(obs[0][0])
 
             H_matrix = build_matrices(H, subsystem_dims)
             L_matrices = build_matrices(L_ops, subsystem_dims)
@@ -357,10 +381,12 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             file_1q = open(self.s_output_path + ".obs-1q.dat", "w")
             file_2q = open(self.s_output_path + ".obs-2q.dat", "w")
             file_3q = open(self.s_output_path + ".obs-3q.dat", "w")
+            file_cu = open(self.s_output_path + ".custom.dat", "w")
             file_gl = open(self.s_output_path + ".global.dat", "w")
             file_1q.write("#time\toperator\tindex\tvalue\n")
             file_2q.write("#time\toperator\tindex_1\tindex_2\tvalue\n")
             file_3q.write("#time\toperator\tindex_1\tindex_2\tindex_3\tvalue\n")
+            file_cu.write("#time\tobservable\tvalue\n")
             file_gl.write("#time\tquantity\tvalue\n")
 
             n_times = len(sol.y)
@@ -368,7 +394,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 rho_t = DensityMatrix(sol_t)
                 t = t_eval[t_i]
 
-                for i_obs, obs in enumerate(obs_1q):
+                for i_obs, _ in enumerate(obs_1q):
                     val = rho_t.expectation_value(obs_1q_mat[i_obs])
                     key = obs_1q_key[i_obs]
                     if abs(val.imag) > self.IMAGINARY_THRESHOLD:
@@ -380,7 +406,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 file_1q.write("\n")
                 file_1q.flush()
 
-                for i_obs, obs in enumerate(obs_2q):
+                for i_obs, _ in enumerate(obs_2q):
                     val = rho_t.expectation_value(obs_2q_mat[i_obs])
                     key = obs_2q_key[i_obs]
                     if abs(val.imag) > self.IMAGINARY_THRESHOLD:
@@ -394,7 +420,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 file_2q.write("\n")
                 file_2q.flush()
 
-                for i_obs, obs in enumerate(obs_3q):
+                for i_obs, _ in enumerate(obs_3q):
                     val = rho_t.expectation_value(obs_3q_mat[i_obs])
                     key = obs_3q_key[i_obs]
                     if abs(val.imag) > self.IMAGINARY_THRESHOLD:
@@ -408,6 +434,17 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     )
                 file_3q.write("\n")
                 file_3q.flush()
+
+                for obs_cu_matrix, obs_cu_name in zip(obs_cu_mat, obs_cu_key):
+                    val = rho_t.expectation_value(obs_cu_matrix)
+                    if abs(val.imag) > self.IMAGINARY_THRESHOLD:
+                        self._print(
+                            f"Warning: imaginary component {val.imag} in observable "
+                            f"{obs_cu_name}.\n"
+                        )
+                    file_cu.write(f"{t}\t{obs_cu_name}\t{val.real}\n")
+                file_cu.write("\n")
+                file_cu.flush()
 
                 rho = rho_t.data
                 tr_rho = np.trace(rho).real
@@ -439,6 +476,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             self._log_file = None
             self._close_file(file_1q)
             self._close_file(file_2q)
+            self._close_file(file_3q)
+            self._close_file(file_cu)
             self._close_file(file_gl)
 
     def _get_parameter(
