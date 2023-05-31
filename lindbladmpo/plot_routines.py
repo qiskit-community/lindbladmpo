@@ -862,8 +862,9 @@ def plot_1q_obs_curves(
             tex_labels.append(f"$\\langle{s_tex_label}(t)\\rangle$")
     if s_title is None:
         s_title = f"$\\langle\\sigma^{s_obs_name}_j(t)\\rangle$"
-    ax = plot_curves(obs_data_list, tex_labels, s_title, ax, fontsize,
-                     line_styles=line_styles)
+    ax = plot_curves(
+        obs_data_list, tex_labels, s_title, ax, fontsize, line_styles=line_styles
+    )
     _, _, t_tick_labels, _ = prepare_time_data(parameters)
     # ax.set_xticks(t_tick_indices)
     ax.set_xticks(t_tick_labels)

@@ -322,7 +322,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             for obs in custom_observables:
                 gs_mat = build_matrices(gs, subsystem_dims)
                 gate_matrix = build_matrices(id_op, subsystem_dims)
-                if obs[0][1] == 'g':
+                if obs[0][1] == "g":
                     for obs_gate in obs[1]:  # Matrices are reversed w.r.t gates
                         gate_name = obs_gate[0]
                         if gate_name == "cz":
