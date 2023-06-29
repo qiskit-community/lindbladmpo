@@ -347,7 +347,7 @@ public:
   }
   //------------------------------------------------------
   // The method below converts a string of the type hello,thanks,home,car into a vector<string>
-  vector<string> stringvec(string var_name) const
+  vector<string> stringvec(string var_name, char delimiter = ',') const
   {
     vector<string> vec;
     map<string, string>::const_iterator it = find(var_name);
@@ -357,7 +357,7 @@ public:
     }
     else
     {
-      vector<string> str_vec = split(it->second, ',');
+      vector<string> str_vec = split(it->second, delimiter);
       for (auto &s : str_vec)
         vec.push_back(s);
     }

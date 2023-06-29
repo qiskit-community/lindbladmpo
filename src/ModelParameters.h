@@ -66,6 +66,8 @@ public:
         // Vector of components. Each element should have three letters.
         operator[]("3q_components") = "";
         operator[]("3q_indices") = ""; // Vector of integers i1,j1,k1,i2,j2,k2,.... If left empty nothing is calculated!
+
+        operator[]("custom_observables") = "";
     }
 };
 
