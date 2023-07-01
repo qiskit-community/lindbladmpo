@@ -15,10 +15,10 @@ APP=lindbladmpo
 
 #	Header files that solver depends on here. The make program
 #	will auto-detect if these headers have changed and recompile if necessary.
-HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h lindbladian.h mps_mpo_utils.h io_utils.h
+HEADERS=Pauli.h ModelParameters.h SimulationParameters.h SimpleSquareLattice.h TimeEvolution.h lindbladian.h mps_mpo_utils.h io_utils.h gates.h
 
 #	Additional .cc (source) files.
-CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc
+CCFILES=$(APP).cc Pauli.cc TimeEvolution.cc mps_mpo_utils.cc gates.cc
 
 #################################################################
 
