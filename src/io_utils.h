@@ -186,8 +186,18 @@ public:
       cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
       return 0;
     }
-    else
-      return stod(it->second);
+    else {
+      double value;
+      try
+      {
+        value = stod(it->second);
+      }
+      catch (...)
+      {
+        cout2 << "Error: was expecting a double after '"<<var_name<<"' and instead got '" << it->second << "'\n", exit(1);
+      }
+      return value;
+    }
   }
   //------------------------------------------------------
   long longval(string var_name) const
