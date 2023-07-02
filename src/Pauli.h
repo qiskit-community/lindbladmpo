@@ -77,6 +77,7 @@ class SpinHalfSystem {
   //Convert a pure state (psi) of the chain into a density matrix rho (projector onto psi)
   //this is usefull to build the density matrix rho at t=0 if we want
   //to start the simulation from the ground-state |psi> of some Hamiltonian.
+  void psi2rho(const MPS &psi,MPS&RHO,const Args &args= Args::global());
   void psi2rho(const MPS& psi,const Args& args = Args::global());
 
   //Expectation value of some single-site operator

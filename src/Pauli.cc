@@ -293,7 +293,134 @@ void SpinHalfSystem::ConstructIdentity()
   } 
 }
 
-//Convert a pure state (psi) of the chain into a density matrix rho (projector onto psi)
+//Convert a pure state (psi) of the chain into a density matrix rho=|psi><psi| (projector onto psi)
+void SpinHalfSystem::psi2rho(const MPS &psi, MPS&RHO,const Args &args)
+{
+  ITensor right_combined, left_combined;
+  int N=psi.length();
+  if (RHO.length()!=N) cout2<<"Error in psi2rho: psi has lenght "<<N<<" and RHO has lenghth "<<RHO.length()<<"\n.",exit(0);
+  
+  for (int j = 1; j <= N; ++j)
+  {
+    ITensor A = psi(j);
+    ITensor A_ = prime(psi(j));
+    A_.conj();
+    ITensor V = A * A_;
+
+    Index new_left, new_right, new_right_tagged, new_left_tagged;
+    if (j > 1)
+    {                                 //Not the first site
+      left_combined = right_combined; //Take the right_(...) of the previous site
+      V *= left_combined;
+      //New bond index
+      new_left = commonIndex(left_combined, V);
+      new_left_tagged = removeTags(new_left, "CMB");
+      new_left_tagged.addTags(string("l=") + to_string(j - 1));
+    }
+    if (j < N)
+    { //Not the last site
+      const ITensor &Anext(psi(j + 1));
+      ITensor Anext_ = prime(psi(j + 1));
+      Index right = commonIndex(A, Anext, "Link");
+      Index right_ = commonIndex(A_, Anext_, "Link");
+      tie(right_combined, new_right) = combiner(right, right_);
+      V *= right_combined;
+      new_right_tagged = removeTags(new_right, "CMB");
+      new_right_tagged.addTags(string("l=") + to_string(j));
+    }
+
+    Index spin = findIndex(A, "Site");   //iTensor v3
+    Index spin_ = findIndex(A_, "Site"); //iTensor v3
+    Index J = siteops(j);                // J takes 4 values
+    ITensor &R = RHO.ref(j);
+    if (j == 1)
+    {
+      R = ITensor(J, new_right_tagged);
+    }
+    else
+    {
+      if (j == N)
+      {
+        R = ITensor(J, new_left_tagged);
+      }
+      else
+      { //Middle of the chain
+        R = ITensor(J, new_right_tagged, new_left_tagged);
+      }
+    }
+    //Loop on the physical index (dimension 4=2*2)
+    for (int i1 = 1; i1 <= 2; i1++)
+    {
+      const IndexVal i1_(spin, i1);
+      for (int i2 = 1; i2 <= 2; i2++)
+      {
+        const IndexVal i2_(spin_, i2);
+        const int i = (i2 - 1) * 2 + i1; // this guy runs from 1 (uu) to 4 (dd)
+        const IndexVal J_(J, i);         //Value 'i' assigned to the index J
+        if (j == 1)
+        {
+          const int bdim_right = new_right.dim();
+          for (int a = 1; a <= bdim_right; a++)
+          {
+            const IndexVal new_right_(new_right, a);
+            const IndexVal new_right_tagged_(new_right_tagged, a);
+            complex<double> v = V.cplx(i1_, i2_, new_right_);
+            R.set(J_, new_right_tagged_, v);
+          }
+        }
+        else
+        {
+          if (j == N)
+          {
+            const int bdim_left = new_left.dim();
+            for (int b = 1; b <= bdim_left; b++)
+            {
+              const IndexVal new_left_(new_left, b);
+              const IndexVal new_left_tagged_(new_left_tagged, b);
+              R.set(J_, new_left_tagged_, V.cplx(i1_, i2_, new_left_));
+            }
+          }
+          else
+          { //Middle of the chain => do left & right loops
+            const int bdim_right = new_right.dim();
+            const int bdim_left = new_left.dim();
+            //Write one element of R, to allocate the memory for this tensor:
+            //const IndexVal new_right_(new_right, 1);
+            //const IndexVal new_left_(new_left, 1);
+            //const IndexVal new_right_tagged_(new_right_tagged, 1);
+            //const IndexVal new_left_tagged_(new_left_tagged, 1);
+            //R.set(J_,new_left_tagged_, new_right_tagged_,V.cplx(i1_,i2_,new_left_,new_right_));
+            // note: if we omit the line above, the parallel loop below
+            //would fail (segmentation fault) because several threads
+            //would independently attempt to allocate the tensor R
+
+            //Fill this (potentially big) tensor R using a parallelized loop:
+            //#pragma omp parallel for
+            for (int a = 1; a <= bdim_right; a++)
+            {
+              const IndexVal new_right_(new_right, a);
+              const IndexVal new_right_tagged_(new_right_tagged, a);
+              for (int b = 1; b <= bdim_left; b++)
+              {
+                const IndexVal new_left_(new_left, b);
+                const IndexVal new_left_tagged_(new_left_tagged, b);
+                R.set(J_, new_left_tagged_, new_right_tagged_, V.cplx(i1_, i2_, new_left_, new_right_));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args) {
+  psi2rho(psi, rho,args);
+}
+
+
+/*
+//Convert a pure state (psi) of the chain into the density matrix of the system (projector |psi><psi|)
 void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
 {
   cout2 << "Norm of |psi>: (<psi|psi>)^(1/2)=" << norm(psi) << "\n";
@@ -325,12 +452,6 @@ void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
       ITensor Anext_ = prime(psi(j + 1));
       Index right = commonIndex(A, Anext, "Link");
       Index right_ = commonIndex(A_, Anext_, "Link");
-      /* v2:  
-      right_combined=combiner(right,right_);
-      V*=right_combined;
-      //New bond index
-      new_right=commonIndex(right_combined,V);  
-      */
       // v3:
       tie(right_combined, new_right) = combiner(right, right_);
       V *= right_combined;
@@ -425,6 +546,7 @@ void SpinHalfSystem::psi2rho(const MPS &psi, const Args &args)
   cout2.flush();
   cout2 << "Max bond dimension of rho:" << maxLinkDim(rho) << "\n";
 }
+*/
 //Expectation value of some single-site operator
 Cplx SpinHalfSystem::Expect(const string &opname, int i) const
 {

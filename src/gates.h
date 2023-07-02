@@ -14,6 +14,8 @@
 #define _GATES_
 
 #include "Pauli.h"
+#include "io_utils.h"
+#include <string>
 
 //Apply the X gate (qubit i) on a mixed state rho
 void ApplyXGate(MPS &, const Pauli &,int);
@@ -37,5 +39,8 @@ void ApplyCNOTGate(MPS &, const Pauli &,int,int,Args=Args("Cutoff",0));
 //Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
 void ApplyControlledZGate(MPS &, const Pauli &,int,int,Args arg=Args("Cutoff",0));
 
+// From an ordered list of gates [g1,g2, ..., gN] specified in a string s, and from a 'initial' pure state |psi0>,
+// construct |psi>=g1*g2*...*gN |psi0>
+void ApplyListOfGatesOnAPureState(string  ,MPS&     ,const SpinHalfSystem&);
 
 #endif

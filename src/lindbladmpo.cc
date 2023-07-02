@@ -392,8 +392,10 @@ int main(int argc, char *argv[])
 		
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
+		cout2 << "Constructing rho from |psi>... Norm of |psi>: (<psi|psi>)^(1/2)=" << norm(psi) <<" ";
+  		cout2.flush();
 		C.psi2rho(psi, argsRho);
-		cout2 << "psi2rho done.\n";
+		cout2 << "psi2rho done.\nMax bond dimension of rho:" << maxLinkDim(C.rho)<<"\n";
 		cout2.flush();
 		for (int site_number = 1; site_number <= N; site_number++)
         {
@@ -544,10 +546,25 @@ int main(int argc, char *argv[])
     // obs_name is the name to write in the output file, obs_type must be the string "g" to indicate
     // that it's an observable constructed by application of gates.
     // gate_name is similar to the names in 'apply_gates', and q0 q1 are the qubits (q1 for 2Q gates only).
-	// zzz
-
 	
-
+	vector<MPS> ProjectorList;
+	vector<string> ProjectorNames;
+	for (string cobs:custom_obs) {
+		vector<string> v=split(cobs,':');
+		if (v.size()!=2) cout2<<"Error in parameter custom_observables:"<<cobs<<"\n",exit(0);
+		cout<<"observable name="<<v[0]<<"\tgates:"<<v[1]<<"\t";
+		ProjectorNames.push_back(v[0]);
+		auto psi0_ini = InitState(C.sites);
+		for (int i = 1; i <= N; ++i) psi0_ini.set(i, "Up");// Start with all spins up
+		MPS psi0 = MPS(psi0_ini);
+		ApplyListOfGatesOnAPureState(v[1],psi0,C);
+		psi0.position(1);
+		ProjectorList.push_back(MPS(C.siteops));
+		MPS& proj=ProjectorList.back();
+		C.psi2rho(psi0,proj);
+		cout<<"MaxBondDim(gates|0...0><0...0|gates)="<<maxLinkDim(proj)<<endl;
+	}
+	
 	if (param.val("b_initial_rho_compression") != 0) {
 
 		cout2 << "C.rho.orthogonalize...";
@@ -875,11 +892,21 @@ int main(int argc, char *argv[])
 				file_3q << endl; //Skip a line between time steps
 				auto t_3q_end = steady_clock::now();
 				if (count)
-				{
-					duration_ms = duration_cast<milliseconds>(t_3q_end - t_2q_end);
-					cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
-				}
+					{
+						duration_ms = duration_cast<milliseconds>(t_3q_end - t_2q_end);
+						cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+					}
+				// --------------------------------------------------
+				// Custom observables
 
+				if (ProjectorList.size()>0) {
+					cout2<<"\n\tCustom observable(s):";
+					int c=0;
+					for (MPS& proj:ProjectorList) {
+						cout2<<"\n\t\t"<<ProjectorNames[c++]<<"|rho>>="<<innerC(proj,C.rho);
+					}
+				}
+				// --------------------------------------------------
 				cout2 << "\n";
 				cout2.flush();
 
