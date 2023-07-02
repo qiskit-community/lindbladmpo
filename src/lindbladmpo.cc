@@ -540,11 +540,10 @@ int main(int argc, char *argv[])
 
 	vector<string> custom_obs = param.stringvec("custom_observables", ';');
 	// each of custom_obs's strings now corresponds to one observable. The string has the format:
-	// "obs_name obs_type:gate_name q0 q1, ..."
+	// "obs_name:gate_name q0 q1, ..."
 	// Therefore it should now be split using the ':' delimiter (to get two sub-strings), and then
 	// the first resulting string split by ' ', and the second resulting string should be split by ','.
-    // obs_name is the name to write in the output file, obs_type must be the string "g" to indicate
-    // that it's an observable constructed by application of gates.
+    // obs_name is the name to write in the output file
     // gate_name is similar to the names in 'apply_gates', and q0 q1 are the qubits (q1 for 2Q gates only).
 	
 	vector<MPS> ProjectorList;
