@@ -903,7 +903,8 @@ int main(int argc, char *argv[])
 					cout2<<"\n\tCustom observable(s):";
 					int c=0;
 					for (MPS& proj:ProjectorList) {
-						cout2<<"\n\t\t"<<ProjectorNames[c++]<<"|rho>>="<<innerC(proj,C.rho);
+						cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
+						c++;
 					}
 				}
 				// --------------------------------------------------
