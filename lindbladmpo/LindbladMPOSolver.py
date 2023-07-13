@@ -262,7 +262,9 @@ class LindbladMPOSolver:
                             if i_element == 0:
                                 file.write(element)
                             else:
-                                file.write(str(element + 1))  # Qubit index for 'g' observables
+                                file.write(
+                                    str(element + 1)
+                                )  # Qubit index for 'g' observables
                             if i_element < n_elements - 1:
                                 file.write(" ")
                         if i_component < n_components - 1:
