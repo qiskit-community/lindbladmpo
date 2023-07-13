@@ -344,7 +344,7 @@ class Hadamard(DynamicalOperator):
                 dim: The physical dimension of the matrix to generate.
         """
         if dim == 2 and self.s_type == "l":
-            return np.asarray([[0.5, 0.5j], [-0.5j, 0.5]], complex)
+            return (0.5**0.5) * np.asarray([[1.0, 1.0], [1.0, -1.0]], complex)
         super().get_operator_matrix(dim)
 
 

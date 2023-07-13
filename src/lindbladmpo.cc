@@ -639,6 +639,9 @@ int main(int argc, char *argv[])
 	ofstream file_global(output_prefix + ".global.dat");
 	file_global.precision(15);
 	file_global << "#time\tquantity\tvalue" << endl;
+	ofstream file_custom(output_prefix + ".obs-cu.dat");
+	file_custom.precision(15);
+	file_custom << "#time\tobservable\tvalue" << endl;
 
 	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qubit observables
@@ -895,17 +898,27 @@ int main(int argc, char *argv[])
 						duration_ms = duration_cast<milliseconds>(t_3q_end - t_2q_end);
 						cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
 					}
+
 				// --------------------------------------------------
 				// Custom observables
-
+				count = 0;
 				if (ProjectorList.size()>0) {
-					cout2<<"\n\tCustom observable(s):";
+					//cout2<<"\n\tCustom observable(s):";
 					int c=0;
 					for (MPS& proj:ProjectorList) {
-						cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
+           				file_custom << t << " \t" << ProjectorNames[c] << "\t" << innerC(proj,C.rho).real() << endl;
+						//cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
 						c++;
 					}
+					count = c;
 				}
+				file_custom << endl; //Skip a line between time steps
+				auto t_cu_end = steady_clock::now();
+				if (count)
+					{
+						duration_ms = duration_cast<milliseconds>(t_cu_end - t_3q_end);
+						cout2 << "\n\t" << count << " custom expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+					}
 				// --------------------------------------------------
 				cout2 << "\n";
 				cout2.flush();
@@ -948,6 +961,7 @@ int main(int argc, char *argv[])
 	file_2q.close();
 	file_3q.close();
 	file_global.close();
+	file_custom.close();
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);

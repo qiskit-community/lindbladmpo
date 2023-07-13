@@ -252,14 +252,21 @@ class LindbladMPOSolver:
                 n_observables = len(observables)
                 for i_obs, (obs_def, obs_components) in enumerate(observables):
                     file.write(obs_def[0])
-                    file.write(" ")
-                    file.write(obs_def[1])
+                    # file.write(" ")
+                    # file.write(obs_def[1])
                     file.write(":")
                     n_components = len(obs_components)
                     for i_component, obs_component in enumerate(obs_components):
-                        for element in obs_component:
-                            file.write(str(element))
-                            file.write(" ")
+                        n_elements = len(obs_component)
+                        for i_element, element in enumerate(obs_component):
+                            if i_element == 0:
+                                file.write(element)
+                            else:
+                                file.write(
+                                    str(element + 1)
+                                )  # Qubit index for 'g' observables
+                            if i_element < n_elements - 1:
+                                file.write(" ")
                         if i_component < n_components - 1:
                             file.write(",")
                     if i_obs < n_observables - 1:
@@ -381,6 +388,10 @@ class LindbladMPOSolver:
         result[s_output_type] = LindbladMPOSolver._read_data_file(
             s_output_path, s_output_type
         )
+        s_output_type = "obs-cu"
+        result[s_output_type] = LindbladMPOSolver._read_data_file(
+            s_output_path, s_output_type
+        )
         s_output_type = "global"
         result[s_output_type] = LindbladMPOSolver._read_data_file(
             s_output_path, s_output_type
@@ -431,7 +442,7 @@ class LindbladMPOSolver:
             q_index2 = int(words[3]) - 1
             q_index3 = int(words[4]) - 1
             q_indices = (q_index1, q_index2, q_index3)
-        elif s_output_type == "global":
+        elif s_output_type in ["obs-cu", "global"]:
             q_indices = ()
         else:
             raise Exception(f"Unknown output type {s_output_type}.")

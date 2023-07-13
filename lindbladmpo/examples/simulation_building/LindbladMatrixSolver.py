@@ -381,7 +381,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             file_1q = open(self.s_output_path + ".obs-1q.dat", "w")
             file_2q = open(self.s_output_path + ".obs-2q.dat", "w")
             file_3q = open(self.s_output_path + ".obs-3q.dat", "w")
-            file_cu = open(self.s_output_path + ".custom.dat", "w")
+            file_cu = open(self.s_output_path + ".obs-cu.dat", "w")
             file_gl = open(self.s_output_path + ".global.dat", "w")
             file_1q.write("#time\toperator\tindex\tvalue\n")
             file_2q.write("#time\toperator\tindex_1\tindex_2\tvalue\n")
@@ -443,6 +443,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             f"{obs_cu_name}.\n"
                         )
                     file_cu.write(f"{t}\t{obs_cu_name}\t{val.real}\n")
+                    # print(f"{t}\t{obs_cu_name}\t{val.real}")
                 file_cu.write("\n")
                 file_cu.flush()
 
