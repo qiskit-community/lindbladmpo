@@ -443,7 +443,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             f"{obs_cu_name}.\n"
                         )
                     file_cu.write(f"{t}\t{obs_cu_name}\t{val.real}\n")
-                    print(f"{t}\t{obs_cu_name}\t{val.real}")
+                    # print(f"{t}\t{obs_cu_name}\t{val.real}")
                 file_cu.write("\n")
                 file_cu.flush()
 
