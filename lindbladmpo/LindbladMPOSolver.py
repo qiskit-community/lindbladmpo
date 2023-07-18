@@ -376,26 +376,11 @@ class LindbladMPOSolver:
                 result : A dictionary with three dictionaries storing the different output types.
         """
         result = {}
-        s_output_type = "obs-1q"
-        result[s_output_type] = LindbladMPOSolver._read_data_file(
-            s_output_path, s_output_type
-        )
-        s_output_type = "obs-2q"
-        result[s_output_type] = LindbladMPOSolver._read_data_file(
-            s_output_path, s_output_type
-        )
-        s_output_type = "obs-3q"
-        result[s_output_type] = LindbladMPOSolver._read_data_file(
-            s_output_path, s_output_type
-        )
-        s_output_type = "obs-cu"
-        result[s_output_type] = LindbladMPOSolver._read_data_file(
-            s_output_path, s_output_type
-        )
-        s_output_type = "global"
-        result[s_output_type] = LindbladMPOSolver._read_data_file(
-            s_output_path, s_output_type
-        )
+        s_output_types = ["obs-1q", "obs-3q", "obs-3q", "obs-cu", "global"]
+        for s_output_type in s_output_types:
+            result[s_output_type] = LindbladMPOSolver._read_data_file(
+                s_output_path, s_output_type
+            )
         return result
 
     @staticmethod
@@ -410,16 +395,19 @@ class LindbladMPOSolver:
                 result : A dictionary with the result.
         """
         full_filename = s_output_path + f".{s_output_type}.dat"
-        print("Loading output data file: " + full_filename)
-        file = open(full_filename, "r")
         result = collections.OrderedDict()
-        file.readline()
-        for line in file:
-            words = line.strip().split()
-            if not words:
-                continue
-            LindbladMPOSolver._read_data_line(s_output_type, words, result)
-        file.close()
+        if os.path.isfile(full_filename):
+            print("Loading output data file: " + full_filename)
+            file = open(full_filename, "r")
+            file.readline()
+            for line in file:
+                words = line.strip().split()
+                if not words:
+                    continue
+                LindbladMPOSolver._read_data_line(s_output_type, words, result)
+            file.close()
+        else:
+            print("Skipping non-existing file: " + full_filename)
         return result
 
     @staticmethod
