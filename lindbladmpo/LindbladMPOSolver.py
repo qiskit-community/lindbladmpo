@@ -376,7 +376,7 @@ class LindbladMPOSolver:
                 result : A dictionary with three dictionaries storing the different output types.
         """
         result = {}
-        s_output_types = ["obs-1q", "obs-3q", "obs-3q", "obs-cu", "global"]
+        s_output_types = ["obs-1q", "obs-2q", "obs-3q", "obs-cu", "global"]
         for s_output_type in s_output_types:
             result[s_output_type] = LindbladMPOSolver._read_data_file(
                 s_output_path, s_output_type
