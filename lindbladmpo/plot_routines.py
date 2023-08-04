@@ -246,7 +246,7 @@ def prepare_2q_correlation_matrix(
 
 
 def prepare_xy_current_data(
-    result: dict, qubit_pairs: Sequence[Sequence], t: float
+    result: dict, qubit_pairs: Sequence[Sequence], t: 0.001
 ) -> (np.ndarray, str):
     """
     Prepare the data used for plotting the current operator between qubit pairs, based on
