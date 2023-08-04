@@ -195,6 +195,11 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                     in_cz_gate[i] = 1
                     in_cz_gate[j] = 1
 
+            apply_gates = self._get_parameter("apply_gates")
+            if apply_gates is not None and len(apply_gates):
+                raise Exception("The parameter apply_gates is not currently supported by "
+                                "this solver. Please use the MPO solver for this simulation.")
+
             h_x = self._get_parameter("h_x")
             h_y = self._get_parameter("h_y")
             h_z = self._get_parameter("h_z")
