@@ -16,7 +16,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-
+import math
 
 LINDBLADMPO_TEX_LABELS = {
     "tr_rho": "{\\rm tr}\\rho",
@@ -189,7 +189,7 @@ def prepare_2q_correlation_data(
 
 
 def prepare_2q_correlation_matrix(
-    result: dict, s_obs_name: str, t: float, n_qubits: int
+    result: dict, s_obs_name: str, t: 0.001, n_qubits: int
 ) -> (np.ndarray, str):
     """
     Prepare the data used for plotting the matrix of connected correlation values of one type for all.
@@ -235,7 +235,7 @@ def prepare_2q_correlation_matrix(
                     # arrays are identical, if they are equal in number. Verifying the time array lengths
                     # will avoid crashes due to interrupted simulations with incomplete data files.
                     try:
-                        t_index = obs_0[0].index(t)
+                        t_index = math.isclose(obs_0[0], obs_0[1], t)
                         obs_data[i, j] = (
                             obs_2[1][t_index] - obs_0[1][t_index] * obs_1[1][t_index]
                         )
@@ -284,7 +284,7 @@ def prepare_xy_current_data(
                 # arrays are identical, if they are equal in number. Verifying the time array lengths
                 # will avoid crashes due to interrupted simulations with incomplete data files.
                 try:
-                    t_index = obs_2[0].index(t)
+                    t_index = math.isclose(obs_2[0], obs_2[1], t)
                     obs_data[i_bond] = 0.5 * (obs_1[1][t_index] - obs_2[1][t_index])
                 except ValueError:
                     pass
