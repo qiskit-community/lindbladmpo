@@ -12,11 +12,11 @@ Routines for basic plotting of simulation results, with both general and more sp
 
 from typing import Optional, Tuple, List, Union, Any, Sequence, Dict
 
+import math
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-import math
 
 LINDBLADMPO_TEX_LABELS = {
     "tr_rho": "{\\rm tr}\\rho",
