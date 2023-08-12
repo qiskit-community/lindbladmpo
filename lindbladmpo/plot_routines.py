@@ -40,8 +40,23 @@ def _save_fig(b_save_figures, s_file_prefix, s_file_label):
         plt.savefig(s_file_prefix + s_file_label + ".png")
 
 
-# Helper function to find the closest time index
 def find_nearest_index_t(arr, target_time, rtol):
+    """
+    Find the index of the nearest time entry in an array of time values.
+
+    This function computes the index of the time entry in the given array that is
+    closest to the specified target time. It takes into account the relative tolerance
+    (`rtol`) for determining closeness.
+
+    Args:
+        arr (sequence of float): An array of time values.
+        target_time (float): The target time to compare against.
+        rtol (float): The relative tolerance for considering time values as close.
+
+    Returns:
+        int or None: The index of the closest time entry in the array, or None if no
+        sufficiently close time entry was found within the specified tolerance.
+    """
     diff = np.abs(np.array(arr) - target_time)
     closest_index = np.argmin(diff)
     if np.isclose(diff[closest_index], 0, rtol=rtol, atol=0):
