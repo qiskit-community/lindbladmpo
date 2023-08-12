@@ -12,11 +12,11 @@ Routines for basic plotting of simulation results, with both general and more sp
 
 from typing import Optional, Tuple, List, Union, Any, Sequence, Dict
 
-import math
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
+
 
 LINDBLADMPO_TEX_LABELS = {
     "tr_rho": "{\\rm tr}\\rho",
@@ -38,6 +38,16 @@ def _save_fig(b_save_figures, s_file_prefix, s_file_label):
         if s_file_prefix != "":
             s_file_label = "." + s_file_label
         plt.savefig(s_file_prefix + s_file_label + ".png")
+
+
+# Helper function to find the closest time index
+def find_nearest_index_t(arr, target_time, rtol):
+    diff = np.abs(np.array(arr) - target_time)
+    closest_index = np.argmin(diff)
+    if np.isclose(diff[closest_index], 0, rtol=rtol, atol=0):
+        return closest_index
+    else:
+        return None
 
 
 def prepare_time_data(
@@ -189,7 +199,7 @@ def prepare_2q_correlation_data(
 
 
 def prepare_2q_correlation_matrix(
-    result: dict, s_obs_name: str, t: 0.001, n_qubits: int
+    result: dict, s_obs_name: str, t: float, n_qubits: int
 ) -> (np.ndarray, str):
     """
     Prepare the data used for plotting the matrix of connected correlation values of one type for all.
@@ -235,7 +245,7 @@ def prepare_2q_correlation_matrix(
                     # arrays are identical, if they are equal in number. Verifying the time array lengths
                     # will avoid crashes due to interrupted simulations with incomplete data files.
                     try:
-                        t_index = math.isclose(obs_0[0], obs_0[1], t)
+                        t_index = find_nearest_index_t(obs_0[0], t, 0.01)
                         obs_data[i, j] = (
                             obs_2[1][t_index] - obs_0[1][t_index] * obs_1[1][t_index]
                         )
@@ -246,7 +256,7 @@ def prepare_2q_correlation_matrix(
 
 
 def prepare_xy_current_data(
-    result: dict, qubit_pairs: Sequence[Sequence], t: 0.001
+    result: dict, qubit_pairs: Sequence[Sequence], t: float
 ) -> (np.ndarray, str):
     """
     Prepare the data used for plotting the current operator between qubit pairs, based on
@@ -284,7 +294,7 @@ def prepare_xy_current_data(
                 # arrays are identical, if they are equal in number. Verifying the time array lengths
                 # will avoid crashes due to interrupted simulations with incomplete data files.
                 try:
-                    t_index = math.isclose(obs_2[0], obs_2[1], t)
+                    t_index = find_nearest_index_t(obs_2[0], t, 0.01)
                     obs_data[i_bond] = 0.5 * (obs_1[1][t_index] - obs_2[1][t_index])
                 except ValueError:
                     pass
