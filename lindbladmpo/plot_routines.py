@@ -260,7 +260,9 @@ def prepare_2q_correlation_matrix(
                     # arrays are identical, if they are equal in number. Verifying the time array lengths
                     # will avoid crashes due to interrupted simulations with incomplete data files.
                     try:
-                        t_index = find_index_nearest_time_within_tolerance(obs_0[0], t, 0.01)
+                        t_index = find_index_nearest_time_within_tolerance(
+                            obs_0[0], t, 0.01
+                        )
                         obs_data[i, j] = (
                             obs_2[1][t_index] - obs_0[1][t_index] * obs_1[1][t_index]
                         )
@@ -309,7 +311,9 @@ def prepare_xy_current_data(
                 # arrays are identical, if they are equal in number. Verifying the time array lengths
                 # will avoid crashes due to interrupted simulations with incomplete data files.
                 try:
-                    t_index = find_index_nearest_time_within_tolerance(obs_2[0], t, 0.01)
+                    t_index = find_index_nearest_time_within_tolerance(
+                        obs_2[0], t, 0.01
+                    )
                     obs_data[i_bond] = 0.5 * (obs_1[1][t_index] - obs_2[1][t_index])
                 except ValueError:
                     pass
