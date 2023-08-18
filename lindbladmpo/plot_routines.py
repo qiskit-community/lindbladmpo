@@ -62,7 +62,7 @@ def find_index_nearest_time_within_tolerance(arr, target_time, rtol):
     if np.isclose(diff[closest_index], 0, rtol=rtol, atol=0):
         return closest_index
     else:
-        return None
+        return closest_index
 
 
 def prepare_time_data(
