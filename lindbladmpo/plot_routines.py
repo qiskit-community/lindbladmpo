@@ -54,8 +54,9 @@ def find_index_nearest_time_within_tolerance(arr, target_time, rtol):
         rtol (float): The relative tolerance for considering time values as close.
 
     Returns:
-        int: The index of the closest time entry in the array. If the array is empty, the
-        function returns 0 (the first index) since there are no time entries to compare.
+        int: The index of the closest time entry in the array. If no time entry is found
+        that meets the rtol criteria, the function still returns the index of
+        the time entry closest to the target time.
     """
     diff = np.abs(np.array(arr) - target_time)
     closest_index = np.argmin(diff)
