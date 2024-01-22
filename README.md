@@ -24,6 +24,13 @@ H. Landa and G. Misguich, *Nonlocal correlations in noisy multiqubit systems sim
 
 **Verifying numerical simulations:** The above paper also explains in detail how to construct and verify numerical results with multiqubit simulations. We recommend users of the package to familiarize themselves with different approaches to verify their numerical simulations, such as those explained in this paper. The sources used to perform this research are included in the detailed [examples](docs/examples.md).
 
+**Further research using the solver:**
+
+_Dissipative Dynamics of Graph-State Stabilizers with Superconducting Qubits_, Liran Shirizly, Grégoire Misguich, Haggai Landa, [arXiv:2308.01860](https://arxiv.org/abs/2308.01860), [Phys. Rev. Lett. **132**, 010601 (2024)](https://doi.org/10.1103/PhysRevLett.132.010601)
+with open-source code in https://github.com/haggaila/graph-state-dynamics
+
+_A solvable model for graph state decoherence dynamics_, Jérôme Houdayer, Haggai Landa, Grégoire Misguich [arXiv:2305.17231](https://arxiv.org/abs/2305.17231)
+
 Note that the C++ binaries of the solver must be **built locally** - see the [installation guide](INSTALL.md).
 
 For more information, tutorials, and detailed examples check the documentation:
