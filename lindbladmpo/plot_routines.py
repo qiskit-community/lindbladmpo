@@ -1013,7 +1013,7 @@ def plot_custom_obs_curves(
     obs_data_list = []
     for s_obs_name in obs_names:
         s_obs_name = s_obs_name.lower()
-        obs_data, s_tex_label = prepare_curve_data(result, "obs-cu", s_obs_name, ())
+        obs_data, _ = prepare_curve_data(result, "obs-cu", s_obs_name, ())
         obs_data_list.append(obs_data)
     ax = plot_curves(
         obs_data_list, tex_labels, s_title, ax, fontsize, line_styles=line_styles
