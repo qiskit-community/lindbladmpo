@@ -252,8 +252,8 @@ class LindbladMPOSolver:
                 n_observables = len(observables)
                 for i_obs, (obs_def, obs_components) in enumerate(observables):
                     file.write(obs_def[0])
-                    # file.write(" ")
-                    # file.write(obs_def[1])
+                    file.write(" ")
+                    file.write(obs_def[1])
                     file.write(":")
                     n_components = len(obs_components)
                     for i_component, obs_component in enumerate(obs_components):
@@ -776,14 +776,14 @@ class LindbladMPOSolver:
                             continue
                         obs_type = g_tuple[0][1]
                         if not isinstance(g_tuple[0][0], str) or (
-                            obs_type != "g" and obs_type != "p"
+                            obs_type != "g" and obs_type != "o"
                         ):
                             check_msg += (
                                 "Error 342: each member of the first element of"
                                 + key
                                 + " must be a tuple of the form"
                                 " (obs_name, obs_type), with obs_type being either 'g' or"
-                                " 'p' to indicate a gate-based observable or a Pauli expansion\n"
+                                " 'o' to indicate a gate-based observable or a 1Q operator expansion\n"
                             )
                             continue
                         for o_tuple in g_tuple[1]:
@@ -799,15 +799,15 @@ class LindbladMPOSolver:
                                     " (gate_name, q0, q1, ...)\n"
                                 )
                                 continue
-                            if obs_type == "p" and (
+                            if obs_type == "o" and (
                                 not isinstance(o_tuple[0], str)
-                                or not LindbladMPOSolver.is_float(o_tuple[1])
+                                or not LindbladMPOSolver._is_int(o_tuple[1])
                             ):
                                 check_msg += (
-                                    "Error 343: each member of Pauli-based component of"
+                                    "Error 343: each member of an operator-based component of"
                                     + key
                                     + " must be a tuple of the form"
-                                    " (pauli-string, weight)\n"
+                                    " (operator name, qubit)\n"
                                 )
                                 continue
 

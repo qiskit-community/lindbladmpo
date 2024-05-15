@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 	vector<long> A = param.longvec("first_bond_indices");
 	vector<long> B = param.longvec("second_bond_indices");
     const unsigned int n_bonds = A.size();
+    const double _2_N = pow(2, -(double)N);
 
 	stringstream strstr = stringstream();
 	if (n_bonds)
@@ -361,20 +362,20 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, ri = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ", up) = " <<
-				 	eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
-				cout2 << "psi(site " << site_number << ", down) = " <<
-				 	eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
+//				cout2 << "psi(site " << site_number << ", up) = " <<
+//				 	eltC(psi(site_number), spin_ind = 1, ri = 1) << "\n";
+//				cout2 << "psi(site " << site_number << ", down) = " <<
+//				 	eltC(psi(site_number), spin_ind = 2, ri = 1) << "\n";
 			}
 			else if (site_number == N)
 			{
 				Index li = leftLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ", up) = " <<
-				 	eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
-				cout2 << "psi(site " << site_number << ", down) = " <<
-				 	eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
+//				cout2 << "psi(site " << site_number << ", up) = " <<
+//				 	eltC(psi(site_number), spin_ind = 1, li = 1) << "\n";
+//				cout2 << "psi(site " << site_number << ", down) = " <<
+//				 	eltC(psi(site_number), spin_ind = 2, li = 1) << "\n";
 			}
 			else
 			{
@@ -382,14 +383,14 @@ int main(int argc, char *argv[])
 				Index ri = rightLinkIndex(psi, site_number);
 				psi.ref(site_number).set(spin_ind = 1, li = 1, ri = 1, Cplx(R0, I0));
 				psi.ref(site_number).set(spin_ind = 2, li = 1, ri = 1, Cplx(R1, I1));
-				cout2 << "psi(site " << site_number << ", up) = " <<
-				 	eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << "\n";
-				cout2 << "psi(site " << site_number << ", down) = " <<
-				 	eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
+//				cout2 << "psi(site " << site_number << ", up) = " <<
+//				 	eltC(psi(site_number), spin_ind = 1, li = 1, ri = 1) << "\n";
+//				cout2 << "psi(site " << site_number << ", down) = " <<
+//				 	eltC(psi(site_number), spin_ind = 2, li = 1, ri = 1) << "\n";
 			}
 		}
 		psi.orthogonalize(Args("Cutoff", 1e-6));
-		
+
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
 		cout2 << "Constructing rho from |psi>... Norm of |psi>: (<psi|psi>)^(1/2)=" << norm(psi) <<" ";
@@ -497,7 +498,7 @@ int main(int argc, char *argv[])
 
 		string sgate = vs[1];
 		transform(sgate.begin(), sgate.end(), sgate.begin(), ::toupper);
-		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SX" || sgate=="H") {
+		if (sgate=="X" || sgate=="Y" || sgate=="Z" || sgate=="SX" || sgate=="H" || sgate=="U" || sgate=="D") {
 				try {
 					i=stod(vs[2]);
 					if (i<1 || i>N) cout2 << "Error: qubit index "<<i<<" out of range in '"<<apply_gates[n] << "'.\n", exit(1);
@@ -539,29 +540,52 @@ int main(int argc, char *argv[])
 	}
 
 	vector<string> custom_obs = param.stringvec("custom_observables", ';');
-	// each of custom_obs's strings now corresponds to one observable. The string has the format:
-	// "obs_name:gate_name q0 q1, ..."
-	// Therefore it should now be split using the ':' delimiter (to get two sub-strings), and then
+	// each of custom_obs's strings now corresponds to one observable. The string can have two formats:
+	// "obs_name obs_type:gate_name q0 q1, ..." with obs_type == 'g' or:
+	// "obs_name obs_type:op_name q0, ..." with obs_type == 'o'.
+	// Therefore it should first be split using the ':' delimiter (to get two sub-strings), and then
 	// the first resulting string split by ' ', and the second resulting string should be split by ','.
     // obs_name is the name to write in the output file
+    // obs_type is 'g' for gates and 'o' for operators
     // gate_name is similar to the names in 'apply_gates', and q0 q1 are the qubits (q1 for 2Q gates only).
 	
 	vector<MPS> ProjectorList;
 	vector<string> ProjectorNames;
-	for (string cobs:custom_obs) {
-		vector<string> v=split(cobs,':');
-		if (v.size()!=2) cout2<<"Error in parameter custom_observables:"<<cobs<<"\n",exit(0);
-		cout<<"observable name="<<v[0]<<"\tgates:"<<v[1]<<"\t";
-		ProjectorNames.push_back(v[0]);
-		auto psi0_ini = InitState(C.sites);
-		for (int i = 1; i <= N; ++i) psi0_ini.set(i, "Up");// Start with all spins up
-		MPS psi0 = MPS(psi0_ini);
-		ApplyListOfGatesOnAPureState(v[1],psi0,C);
-		psi0.position(1);
-		ProjectorList.push_back(MPS(C.siteops));
-		MPS& proj=ProjectorList.back();
-		C.psi2rho(psi0,proj);
-		cout<<"MaxBondDim(gates|0...0><0...0|gates)="<<maxLinkDim(proj)<<endl;
+	vector<string> OperatorObsNames;
+	vector<vector<string>> OperatorObs;
+	vector<vector<int>> OperatorObsQubits;
+	for (string c_obs : custom_obs) {
+		vector<string> obs_defs=split(c_obs, ':');
+		if (obs_defs.size() != 2)
+		    cout2 << "No gate or operator data in parameter custom_observables: " << c_obs << "\n", exit(0);
+    	vector<string> obs_head=split(obs_defs[0], ' ');
+        if (obs_head[1] == "g")
+        {
+//            cout2 << "Custom observable defined by gates, name: " << obs_head[0] << ", gates: "<< obs_defs[1] << ";  ";
+            ProjectorNames.push_back(obs_head[0]);
+            auto psi0_ini = InitState(C.sites);
+            for (int i = 1; i <= N; ++i) psi0_ini.set(i, "Up");// Start with all spins up
+            MPS psi0 = MPS(psi0_ini);
+            ApplyListOfGatesOnAPureState(obs_defs[1],psi0,C);
+            psi0.position(1);
+            ProjectorList.push_back(MPS(C.siteops));
+            MPS& proj=ProjectorList.back();
+            C.psi2rho(psi0,proj);
+            int max_bd = maxLinkDim(proj);
+            cout2 << "MaxBondDim(gates|0...0><0...0|gates) = " << max_bd << "\n";
+        }
+        else if (obs_head[1] == "o")
+        {
+//            cout2 << "Custom observable defined by operators, name: " << obs_head[0] << ", operators: "<< obs_defs[1] << ";  ";
+            OperatorObsNames.push_back(obs_head[0]);
+            vector<string> obs_ops = vector<string>();
+            vector<int> obs_qubits = vector<int>();
+            StringToOperatorsList(obs_defs[1], obs_ops, obs_qubits);
+            OperatorObs.push_back(obs_ops);
+            OperatorObsQubits.push_back(obs_qubits);
+        }
+        else
+		    cout2 << "Type of an observable custom_observables is unknown (must be 'g' or 'o'): " << c_obs << "\n", exit(0);
 	}
 	
 	if (param.val("b_initial_rho_compression") != 0) {
@@ -751,6 +775,7 @@ int main(int argc, char *argv[])
 		//If the time corresponds a step where some gates should be applied:
 		//note: if several gates are associated to the same time, the application will follow
 		// the order of the arguments of 'apply_gate'
+		bool b_normalize = false; // Will be set to true of projectors applied to rho.
 		for (unsigned int k=0;k<gate_times.size();k++) {
 			if (abs(gate_times[k] - t) < (tau / 2.)) {
 				// This will make the gate execute at t nearest to the requested time.
@@ -769,15 +794,37 @@ int main(int argc, char *argv[])
 					else
 						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
 				} else {
-					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<")\n";
-					if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
-					if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
-					if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
-					if (gate_names[k]=="SX") ApplySqrtXGate(C.rho,C.siteops,gate_i[k]);
-					if (gate_names[k]=="H") ApplyHGate(C.rho,C.siteops,gate_i[k]);
+					if (gate_names[k]=="U") {
+      					cout2<<"\tApplication of projector Up" <<"("<<gate_i[k]<<")\n";
+					    ApplyProjUp(C.rho,C.siteops,gate_i[k]);
+					    b_normalize = true;
+					}
+					else {
+                        if (gate_names[k]=="D") {
+          					cout2<<"\tApplication of projector Down" <<"("<<gate_i[k]<<")\n";
+                            ApplyProjDn(C.rho,C.siteops,gate_i[k]);
+                            b_normalize = true;
+                        }
+                        else {
+        					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<")\n";
+                            if (gate_names[k]=="X") ApplyXGate(C.rho,C.siteops,gate_i[k]);
+                            if (gate_names[k]=="Y") ApplyYGate(C.rho,C.siteops,gate_i[k]);
+                            if (gate_names[k]=="Z") ApplyZGate(C.rho,C.siteops,gate_i[k]);
+                            if (gate_names[k]=="SX") ApplySqrtXGate(C.rho,C.siteops,gate_i[k]);
+                            if (gate_names[k]=="H") ApplyHGate(C.rho,C.siteops,gate_i[k]);
+                        }
+                    }
 				}
 			}
 		}
+        if (b_normalize) {
+			Cplx z = C.trace_rho();
+			cout2 << "\tNormalizing rho after projections applied. Tr{rho}: " << z << "\n";
+			if (std::abs(z) < _2_N)
+				cout2 << "\t\tNote: this is smaller than 2^(-N)!" << "\n";
+    		C.rho /= z;
+        }
+		cout2.flush();
 
 		if (force_rho_Hermitian_step && (n % force_rho_Hermitian_step) == 0)
 			C.MakeRhoHermitian(argsRho);
@@ -903,11 +950,21 @@ int main(int argc, char *argv[])
 				// Custom observables
 				count = 0;
 				if (ProjectorList.size()>0) {
-					//cout2<<"\n\tCustom observable(s):";
 					int c=0;
 					for (MPS& proj:ProjectorList) {
            				file_custom << t << " \t" << ProjectorNames[c] << "\t" << innerC(proj,C.rho).real() << endl;
 						//cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
+						c++;
+					}
+					count = c;
+				}
+				unsigned int n_op_obs = OperatorObsNames.size();
+				if (n_op_obs>0) {
+					int c=0;
+					for (string& s_op_obs:OperatorObsNames)
+					{
+					    Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
+           				file_custom << t << " \t" << s_op_obs << "\t" << op_val.real() << endl;
 						c++;
 					}
 					count = c;

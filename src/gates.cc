@@ -34,6 +34,16 @@ void ApplyHGate(MPS &rho, const Pauli &siteops,int i) {
 	rho.ref(i)*=op(siteops,"_H",i);
 	rho.ref(i).noPrime("Site");
 }
+void ApplyProjUp(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"projUp",i);
+	rho.ref(i)*=op(siteops,"_projUp",i);
+	rho.ref(i).noPrime("Site");
+}
+void ApplyProjDn(MPS &rho, const Pauli &siteops,int i) {
+	rho.ref(i)*=op(siteops,"projDn",i);
+	rho.ref(i)*=op(siteops,"_projDn",i);
+	rho.ref(i).noPrime("Site");
+}
 
 void ApplyControlledXYZGateONPureState(MPS &psi, const SpinHalf&sites,int control,int target,string opname,Args args) {
 	if (control==target) cerr << "Error, ApplyControlledXYZGateONPureState was called with control=target="<<control<<".\n", exit(1);
@@ -240,7 +250,41 @@ void ApplyListOfGatesOnAPureState(string s,MPS& psi,const SpinHalfSystem& C) {
         else cout2<<"Error in SpinHalfSystem::ConstructProjectorFromGates: unknown 2-qubit gate "<<op_name<<".\n",exit(0);
       break;
       default:
-        cout2<<"Error in SpinHalfSystem::ConstructProjectorFromGates: expecting an operator names followed by 1 or 2 qubit number but got "<<op<<".\n",exit(0);
+        cout2<<"Error in SpinHalfSystem::ConstructProjectorFromGates: expecting an operator name followed by 1 or 2 qubit number but got "<<op<<".\n",exit(0);
+    }
+  }
+}
+
+void StringToOperatorsList(string s, vector<string> &ops, vector<int> &qubits) {
+  // The string s describes a list of operators
+  // format: op0_name q0a, op1_name q1a, ...
+  vector<string> l_ops=split(s,',');
+  for (auto & op : l_ops) {
+    vector<string> st=split(op,' ');
+    string op_name;
+    int i=-1;
+    int n=st.size();
+    switch(n) {
+      case 2:
+      {
+        op_name=st[0];
+        i=stoi(st[1]);
+        if (i<1)  // || i>C.N)
+            cout2 << "Error in StringToOperatorsList: qubit index i="<<i<<" is out of range.\n",exit(0);
+        char op_lower = char(tolower(op_name[0]));
+        if (op_lower=='x' || op_lower=='y' || op_lower=='z' || op_lower=='u' || op_lower=='d')
+        {
+            string s_op_lower = string("S");
+            s_op_lower += op_lower;
+            ops.push_back(s_op_lower);
+            qubits.push_back(i);
+        }
+        else
+            cout2 << "Error in StringToOperatorsList: unknown 1-qubit operator "<<op_name<<".\n",exit(0);
+        break;
+      }
+      default:
+        cout2 << "Error in StringToOperatorsList: expecting an operator name followed by 1 qubit number but got "<<op<<".\n",exit(0);
     }
   }
 }

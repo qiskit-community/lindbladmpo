@@ -149,12 +149,12 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   {
     Op.set(uu_, dd, 1.0);
   }
-  else if (opname == "projUp")
+  else if (opname == "projUp" || opname == "Su")
   {
     Op.set(uu_, uu, 1.0);
     Op.set(du_, du, 1.0);
   }
-  else if (opname == "projDn")
+  else if (opname == "projDn" || opname == "Sd")
   {
     Op.set(ud_, ud, 1.0);
     Op.set(dd_, dd, 1.0);

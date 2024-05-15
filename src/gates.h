@@ -31,6 +31,10 @@ void ApplySqrtXGate(MPS &, const Pauli &,int);
 
 void ApplyHGate(MPS &, const Pauli &,int);
 
+void ApplyProjUp(MPS &, const Pauli &,int);
+
+void ApplyProjDn(MPS &, const Pauli &,int);
+
 void ApplyControlledXYZGate(MPS &, const Pauli &,int,int,string,Args=Args("Cutoff",0));
 
 //Apply the CNOT gate on some mixed state rho, at sites (control,target)
@@ -42,5 +46,7 @@ void ApplyControlledZGate(MPS &, const Pauli &,int,int,Args arg=Args("Cutoff",0)
 // From an ordered list of gates [g1,g2, ..., gN] specified in a string s, and from a 'initial' pure state |psi0>,
 // construct |psi>=g1*g2*...*gN |psi0>
 void ApplyListOfGatesOnAPureState(string  ,MPS&     ,const SpinHalfSystem&);
+
+void StringToOperatorsList(string, vector<string> &, vector<int> &);
 
 #endif
