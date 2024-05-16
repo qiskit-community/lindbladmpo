@@ -716,7 +716,9 @@ class LindbladMPOSolver:
                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     )
                     continue
-            elif key == "apply_gates" or key == "custom_observables" or key == "collapse":
+            elif (
+                key == "apply_gates" or key == "custom_observables" or key == "collapse"
+            ):
                 if (
                     not isinstance(parameters[key], tuple)
                     and not isinstance(parameters[key], list)
