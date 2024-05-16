@@ -237,6 +237,9 @@ void ApplyListOfGatesOnAPureState(string s,MPS& psi,const SpinHalfSystem& C) {
         else if  (op_name=="Y" || op_name=="y") psi.ref(i)*=2*C.sites.op("Sy",i),psi.ref(i).noPrime();
         else if  (op_name=="Z" || op_name=="z") psi.ref(i)*=2*C.sites.op("Sz",i),psi.ref(i).noPrime();
         else if  (op_name=="H" || op_name=="h") psi.ref(i)*=Hadamard(C.sites,i),psi.ref(i).noPrime();
+        else if  (op_name=="U" || op_name=="u") psi.ref(i)*=C.sites.op("projUp",i),psi.ref(i).noPrime();
+        else if  (op_name=="D" || op_name=="d") psi.ref(i)*=C.sites.op("projDn",i),psi.ref(i).noPrime();
+        // TODO: Verify whether the projectors need the factor of 2 ?
         else cout2<<"Error in SpinHalfSystem::ConstructProjectorFromGates: unknown 1-qubit operator "<<op_name<<".\n",exit(0);
         break;
       case 3:

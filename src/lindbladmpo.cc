@@ -28,7 +28,7 @@ using namespace std;
 using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
-const string SOLVER_VERSION = "0.2.3";
+const string SOLVER_VERSION = "0.3.1";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -536,10 +536,10 @@ int main(int argc, char *argv[])
 		} else {
 			cout2 << "Error: "<<sgate<<" is not a valid gate name.\n", exit(1);
 		}
-
 	}
 
 	vector<string> custom_obs = param.stringvec("custom_observables", ';');
+	const bool b_custom_obs = custom_obs.size() > 0;
 	// each of custom_obs's strings now corresponds to one observable. The string can have two formats:
 	// "obs_name obs_type:gate_name q0 q1, ..." with obs_type == 'g' or:
 	// "obs_name obs_type:op_name q0, ..." with obs_type == 'o'.
@@ -561,7 +561,7 @@ int main(int argc, char *argv[])
     	vector<string> obs_head=split(obs_defs[0], ' ');
         if (obs_head[1] == "g")
         {
-//            cout2 << "Custom observable defined by gates, name: " << obs_head[0] << ", gates: "<< obs_defs[1] << ";  ";
+            // cout2 << "Custom observable defined by gates, name: " << obs_head[0] << ", gates: "<< obs_defs[1] << ";  ";
             ProjectorNames.push_back(obs_head[0]);
             auto psi0_ini = InitState(C.sites);
             for (int i = 1; i <= N; ++i) psi0_ini.set(i, "Up");// Start with all spins up
@@ -576,7 +576,7 @@ int main(int argc, char *argv[])
         }
         else if (obs_head[1] == "o")
         {
-//            cout2 << "Custom observable defined by operators, name: " << obs_head[0] << ", operators: "<< obs_defs[1] << ";  ";
+            // cout2 << "Custom observable defined by operators, name: " << obs_head[0] << ", operators: "<< obs_defs[1] << ";  ";
             OperatorObsNames.push_back(obs_head[0]);
             vector<string> obs_ops = vector<string>();
             vector<int> obs_qubits = vector<int>();
@@ -585,8 +585,32 @@ int main(int argc, char *argv[])
             OperatorObsQubits.push_back(obs_qubits);
         }
         else
-		    cout2 << "Type of an observable custom_observables is unknown (must be 'g' or 'o'): " << c_obs << "\n", exit(0);
+		    cout2 << "Type of an observable in custom_observables is unknown (must be 'g' or 'o'): " << c_obs << "\n", exit(0);
 	}
+
+	vector<string> collapse = param.stringvec("collapse", ';');
+	vector<string> CollapseOpsNames;
+	vector<vector<string>> CollapseOps;
+	vector<vector<int>> CollapseOpsQubits;
+	for (string coll : collapse) {
+		vector<string> op_defs=split(coll, ':');
+		if (op_defs.size() != 2)
+		    cout2 << "No operator data in parameter collapse: " << coll << "\n", exit(0);
+    	vector<string> op_head=split(op_defs[0], ' ');
+        if (op_head[1] == "o")
+        {
+            // cout2 << "Collapse operator, name: " << op_head[0] << ", operators: "<< op_defs[1] << ";  ";
+            CollapseOpsNames.push_back(op_head[0]);
+            vector<string> coll_ops = vector<string>();
+            vector<int> coll_qubits = vector<int>();
+            StringToOperatorsList(op_defs[1], coll_ops, coll_qubits);
+            CollapseOps.push_back(coll_ops);
+            CollapseOpsQubits.push_back(coll_qubits);
+        }
+        else
+		    cout2 << "Type of an operator in collapse is unknown (must be 'o'): " << coll << "\n", exit(0);
+	}
+    cout2.flush();
 
 	if (param.val("b_initial_rho_compression") != 0) {
 
@@ -651,110 +675,117 @@ int main(int argc, char *argv[])
 	const int n_steps = int(t_total / tau);
 
 	// Open output files
-	ofstream file_1q(output_prefix + ".obs-1q.dat");
-	file_1q.precision(15);
-	file_1q << "#time\toperator\tindex\tvalue" << endl;
-	ofstream file_2q(output_prefix + ".obs-2q.dat");
-	file_2q.precision(15);
-	file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
-	ofstream file_3q(output_prefix + ".obs-3q.dat");
-	file_3q.precision(15);
-	file_3q << "#time\toperator\tindex_1\tindex_2\tindex_3\tvalue" << endl;
-	ofstream file_global(output_prefix + ".global.dat");
+	ofstream file_1q, file_2q, file_3q, file_global, file_custom;
+	file_global.open(output_prefix + ".global.dat"); // Always written to.
 	file_global.precision(15);
 	file_global << "#time\tquantity\tvalue" << endl;
-	ofstream file_custom(output_prefix + ".obs-cu.dat");
-	file_custom.precision(15);
-	file_custom << "#time\tobservable\tvalue" << endl;
+	if (b_custom_obs)
+	{
+        file_custom.open(output_prefix + ".obs-cu.dat");
+        file_custom.precision(15);
+        file_custom << "#time\tobservable\tvalue" << endl;
+    }
 
-	//-----------------------------------------------------
 	// Some preparation/checks for the 1-qubit observables
 	auto components = param.stringvec("1q_components");
-	for (auto &s : components)
-	{
-		if (s.length() != 1)
-			cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
-		char c = toupper(s[0]);
-		if (c != 'X' && c != 'Y' && c != 'Z')
-			cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
-	}
 	vector<long> sit = param.longvec("1q_indices");
-	if (sit.size() == 0)
-	{ //If no sites are given explicitly we consider all: 1,...,N
-	    sit.resize(N);
-		iota(sit.begin(), sit.end(), 1);
-	}
-	for (int i : sit)
+	if (components.size())
 	{
-		if (i < 1 || i > N)
-			cout2 << "Error: invalid index i=" << i << " found in list `1q_indices`.\n", exit(1);
-	}
-	//-----------------------------------------------------
+        for (auto &s : components)
+        {
+            if (s.length() != 1)
+                cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+            char c = toupper(s[0]);
+            if (c != 'X' && c != 'Y' && c != 'Z')
+                cout2 << "Error: " << s << " is an unknown 1-qubit component (should be in {x,y,z} or in {X,Y,Z}).\n", exit(1);
+        }
+        if (sit.size() == 0)
+        { //If no sites are given explicitly we consider all: 1,...,N
+            sit.resize(N);
+            iota(sit.begin(), sit.end(), 1);
+        }
+        for (int i : sit)
+        {
+            if (i < 1 || i > N)
+                cout2 << "Error: invalid index i=" << i << " found in list `1q_indices`.\n", exit(1);
+        }
+        file_1q.open(output_prefix + ".obs-1q.dat");
+        file_1q.precision(15);
+        file_1q << "#time\toperator\tindex\tvalue" << endl;
+    }
+
 	// Some preparation/checks for the 2-qubit observables
-	vector<long> sit2 = param.longvec("2q_indices");
-	if (sit2.size() % 2 == 1)
-		cout2 << "Error: the list of indices given in the parameter `2q_indices` should have an even length.\n", exit(1);
-
-	if (sit2.size() == 0)
-	{ //If no sites are given explicitly we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
-		for (int i = 1; i <= N; i++)
-			for (int j = 1; j <= N; j++)
-			{
-				if (i != j)
-					sit2.push_back(i), sit2.push_back(j);
-			}
-	}
-	validate_2q_list(sit2, N, "q2_indices");
-
 	auto components2 = param.stringvec("2q_components");
-	for (auto &s : components2)
+	vector<long> sit2 = param.longvec("2q_indices");
+	if (components2.size())
 	{
-		if (s.length() != 2)
-			cout2 << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
-		for (int n = 0; n <= 1; n++)
-		{
-			char c = toupper(s[n]);
-			if (c != 'X' && c != 'Y' && c != 'Z')
-				cout2 << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
-		}
+        if (sit2.size() % 2 == 1)
+            cout2 << "Error: the list of indices given in the parameter `2q_indices` should have an even length.\n", exit(1);
+        if (sit2.size() == 0)
+        { //If no sites are given explicitly we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
+            for (int i = 1; i <= N; i++)
+                for (int j = 1; j <= N; j++)
+                {
+                    if (i != j)
+                        sit2.push_back(i), sit2.push_back(j);
+                }
+        }
+        validate_2q_list(sit2, N, "q2_indices");
+        for (auto &s : components2)
+        {
+            if (s.length() != 2)
+                cout2 << "Error: " << s << " is an unknown 2-qubit component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
+            for (int n = 0; n <= 1; n++)
+            {
+                char c = toupper(s[n]);
+                if (c != 'X' && c != 'Y' && c != 'Z')
+                    cout2 << "Error: " << s << " is an unknown component (should be a pair in (x,y,z)*(x,y,z)).\n", exit(1);
+            }
+        }
+        file_2q.open(output_prefix + ".obs-2q.dat");
+        file_2q.precision(15);
+        file_2q << "#time\toperator\tindex_1\tindex_2\tvalue" << endl;
 	}
 
-	//-----------------------------------------------------
 	// Some preparation/checks for the 3-qubit observables
-	vector<long> sit3 = param.longvec("3q_indices");
-	if (sit3.size() % 3 > 0)
-		cout2 << "Error: the list of indices given in the parameter `3q_indices` should be multiple of three.\n", exit(1);
-
-	if (sit3.size() == 0)
-	{ //If no sites are given explicitly we consider all pairs 1,2,1,3,...,1,N,    2,1,2,3,2,4,...,2,N,  ...  N,N-1
-		for (int i = 1; i <= N; i++)
-			for (int j = 1; j <= N; j++)
-				for (int k = 1; k <= N; k++)
-				{
-					if (i != j && i != k && j != k)
-						sit3.push_back(i), sit3.push_back(j), sit3.push_back(k);
-				}
-	}
-	validate_3q_list(sit3, N, "q3_indices");
-
 	auto components3 = param.stringvec("3q_components");
-	for (auto &s : components3)
+	vector<long> sit3 = param.longvec("3q_indices");
+	if (components3.size())
 	{
-		if (s.length() != 3)
-			cout2 << "Error: " << s << " is an unknown 3-qubit component (should be a triplet in (x,y,z)*(x,y,z)*(x,y,z)).\n", exit(1);
-		for (int n = 0; n <= 2; n++)
-		{
-			char c = toupper(s[n]);
-			if (c != 'X' && c != 'Y' && c != 'Z')
-				cout2 << "Error: " << s << " is an unknown component (should be a triplet in (x,y,z)*(x,y,z)*(x,y,z)).\n", exit(1);
-		}
-	}
+        if (sit3.size() % 3 > 0)
+            cout2 << "Error: the list of indices given in the parameter `3q_indices` should be multiple of three.\n", exit(1);
+        if (sit3.size() == 0)
+        { //If no sites are given explicitly we consider all triples
+            for (int i = 1; i <= N; i++)
+                for (int j = 1; j <= N; j++)
+                    for (int k = 1; k <= N; k++)
+                    {
+                        if (i != j && i != k && j != k)
+                            sit3.push_back(i), sit3.push_back(j), sit3.push_back(k);
+                    }
+        }
+        validate_3q_list(sit3, N, "q3_indices");
+        for (auto &s : components3)
+        {
+            if (s.length() != 3)
+                cout2 << "Error: " << s << " is an unknown 3-qubit component (should be a triplet in (x,y,z)*(x,y,z)*(x,y,z)).\n", exit(1);
+            for (int n = 0; n <= 2; n++)
+            {
+                char c = toupper(s[n]);
+                if (c != 'X' && c != 'Y' && c != 'Z')
+                    cout2 << "Error: " << s << " is an unknown component (should be a triplet in (x,y,z)*(x,y,z)*(x,y,z)).\n", exit(1);
+            }
+        }
+        file_3q.open(output_prefix + ".obs-3q.dat");
+        file_3q.precision(15);
+        file_3q << "#time\toperator\tindex_1\tindex_2\tindex_3\tvalue" << endl;
+    }
 
 	//-----------------------------------------------------
 	const int output_step = param.longval("output_step");
 	auto t_init_end = steady_clock::now();
 	auto duration_ms = duration_cast<milliseconds>(t_init_end - t_start_sim);
-	cout2 << "\nSimulation initialization duration: " << duration_ms.count() / 1000. << "s" << "\n";
+	cout2 << "\nSimulation initialization took: " << duration_ms.count() / 1000. << "s" << "\n";
 	cout2.flush();
 
 	char buf[100];
@@ -822,6 +853,7 @@ int main(int argc, char *argv[])
 			cout2 << "\tNormalizing rho after projections applied. Tr{rho}: " << z << "\n";
 			if (std::abs(z) < _2_N)
 				cout2 << "\t\tNote: this is smaller than 2^(-N)!" << "\n";
+				// TODO: This is a somewhat arbitrary threshold for the warning.
     		C.rho /= z;
         }
 		cout2.flush();
@@ -860,122 +892,134 @@ int main(int argc, char *argv[])
 				// Compute 1-qubit observables and write them to file
 				int count = 0;
 				auto t_1q_start = steady_clock::now();
-
-				for (long &i : sit)
-				{
-					for (auto &s : components)
-					{
-						string c1("S");
-						c1 += char(tolower(s[0]));
-						Cplx expectation_value = C.Expect(c1, i);
-						if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
-							cout2 << "\nWarning: <S^" << s << "(" << i << ")> = " << expectation_value <<
-								"; it should be real, but has an imaginary part > " <<
-								IMAGINARY_THRESHOLD << ".\n";
-						file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i
-							  << "\t" << expectation_value.real() << endl;
-						count++;
-					}
-//					file_1q << endl;
-				}
-				file_1q << endl; // Skip a line between time steps
-				auto t_1q_end = steady_clock::now();
-				if (count)
-				{
-					duration_ms = duration_cast<milliseconds>(t_1q_end - t_1q_start);
-					cout2 << "\n\t" << count << " 1-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
-				}
+                if (components.size())
+                {
+                    for (long &i : sit)
+                    {
+                        for (auto &s : components)
+                        {
+                            string c1("S");
+                            c1 += char(tolower(s[0]));
+                            Cplx expectation_value = C.Expect(c1, i);
+                            if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
+                                cout2 << "\nWarning: <S^" << s << "(" << i << ")> = " << expectation_value <<
+                                    "; it should be real, but has an imaginary part > " <<
+                                    IMAGINARY_THRESHOLD << ".\n";
+                            file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i
+                                  << "\t" << expectation_value.real() << endl;
+                            count++;
+                        }
+    //					file_1q << endl;
+                    }
+                    file_1q << endl; // Skip a line between time steps
+                }
+                auto t_1q_end = steady_clock::now();
+                if (count)
+                {
+                    duration_ms = duration_cast<milliseconds>(t_1q_end - t_1q_start);
+                    cout2 << "\n\t" << count << " 1-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+    				count = 0;
+                }
 		        // --------------------------------------------------
 				// Compute 2-qubit observables and write them to file
-				count = 0;
-				for (unsigned int n = 0; n < sit2.size(); n += 2)
+				if (components2.size())
 				{
-					const int i = sit2[n], j = sit2[n + 1];
-					//Loop over components
-					for (auto &s : components2)
-					{
-						string c1("S"), c2("S");
-						c1 += char(tolower(s[0]));
-						c2 += char(tolower(s[1]));
-						Cplx expectation_value = C.Expect(c1, i, c2, j);
-						if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
-							cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
-								")> = " << expectation_value <<
-								"; it should be real, but has an imaginary part > " <<
-								IMAGINARY_THRESHOLD << ".\n";
-						file_2q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
-						count++;
-					}
-				}
-				file_2q << endl; //Skip a line between time steps
+                    for (unsigned int n = 0; n < sit2.size(); n += 2)
+                    {
+                        const int i = sit2[n], j = sit2[n + 1];
+                        //Loop over components
+                        for (auto &s : components2)
+                        {
+                            string c1("S"), c2("S");
+                            c1 += char(tolower(s[0]));
+                            c2 += char(tolower(s[1]));
+                            Cplx expectation_value = C.Expect(c1, i, c2, j);
+                            if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
+                                cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
+                                    ")> = " << expectation_value <<
+                                    "; it should be real, but has an imaginary part > " <<
+                                    IMAGINARY_THRESHOLD << ".\n";
+                            file_2q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << i << "\t" << j << "\t" << expectation_value.real() << endl;
+                            count++;
+                        }
+                    }
+                    file_2q << endl; //Skip a line between time steps
+                }
 				auto t_2q_end = steady_clock::now();
 				if (count)
 				{
 					duration_ms = duration_cast<milliseconds>(t_2q_end - t_1q_end);
 					cout2 << "\n\t" << count << " 2-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+    				count = 0;
 				}
 				// --------------------------------------------------
 				// Compute 3-qubit observables and write them to file
-				count = 0;
-				for (unsigned int n = 0; n < sit3.size(); n += 3)
-				{
-					const int i = sit3[n], j = sit3[n + 1], k = sit3[n + 2];
-					//Loop over components
-					for (auto &s : components3)
-					{
-						string c1("S"), c2("S"),c3("S");
-						c1 += char(tolower(s[0]));
-						c2 += char(tolower(s[1]));
-						c3 += char(tolower(s[2]));
-						Cplx expectation_value = C.Expect(c1, i, c2, j,c3,k);
-						if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
-							cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
-								")"<< c3 << "(" << k <<")" << expectation_value <<
-								"; it should be real, but has an imaginary part > " <<
-								IMAGINARY_THRESHOLD << ".\n";
-						file_3q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << char(toupper(s[2]))
-						<< "\t" << i << "\t" << j << "\t" << k <<"\t" << expectation_value.real() << endl;
-						count++;
-					}
-				}
-				file_3q << endl; //Skip a line between time steps
+				if (components3.size())
+                {
+                    for (unsigned int n = 0; n < sit3.size(); n += 3)
+                    {
+                        const int i = sit3[n], j = sit3[n + 1], k = sit3[n + 2];
+                        //Loop over components
+                        for (auto &s : components3)
+                        {
+                            string c1("S"), c2("S"),c3("S");
+                            c1 += char(tolower(s[0]));
+                            c2 += char(tolower(s[1]));
+                            c3 += char(tolower(s[2]));
+                            Cplx expectation_value = C.Expect(c1, i, c2, j,c3,k);
+                            if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
+                                cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
+                                    ")"<< c3 << "(" << k <<")" << expectation_value <<
+                                    "; it should be real, but has an imaginary part > " <<
+                                    IMAGINARY_THRESHOLD << ".\n";
+                            file_3q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << char(toupper(s[2]))
+                            << "\t" << i << "\t" << j << "\t" << k <<"\t" << expectation_value.real() << endl;
+                            count++;
+                        }
+                    }
+                    file_3q << endl; //Skip a line between time steps
+                }
 				auto t_3q_end = steady_clock::now();
 				if (count)
-					{
-						duration_ms = duration_cast<milliseconds>(t_3q_end - t_2q_end);
-						cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
-					}
+                {
+                    duration_ms = duration_cast<milliseconds>(t_3q_end - t_2q_end);
+                    cout2 << "\n\t" << count << " 3-qubit expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+    				count = 0;
+                }
 
 				// --------------------------------------------------
 				// Custom observables
-				count = 0;
-				if (ProjectorList.size()>0) {
-					int c=0;
-					for (MPS& proj:ProjectorList) {
-           				file_custom << t << " \t" << ProjectorNames[c] << "\t" << innerC(proj,C.rho).real() << endl;
-						//cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
-						c++;
-					}
-					count = c;
-				}
-				unsigned int n_op_obs = OperatorObsNames.size();
-				if (n_op_obs>0) {
-					int c=0;
-					for (string& s_op_obs:OperatorObsNames)
-					{
-					    Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
-           				file_custom << t << " \t" << s_op_obs << "\t" << op_val.real() << endl;
-						c++;
-					}
-					count = c;
-				}
-				file_custom << endl; //Skip a line between time steps
+				if (b_custom_obs)
+				{
+                    if (ProjectorList.size()>0) {
+                        int c=0;
+                        for (MPS& proj:ProjectorList) {
+                            file_custom << t << " \t" << ProjectorNames[c] << "\t" << innerC(proj,C.rho).real() << endl;
+                            //cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
+                            c++;
+                        }
+                        count += c;
+                    }
+                    unsigned int n_op_obs = OperatorObsNames.size();
+                    if (n_op_obs>0) {
+                        int c=0;
+                        for (string& s_op_obs:OperatorObsNames)
+                        {
+                            Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
+                            file_custom << t << " \t" << s_op_obs << "\t" << op_val.real() << endl;
+                            c++;
+                        }
+                        count += c;
+                    }
+                    file_custom << endl; //Skip a line between time steps
+                }
 				auto t_cu_end = steady_clock::now();
 				if (count)
-					{
-						duration_ms = duration_cast<milliseconds>(t_cu_end - t_3q_end);
-						cout2 << "\n\t" << count << " custom expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
-					}
+                {
+                    duration_ms = duration_cast<milliseconds>(t_cu_end - t_3q_end);
+                    cout2 << "\n\t" << count << " custom expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
+                    count = 0;
+                }
 				// --------------------------------------------------
 				cout2 << "\n";
 				cout2.flush();
@@ -993,7 +1037,7 @@ int main(int argc, char *argv[])
 			duration_ms = duration_cast<milliseconds>(t_evolve_end - t_evolve_start);
 			cout2 << "done. Duration: " << duration_ms.count() / 1000. << "s" << "\n";
 
-			Cplx z = C.trace_rho(); //Should be very close to 1, since the Lindblad evolution preserves Tr[rho]
+			Cplx z = C.trace_rho();
 			if (std::abs(z - 1) > TRACE_RHO_THRESHOLD)
 				cout2 << "\nWarning: Tr[rho] != 1 :" << z << "\n";
 			if (param.val("b_force_rho_trace") != 0)
@@ -1014,11 +1058,16 @@ int main(int argc, char *argv[])
 		writeToFile(f3, C.sites);
 		cout2 << "The final state was saved to disk, using 3 files:\n" << f1 << "\n" << f2 << "\n" << f3 << "\n";
 	}
-	file_1q.close();
-	file_2q.close();
-	file_3q.close();
-	file_global.close();
-	file_custom.close();
+	if (file_1q.is_open())
+    	file_1q.close();
+	if (file_2q.is_open())
+        file_2q.close();
+	if (file_3q.is_open())
+    	file_3q.close();
+	if (file_global.is_open())
+    	file_global.close();
+	if (file_custom.is_open())
+    	file_custom.close();
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
