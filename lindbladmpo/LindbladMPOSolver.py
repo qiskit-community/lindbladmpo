@@ -533,7 +533,7 @@ class LindbladMPOSolver:
                 if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 140: " + key + " is not a float\n"
                     continue
-                if key != "t_init" and parameters[key] <= 0:
+                if key == "tau" and parameters[key] <= 0:
                     check_msg += "Error 150: " + key + " must be larger than 0\n"
                     continue
                 if key == "t_init" and parameters[key] > parameters["t_final"]:
@@ -1215,29 +1215,4 @@ class LindbladMPOSolver:
                 check_msg += "Error: unknown parameter key passed: " + key + "\n"
         # End of: "for key in dict.keys(parameters)"
 
-        # More cross-parameter checks:
-        if ("t_final" in parameters) and ("tau" in parameters):
-            if (LindbladMPOSolver.is_float(parameters["tau"])) and (
-                LindbladMPOSolver.is_float(parameters["t_final"])
-            ):
-                if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
-                    if parameters["tau"] > parameters["t_final"] - parameters.get(
-                        "t_init", 0.0
-                    ):
-                        check_msg += (
-                            "Error 640: t_final (total time) is smaller than tau (time step "
-                            "for time evolution)\n "
-                        )
-                    elif "output_step" in parameters:
-                        if LindbladMPOSolver._is_int(parameters["output_step"]):
-                            if parameters["output_step"] > 0:
-                                if (
-                                    parameters["output_step"] * parameters["tau"]
-                                    > parameters["t_final"]
-                                ):
-                                    check_msg += (
-                                        "Error 650: output_step multiplied by tau is larger "
-                                        "than t_final (output_step in units of tau, times "
-                                        "tau is larger than the simulation time)\n "
-                                    )
         return check_msg

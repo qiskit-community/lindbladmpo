@@ -676,7 +676,7 @@ int main(int argc, char *argv[])
 	const int n_steps = int(t_total / tau);
 
 	// Open output files
-	ofstream file_1q, file_2q, file_3q, file_global, file_custom;
+	ofstream file_1q, file_2q, file_3q, file_global, file_custom, file_collapse;
 	file_global.open(output_prefix + ".global.dat"); // Always written to.
 	file_global.precision(15);
 	file_global << "#time\tquantity\tvalue" << endl;
@@ -686,7 +686,10 @@ int main(int argc, char *argv[])
         file_custom.precision(15);
         file_custom << "#time\tobservable\tvalue" << endl;
     }
-
+    if (collapse.size() && !b_custom_obs)
+    {
+        cout2 << "Error: collapse operators list is nonempty, but no custom observables defined.\n", exit(1);
+    }
 	// Some preparation/checks for the 1-qubit observables
 	auto components = param.stringvec("1q_components");
 	vector<long> sit = param.longvec("1q_indices");
@@ -793,9 +796,10 @@ int main(int argc, char *argv[])
 	const long force_rho_Hermitian_step = param.longval("force_rho_hermitian_step");
  	const bool b_quiet = param.boolval("b_quiet");
  	cout2.quiet(b_quiet);
+ 	double t = t_0;
 	for (int n = 0; n <= n_steps; n++)
 	{
-		const double t = t_0 + n * tau;
+		t = t_0 + n * tau;
 		// Print data about this time step
 		auto t_now = steady_clock::now();
 		auto tot_duration = duration_cast<milliseconds>(t_now - t_start_sim);
@@ -807,7 +811,7 @@ int main(int argc, char *argv[])
 		//If the time corresponds a step where some gates should be applied:
 		//note: if several gates are associated to the same time, the application will follow
 		// the order of the arguments of 'apply_gate'
-		bool b_normalize = false; // Will be set to true of projectors applied to rho.
+		bool b_normalize = false; // Will be set to true if projectors applied to rho.
 		for (unsigned int k=0;k<gate_times.size();k++) {
 			if (abs(gate_times[k] - t) < (tau / 2.)) {
 				// This will make the gate execute at t nearest to the requested time.
@@ -903,7 +907,7 @@ int main(int argc, char *argv[])
                             c1 += char(tolower(s[0]));
                             Cplx expectation_value = C.Expect(c1, i);
                             if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
-                                cout2 << "\nWarning: <S^" << s << "(" << i << ")> = " << expectation_value <<
+                                cout2 << "\tWarning: <S^" << s << "(" << i << ")> = " << expectation_value <<
                                     "; it should be real, but has an imaginary part > " <<
                                     IMAGINARY_THRESHOLD << ".\n";
                             file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i
@@ -936,7 +940,7 @@ int main(int argc, char *argv[])
                             c2 += char(tolower(s[1]));
                             Cplx expectation_value = C.Expect(c1, i, c2, j);
                             if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
-                                cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
+                                cout2 << "\tWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
                                     ")> = " << expectation_value <<
                                     "; it should be real, but has an imaginary part > " <<
                                     IMAGINARY_THRESHOLD << ".\n";
@@ -969,8 +973,8 @@ int main(int argc, char *argv[])
                             c3 += char(tolower(s[2]));
                             Cplx expectation_value = C.Expect(c1, i, c2, j,c3,k);
                             if (abs(expectation_value.imag()) > IMAGINARY_THRESHOLD)
-                                cout2 << "\nWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
-                                    ")"<< c3 << "(" << k <<")" << expectation_value <<
+                                cout2 << "\tWarning: <" << c1 << "(" << i << ")" << c2 << "(" << j <<
+                                    ")" << c3 << "(" << k <<")" << expectation_value <<
                                     "; it should be real, but has an imaginary part > " <<
                                     IMAGINARY_THRESHOLD << ".\n";
                             file_3q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << char(toupper(s[2]))
@@ -992,19 +996,18 @@ int main(int argc, char *argv[])
 				// Custom observables
 				if (b_custom_obs)
 				{
-                    if (ProjectorList.size()>0) {
+                    if (ProjectorList.size()) {
                         int c=0;
                         for (MPS& proj:ProjectorList) {
-                            file_custom << t << " \t" << ProjectorNames[c] << "\t" << innerC(proj,C.rho).real() << endl;
-                            //cout2<<"\n\t\tTr[ |"<<ProjectorNames[c]<<"><"<<ProjectorNames[c]<<"| * rho ]="<<innerC(proj,C.rho);
+                            Cplx op_val = innerC(proj,C.rho);
+                            file_custom << t << " \t" << ProjectorNames[c] << "\t" << op_val.real() << endl;
                             c++;
                         }
                         count += c;
                     }
-                    unsigned int n_op_obs = OperatorObsNames.size();
-                    if (n_op_obs>0) {
+                    if (OperatorObsNames.size()) {
                         int c=0;
-                        for (string& s_op_obs:OperatorObsNames)
+                        for (string& s_op_obs : OperatorObsNames)
                         {
                             Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
                             file_custom << t << " \t" << s_op_obs << "\t" << op_val.real() << endl;
@@ -1021,11 +1024,8 @@ int main(int argc, char *argv[])
                     cout2 << "\n\t" << count << " custom expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s";
                     count = 0;
                 }
-				// --------------------------------------------------
 				cout2 << "\n";
 				cout2.flush();
-
-	        //-----------------------------------------------------------------------------------------
 			}
 		}
 		if (n < n_steps)
@@ -1047,6 +1047,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	cout2.quiet(false);
+	cout2 << "\nSimulation ended.\n";
 
 	bool b_save_state = param.boolval("b_save_final_state");
 	if (b_save_state)
@@ -1069,6 +1070,81 @@ int main(int argc, char *argv[])
     	file_global.close();
 	if (file_custom.is_open())
     	file_custom.close();
+
+    if (collapse.size())
+    {
+        // auto t_collapse_start = steady_clock::now();
+    	cout2 << "\nStarting evaluation of " << collapse.size() << " collapse operators.\n";
+        file_collapse.open(output_prefix + ".obs-co.dat");
+        file_collapse.precision(15);
+        file_collapse << "#time\tcollapse_op\tobservable\tvalue" << endl;
+
+        int i_coll = 0;
+        MPS rho_0(C.rho);  // Keep a copy of the uncollapsed state
+        for (string& s_coll_op : CollapseOpsNames)
+        {
+            // collapse rho and send it to the observables
+            auto t_cu_start = steady_clock::now();
+            vector<string> &op_names = CollapseOps[i_coll];
+            vector<int> &op_qubits = CollapseOpsQubits[i_coll];
+            int i_op = 0 ;
+            for (string &op_name: op_names)
+            {
+                if (op_name[1] == 'u') {
+                    ApplyProjUp(C.rho,C.siteops,op_qubits[i_op]);
+                }
+                else if (op_name[1]=='d') {
+                    ApplyProjDn(C.rho,C.siteops,op_qubits[i_op]);
+                }
+                else
+                    cout2 << "Error: Collapse operator " << s_coll_op <<
+                        " can only contain standard-basis projectors (u or d)," <<
+                        " but contains " << op_name << ".\n", exit(1);
+                i_op++;
+            }
+            Cplx z = C.trace_rho();
+			cout2 << "\tNormalizing rho after collapse projector applied. Tr{rho}: " << z << "\n";
+			if (std::abs(z) < _2_N)
+				cout2 << "\t\tNote: this is smaller than 2^(-N)!" << "\n";
+				// TODO: This is a somewhat arbitrary threshold for the warning.
+       		C.rho /= z;
+
+            int count = 0;
+            if (ProjectorList.size()) {
+                int c=0;
+                for (MPS& proj:ProjectorList) {
+                    Cplx op_val = innerC(proj,C.rho);
+                    file_collapse << t << " \t" << s_coll_op << " \t" << ProjectorNames[c] << "\t" << op_val.real() << endl;
+                    c++;
+                }
+                count += c;
+            }
+            if (OperatorObsNames.size()) {
+                int c=0;
+                for (string& s_op_obs : OperatorObsNames)
+                {
+                    Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
+                    file_collapse << t << " \t" << s_coll_op << " \t" << s_op_obs << "\t" << op_val.real() << endl;
+                    c++;
+                }
+                count += c;
+            }
+            file_collapse << endl; //Skip a line between time steps
+            C.rho = MPS(rho_0);
+            auto t_cu_end = steady_clock::now();
+            if (count)
+            {
+                duration_ms = duration_cast<milliseconds>(t_cu_end - t_cu_start);
+                cout2 << "\t" << count << " custom expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s\n";
+                count = 0;
+            }
+            i_coll++;
+        }
+
+    	file_collapse.close();
+        // auto t_collapse_end = steady_clock::now();
+    }
+
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);
 	sprintf(buf, "%.2fhr", tot_duration.count() / 3600.);
