@@ -164,13 +164,17 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     if (g_2_len == 1)
         g_2 = vector<double>(N, g_2[0]);
 
+    g_3 = vector<double>(N, 0.);
+    // TODO: support parameter input
+
     for (int i = 1; i <= int(N); i++)
-        if (g_0[i - 1] || g_1[i - 1] || g_2[i - 1])
+        if (g_0[i - 1] || g_1[i - 1] || g_2[i - 1] || g_3[i - 1])
         {
-            C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], i);
+            C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], g_3[i - 1], i);
             // The first argument is the rate of dissipative processes where a spin goes from down to up
             // The second argument is the rate of dissipative processes where a spin goes from up to down
             // The third argument is the rate of energy-conserving (pure) dephasing processes
+            // The fourth argument is the rate of bit flip processes
             b_time_evolution = true;
         }
     return b_time_evolution;

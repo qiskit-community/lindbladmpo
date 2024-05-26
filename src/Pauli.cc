@@ -141,6 +141,10 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
     Op.set(ud_, ud, -1.0);
     Op.set(uu_, uu, +1.0);
   }
+  else if (opname == "Sx_Sx")
+  {
+    Error("Operator " + opname + " missing implementation.");
+  }
   else if (opname == "_S-S+")
   {
     Op.set(dd_, uu, 1.0);
@@ -231,7 +235,7 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else
   {
-    Error("Operator " + opname + " name not recognized");
+    Error("Operator " + opname + " name not recognized.");
   }
   return Op;
 }
@@ -603,7 +607,8 @@ Cplx SpinHalfSystem::Expect(const vector <string>& opnames, const vector <int>& 
   return (re);
 }
 
-void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site)
+void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing,
+    double GammaBitFlip, int site)
 {
   if (GammaMinus)
   {
@@ -623,6 +628,13 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
   {
       Cplx z = GammaDephasing * Cplx_i;
       Lindbladian += z, "Sz_Sz", site;
+      Lindbladian += -z * 0.5, "Id", site;
+      Lindbladian += -z * 0.5, "Id", site;
+  }
+  if (GammaBitFlip)
+  {
+      Cplx z = GammaBitFlip * Cplx_i;
+      Lindbladian += z, "Sx_Sx", site;
       Lindbladian += -z * 0.5, "Id", site;
       Lindbladian += -z * 0.5, "Id", site;
   }
