@@ -164,7 +164,7 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     if (g_2_len == 1)
         g_2 = vector<double>(N, g_2[0]);
 
-    g_3 = vector<double>(N, 0.);
+    vector<double> g_3 = vector<double>(N, 0.);
     // TODO: support parameter input
 
     for (int i = 1; i <= int(N); i++)
