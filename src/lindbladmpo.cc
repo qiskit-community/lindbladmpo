@@ -34,8 +34,11 @@ const string SOLVER_VERSION = "0.2.4";
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
 
-const double TRACE_RHO_THRESHOLD = 1e-4;
+const double TRACE_RHO_WARN_THRESHOLD = 1e-4;
 // Threshold for the deviation of the density matrix trace from 1, to issue a warning
+
+const double TRACE_RHO_DIV_THRESHOLD = 1e-10;
+// Threshold for the deviation of the density matrix trace from 1, to normalize
 
 
 void validate_2q_list(vector<long> &vect, int N, string const &list_name);
@@ -394,10 +397,10 @@ int main(int argc, char *argv[])
 
 		psi_defined = true;
 		//Compute the density matrix rho associated to the pure state |psi>
-		cout2 << "Constructing rho from |psi>... Norm of |psi>: (<psi|psi>)^(1/2)=" << norm(psi) <<" ";
+		cout2 << "Constructing rho from |psi>... Norm of |psi>, (<psi|psi>)^(1/2) = " << norm(psi) <<" ";
   		cout2.flush();
 		C.psi2rho(psi, argsRho);
-		cout2 << "psi2rho done.\nMax bond dimension of rho:" << maxLinkDim(C.rho)<<"\n";
+		cout2 << "psi2rho done.\nMax bond dimension of rho: " << maxLinkDim(C.rho)<<".\n";
 		cout2.flush();
 		for (int site_number = 1; site_number <= N; site_number++)
         {
@@ -457,6 +460,7 @@ int main(int argc, char *argv[])
 
 	}
 
+    const bool b_apply_gate_compression = param.boolval("b_apply_gate_compression");
 	if (b_cz_pairs) {
 			psi_defined=false;
 			cout2 << "Application of CZ gates on the requested " << init_cz_gates.size() / 2 << " pairs.\n"; cout2.flush();
@@ -465,7 +469,7 @@ int main(int argc, char *argv[])
 				const int i = init_cz_gates[n], j = init_cz_gates[n + 1];
 				const unsigned int i0 = (unsigned int)(i - 1);
 				const unsigned int j0 = (unsigned int)(j - 1);
-				if (param.boolval("b_apply_gate_compression"))
+				if (b_apply_gate_compression)
 						ApplyControlledZGate(C.rho,C.siteops,i,j,argsRho);
 					else
 						ApplyControlledZGate(C.rho,C.siteops,i,j);
@@ -573,7 +577,7 @@ int main(int argc, char *argv[])
             MPS& proj=ProjectorList.back();
             C.psi2rho(psi0,proj);
             int max_bd = maxLinkDim(proj);
-            cout2 << "MaxBondDim(gates|0...0><0...0|gates) = " << max_bd << "\n";
+            cout2 << "Max bond dimension of the custom observable " << obs_head[0] << ": " << max_bd << ".\n";
         }
         else if (obs_head[1] == "o")
         {
@@ -624,18 +628,20 @@ int main(int argc, char *argv[])
 	}
 
 	Cplx tr = C.trace_rho();
-	cout2 << "Tr{rho} before re-normalization: " << tr << "\n"; cout2.flush();
-	C.rho /= tr; //Normalize rho so that Tr[rho]=1
-	tr = C.trace_rho();
-	cout2 << "Tr{rho} after re-normalization: " << tr << "\n"; cout2.flush();
-
-	cout2 << "Tr{rho^2} ="; cout2.flush();
-	const Cplx tr2 = C.trace_rho2();
-	cout2 << tr2 << "\n"; cout2.flush();
+	cout2 << "Tr{rho}: " << tr;
+	if (std::abs(tr - 1) > TRACE_RHO_DIV_THRESHOLD)
+	{
+	    cout2 << ", normalizing.";
+	    C.rho /= tr;
+    }
+	cout2 << "\n";
+	Cplx tr2 = C.trace_rho2();
+	cout2 << "Tr{rho^2}: " << tr2 << "\n";
+	cout2.flush();
 
 	if (psi_defined)
 	{
-		if (std::abs(tr - 1) > TRACE_RHO_THRESHOLD || std::abs(tr2 - 1) > TRACE_RHO_THRESHOLD)
+		if (std::abs(tr - 1) > TRACE_RHO_WARN_THRESHOLD || std::abs(tr2 - 1) > TRACE_RHO_WARN_THRESHOLD)
 			cout2 << "Error, those traces should be 1 for a pure state |psi><psi|.\n", C.rho /= tr;
 		//Check a few simple observables, using rho and psi
 		vector<string> ops = {"Sz", "S+", "S-", "Sx", "Sy"};
@@ -650,7 +656,7 @@ int main(int argc, char *argv[])
 				Cplx with_rho = C.Expect(opname, i);
 				Cplx with_psi = psi_factor[o] * PureStateObs(opname, psi, i, C.sites)/n2;
 				err += std::abs(with_rho - with_psi);
-				if (std::abs(with_rho - with_psi) > TRACE_RHO_THRESHOLD)
+				if (std::abs(with_rho - with_psi) > TRACE_RHO_WARN_THRESHOLD)
 				cout2 << "Error: <psi|" << opname << "(" << i << ")|psi> / <psi|psi> =" << with_psi << "\t"
 					<< "Tr[rho*" << opname << "(" << i << ")]=" << with_rho << "\n",
 					exit(1);
@@ -661,22 +667,27 @@ int main(int argc, char *argv[])
 	//-----------------------------------------------------
 	//Construct the Lindbladian from the parameters (unitary and dissipative terms)
 
-	SetLindbladian(C, param, lattice);
-
-	//-----------------------------------------------------
-	cout2 << "Compute exp(i*tau*L) as an MPO... ";
-	cout2.flush();
-
-	const int o = param.val("trotter_order");
 	TimeEvolver TE; //Object defined in "TimeEvolution.h" and "TimeEvolution.cc"
-	TE.init(tau, C.Lindbladian, argsRho, o);
-	cout2 << "done.\n";
-	cout2.flush();
-	cout2 << "Largest bond dimension of the MPO exp(tau*L): " << maxLinkDim(TE.expL1) << "\n";
+	bool b_time_evolution = SetLindbladian(C, param, lattice);
+    if (b_time_evolution)
+    {
+        cout2 << "Computing exp(tau*L) as an MPO... ";
+        cout2.flush();
+        const int o = param.val("trotter_order");
+    	TE.init(tau, C.Lindbladian, argsRho, o);
+        cout2 << "done.\n";
+        cout2.flush();
+        cout2 << "Largest bond dimension of exp(tau*L): " << maxLinkDim(TE.expL1) << ".\n";
+    }
+    else
+    {
+        cout2 << "Lindbladian is trivial and no time evolution will be applied.\n";
+        cout2.flush();
+    }
 	const int n_steps = int(t_total / tau);
 
 	// Open output files
-	ofstream file_1q, file_2q, file_3q, file_global, file_custom, file_collapse;
+	ofstream file_1q, file_2q, file_3q, file_global, file_custom;
 	file_global.open(output_prefix + ".global.dat"); // Always written to.
 	file_global.precision(15);
 	file_global << "#time\tquantity\tvalue" << endl;
@@ -685,10 +696,6 @@ int main(int argc, char *argv[])
         file_custom.open(output_prefix + ".obs-cu.dat");
         file_custom.precision(15);
         file_custom << "#time\tobservable\tvalue" << endl;
-    }
-    if (collapse.size() && !b_custom_obs)
-    {
-        cout2 << "Error: collapse operators list is nonempty, but no custom observables defined.\n", exit(1);
     }
 	// Some preparation/checks for the 1-qubit observables
 	auto components = param.stringvec("1q_components");
@@ -789,11 +796,63 @@ int main(int argc, char *argv[])
 	const int output_step = param.longval("output_step");
 	auto t_init_end = steady_clock::now();
 	auto duration_ms = duration_cast<milliseconds>(t_init_end - t_start_sim);
-	cout2 << "\nSimulation initialization took: " << duration_ms.count() / 1000. << "s" << "\n";
+	cout2 << "\nSimulation initialization duration: " << duration_ms.count() / 1000. << "s" << "\n";
 	cout2.flush();
 
+    if (collapse.size())
+    {
+        auto t_collapse_start = steady_clock::now();
+    	cout2 << "\nStarting evaluation of " << collapse.size() << " collapse operators.\n";
+
+        int i_coll = 0;
+        MPS rho_0(C.rho);  // Keep a copy of the uncollapsed state
+        MPS rho_c;  // Here accumulate the collapsed density matrices
+        for (string& s_coll_op : CollapseOpsNames)
+        {
+            vector<string> &op_names = CollapseOps[i_coll];
+            vector<int> &op_qubits = CollapseOpsQubits[i_coll];
+            int i_op = 0 ;
+            for (string &op_name: op_names)
+            {
+                if (op_name[1] == 'u')
+                    ApplyProjUp(C.rho,C.siteops,op_qubits[i_op]);
+                else if (op_name[1]=='d')
+                    ApplyProjDn(C.rho,C.siteops,op_qubits[i_op]);
+                else if (op_name[1]=='x')
+                    ApplyXGate(C.rho,C.siteops,op_qubits[i_op]);
+                else if (op_name[1]=='y')
+                    ApplyYGate(C.rho,C.siteops,op_qubits[i_op]);
+                else if (op_name[1]=='z')
+                    ApplyZGate(C.rho,C.siteops,op_qubits[i_op]);
+                else
+                    cout2 << "Error: Collapse operator " << s_coll_op <<
+                        " can only contain Paulis or standard-basis projectors (u or d)," <<
+                        " but contains " << op_name << ".\n", exit(1);
+                i_op++;
+            }
+            if (i_coll == 0)
+                rho_c = MPS(C.rho);
+            else
+                rho_c.plusEq(C.rho, argsRho);
+            C.rho = rho_0;
+            i_coll++;
+        }
+        C.rho = rho_c;
+        Cplx z = C.trace_rho();
+        cout2 << "\tNormalizing rho after collapse projectors. Tr{rho}: " << z << "\n";
+        if (std::abs(z) < _2_N)
+            cout2 << "\t\tNote: this is smaller than 2^(-N)!" << "\n";
+            // TODO: This is a somewhat arbitrary threshold for the warning.
+        C.rho /= z;
+        auto t_collapse_end = steady_clock::now();
+        duration_ms = duration_cast<milliseconds>(t_collapse_end - t_collapse_start);
+       	cout2 << "Collapse evaluation terminated. Duration: " << duration_ms.count() / 1000. << "s\n";
+    }
+
 	char buf[100];
-	const long force_rho_Hermitian_step = param.longval("force_rho_hermitian_step");
+	const bool b_force_rho_trace = param.boolval("b_force_rho_trace");
+	const long force_rho_hermitian_step = param.longval("force_rho_hermitian_step");
+	const long force_rho_hermitian_gates = param.longval("force_rho_hermitian_gates");
  	const bool b_quiet = param.boolval("b_quiet");
  	cout2.quiet(b_quiet);
  	double t = t_0;
@@ -812,24 +871,41 @@ int main(int argc, char *argv[])
 		//note: if several gates are associated to the same time, the application will follow
 		// the order of the arguments of 'apply_gate'
 		bool b_normalize = false; // Will be set to true if projectors applied to rho.
+		int n_2q_gates = 0;
 		for (unsigned int k=0;k<gate_times.size();k++) {
 			if (abs(gate_times[k] - t) < (tau / 2.)) {
 				// This will make the gate execute at t nearest to the requested time.
 				// Earlier there is a validation making sure this is unique.
-				if (gate_names[k]=="CZ") {
-					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
-					if (param.boolval("b_apply_gate_compression"))
-						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
+				auto &s_gate_name = gate_names[k];
+				if (s_gate_name == "CZ" || s_gate_name == "CX") {
+					cout2 << "\tApplication of gate " << s_gate_name << "(" << gate_i[k] << "," << gate_j[k] << ")\n";
+					cout2.flush();
+					if (b_apply_gate_compression)
+					    if (s_gate_name == "CZ")
+						    ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
+						else  // "CX"
+						    ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
 					else
-						ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+					    if (s_gate_name == "CZ")
+						    ApplyControlledZGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+						else // "CX"
+						    ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
+					if (force_rho_hermitian_gates && (n_2q_gates % force_rho_hermitian_gates) == 0)
+			            C.MakeRhoHermitian(argsRho);
+                    tr = C.trace_rho();
+                    if (std::abs(tr - 1) > TRACE_RHO_DIV_THRESHOLD)
+                    {
+                        cout2 << "\tTr{rho}: " << tr;
+                        if (b_force_rho_trace)
+                        {
+                            cout2 << ", normalizing.";
+                            C.rho /= tr;
+                        }
+                        cout2 << "\n";
+                    }
+			        n_2q_gates++;
 				}
-				else if (gate_names[k]=="CX") {
-					cout2<<"\tApplication of gate "<<gate_names[k]<<"("<<gate_i[k]<<","<<gate_j[k]<<")\n";
-					if (param.boolval("b_apply_gate_compression"))
-						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k],argsRho);
-					else
-						ApplyCNOTGate(C.rho,C.siteops,gate_i[k],gate_j[k]);
-				} else {
+				else {
 					if (gate_names[k]=="U") {
       					cout2<<"\tApplication of projector Up" <<"("<<gate_i[k]<<")\n";
 					    ApplyProjUp(C.rho,C.siteops,gate_i[k]);
@@ -851,19 +927,20 @@ int main(int argc, char *argv[])
                         }
                     }
 				}
+	            cout2.flush();
 			}
 		}
         if (b_normalize) {
-			Cplx z = C.trace_rho();
-			cout2 << "\tNormalizing rho after projections applied. Tr{rho}: " << z << "\n";
-			if (std::abs(z) < _2_N)
+			tr = C.trace_rho();
+			cout2 << "\tNormalizing rho after projections applied. Tr{rho}: " << tr << "\n";
+			if (std::abs(tr) < _2_N)
 				cout2 << "\t\tNote: this is smaller than 2^(-N)!" << "\n";
 				// TODO: This is a somewhat arbitrary threshold for the warning.
-    		C.rho /= z;
+    		C.rho /= tr;
+    		cout2.flush();
         }
-		cout2.flush();
 
-		if (force_rho_Hermitian_step && (n % force_rho_Hermitian_step) == 0)
+		if (force_rho_hermitian_step && (n % force_rho_hermitian_step) == 0)
 			C.MakeRhoHermitian(argsRho);
 		if (output_step > 0)
 		{
@@ -872,7 +949,7 @@ int main(int argc, char *argv[])
 				// Print and save output data at initial time, final time, and every output_step time steps
 
 				tr = C.trace_rho();
-				const Cplx tr2 = C.trace_rho2();
+				tr2 = C.trace_rho2();
 				const Real osee = OSEE(C.rho, N / 2);
 				// This is the operator-space entanglement entropy (OSEE) of rho, associated
 				// to a cut in the middle of the system (at the center bond)
@@ -881,7 +958,7 @@ int main(int argc, char *argv[])
 
 				cout2 << "\tTr{rho}: " << tr << ", Renyi Entropy S_2: " << S_2; // << ",\tTr{rho^2} =" << tr2
 //				     << "\n\tCenter bond dimension: " << bd << ", Max bond dimension: " << bd_max
-				if (!force_rho_Hermitian_step || (n % force_rho_Hermitian_step) != 0)
+				if (!force_rho_hermitian_step || (n % force_rho_hermitian_step) != 0)
 				     cout2 << "\n\tMax bond dimension: " << bd_max;
 				cout2 << "\n\tOperator space entanglement entropy at center bond: " << osee;
 
@@ -1010,6 +1087,7 @@ int main(int argc, char *argv[])
                         for (string& s_op_obs : OperatorObsNames)
                         {
                             Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
+                            // cout2 << "\nCalculating: " << OperatorObs[c] << " " << OperatorObsQubits[c];
                             file_custom << t << " \t" << s_op_obs << "\t" << op_val.real() << endl;
                             c++;
                         }
@@ -1028,9 +1106,9 @@ int main(int argc, char *argv[])
 				cout2.flush();
 			}
 		}
-		if (n < n_steps)
+		if (b_time_evolution && n < n_steps)
 		{
-			cout2 << "\t" << "Time evolving the state -> ";
+			cout2 << "\tTime evolving the state -> ";
 			cout2.flush();
 			auto t_evolve_start = steady_clock::now();
 			TE.evolve(C.rho);
@@ -1038,16 +1116,25 @@ int main(int argc, char *argv[])
 			duration_ms = duration_cast<milliseconds>(t_evolve_end - t_evolve_start);
 			cout2 << "done. Duration: " << duration_ms.count() / 1000. << "s" << "\n";
 
-			Cplx z = C.trace_rho();
-			if (std::abs(z - 1) > TRACE_RHO_THRESHOLD)
-				cout2 << "\nWarning: Tr[rho] != 1 :" << z << "\n";
-			if (param.val("b_force_rho_trace") != 0)
-				C.rho /= z;
+            tr = C.trace_rho();
+            if (std::abs(tr - 1) > TRACE_RHO_DIV_THRESHOLD)
+            {
+                cout2 << "\tTr{rho}: " << tr;
+                if (b_force_rho_trace)
+                {
+                    cout2 << ", normalizing.";
+                    C.rho /= tr;
+                }
+                cout2 << "\n";
+            }
+//			if (std::abs(z - 1) > TRACE_RHO_WARN_THRESHOLD)
+//				cout2 << "\nWarning: Tr[rho] != 1 :" << z << "\n";
 			cout2.flush();
 		}
 	}
 	cout2.quiet(false);
-	cout2 << "\nSimulation ended.\n";
+	if (b_time_evolution && n_steps)
+	    cout2 << "\nTime evolution done.\n";
 
 	bool b_save_state = param.boolval("b_save_final_state");
 	if (b_save_state)
@@ -1070,80 +1157,6 @@ int main(int argc, char *argv[])
     	file_global.close();
 	if (file_custom.is_open())
     	file_custom.close();
-
-    if (collapse.size())
-    {
-        // auto t_collapse_start = steady_clock::now();
-    	cout2 << "\nStarting evaluation of " << collapse.size() << " collapse operators.\n";
-        file_collapse.open(output_prefix + ".obs-co.dat");
-        file_collapse.precision(15);
-        file_collapse << "#time\tcollapse_op\tobservable\tvalue" << endl;
-
-        int i_coll = 0;
-        MPS rho_0(C.rho);  // Keep a copy of the uncollapsed state
-        for (string& s_coll_op : CollapseOpsNames)
-        {
-            // collapse rho and send it to the observables
-            auto t_cu_start = steady_clock::now();
-            vector<string> &op_names = CollapseOps[i_coll];
-            vector<int> &op_qubits = CollapseOpsQubits[i_coll];
-            int i_op = 0 ;
-            for (string &op_name: op_names)
-            {
-                if (op_name[1] == 'u') {
-                    ApplyProjUp(C.rho,C.siteops,op_qubits[i_op]);
-                }
-                else if (op_name[1]=='d') {
-                    ApplyProjDn(C.rho,C.siteops,op_qubits[i_op]);
-                }
-                else
-                    cout2 << "Error: Collapse operator " << s_coll_op <<
-                        " can only contain standard-basis projectors (u or d)," <<
-                        " but contains " << op_name << ".\n", exit(1);
-                i_op++;
-            }
-            Cplx z = C.trace_rho();
-			cout2 << "\tNormalizing rho after collapse projector applied. Tr{rho}: " << z << "\n";
-			if (std::abs(z) < _2_N)
-				cout2 << "\t\tNote: this is smaller than 2^(-N)!" << "\n";
-				// TODO: This is a somewhat arbitrary threshold for the warning.
-       		C.rho /= z;
-
-            int count = 0;
-            if (ProjectorList.size()) {
-                int c=0;
-                for (MPS& proj:ProjectorList) {
-                    Cplx op_val = innerC(proj,C.rho);
-                    file_collapse << t << " \t" << s_coll_op << " \t" << ProjectorNames[c] << "\t" << op_val.real() << endl;
-                    c++;
-                }
-                count += c;
-            }
-            if (OperatorObsNames.size()) {
-                int c=0;
-                for (string& s_op_obs : OperatorObsNames)
-                {
-                    Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
-                    file_collapse << t << " \t" << s_coll_op << " \t" << s_op_obs << "\t" << op_val.real() << endl;
-                    c++;
-                }
-                count += c;
-            }
-            file_collapse << endl; //Skip a line between time steps
-            C.rho = MPS(rho_0);
-            auto t_cu_end = steady_clock::now();
-            if (count)
-            {
-                duration_ms = duration_cast<milliseconds>(t_cu_end - t_cu_start);
-                cout2 << "\t" << count << " custom expectation values saved to file. Duration: " << duration_ms.count() / 1000. << "s\n";
-                count = 0;
-            }
-            i_coll++;
-        }
-
-    	file_collapse.close();
-        // auto t_collapse_end = steady_clock::now();
-    }
 
 	auto t_end_sim = steady_clock::now();
 	auto tot_duration = duration_cast<seconds>(t_end_sim - t_start_sim);

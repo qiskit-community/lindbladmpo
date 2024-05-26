@@ -111,9 +111,9 @@ public:
       }
 
     strstr << "Initializing a square lattice of size (l_x = " << Lx << ") * (l_y = " << Ly << ") = " << N << " qubits.\n";
-    for (auto it = index.cbegin(); it != index.cend(); ++it)
-      strstr << "x=" << it->first.first << " y=" << it->first.second
-                << " #" << it->second << "\n";
+//    for (auto it = index.cbegin(); it != index.cend(); ++it)
+//      strstr << "x=" << it->first.first << " y=" << it->first.second
+//                << " #" << it->second << "\n";
     ListBonds(strstr);
   }
   void ListBonds(std::stringstream &strstr)

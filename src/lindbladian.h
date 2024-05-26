@@ -20,8 +20,9 @@ using namespace std;
 
 //____________________________________________________________________
 
-void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
+bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 {
+    bool b_time_evolution = false;  // Whether there's a nontrivial time evolution
     // -----------------------------------------------------------
     // We first construct the Hamiltonian (unitary evolution) terms
     const unsigned int N = C.N;
@@ -106,13 +107,20 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 	for (unsigned int n = 0; n < num_bonds; n++)
 	{
 		int i = L.I[n], j = L.J[n];
-		auto_L += -J[n], "S+", i, "S-", j;
-		auto_L += -J[n], "S-", i, "S+", j;
-		auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
-
-		auto_L += J[n], "_S+", i, "_S-", j;
-		auto_L += J[n], "_S-", i, "_S+", j;
-		auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
+		if (J[n])
+		{
+    		auto_L += -J[n], "S+", i, "S-", j;
+	    	auto_L += -J[n], "S-", i, "S+", j;
+            auto_L += J[n], "_S+", i, "_S-", j;
+            auto_L += J[n], "_S-", i, "_S+", j;
+	    	b_time_evolution = true;
+	    }
+		if (J_z[n])
+		{
+            auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
+            auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
+	    	b_time_evolution = true;
+	    }
 	}
 
 	//Magnetic field terms:
@@ -122,16 +130,19 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 		{
 			auto_L += -.5 * h_x[j - 1], "Sx", j;
 			auto_L += .5 * h_x[j - 1], "_Sx", j;
+	    	b_time_evolution = true;
 		}
 		if (h_y[j - 1] != 0.)
 		{
 			auto_L += -.5 * h_y[j - 1], "Sy", j;
 			auto_L += .5 * h_y[j - 1], "_Sy", j;
+	    	b_time_evolution = true;
 		}
 		if (h_z[j - 1] != 0.)
 		{
 			auto_L += -.5 * h_z[j - 1], "Sz", j;
 			auto_L += .5 * h_z[j - 1], "_Sz", j;
+	    	b_time_evolution = true;
 		}
 	}
     // -----------------------------------------------------------
@@ -154,11 +165,15 @@ void SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         g_2 = vector<double>(N, g_2[0]);
 
     for (int i = 1; i <= int(N); i++)
-        // AddSingleSpinBath:
-        // The first argument is the rate of dissipative processes where a spin goes from down to up
-        // The second argument is the rate of dissipative processes where a spin goes from up to down
-        // The third argument is the rate of energy-conserving (pure) dephasing processes
-        C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], i);
+        if (g_0[i - 1] || g_1[i - 1] || g_2[i - 1])
+        {
+            C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], i);
+            // The first argument is the rate of dissipative processes where a spin goes from down to up
+            // The second argument is the rate of dissipative processes where a spin goes from up to down
+            // The third argument is the rate of energy-conserving (pure) dephasing processes
+            b_time_evolution = true;
+        }
+    return b_time_evolution;
 }
 //____________________________________________________________________
 

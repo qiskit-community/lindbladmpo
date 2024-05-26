@@ -971,6 +971,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["cut_off_rho"] = 1e-11
         parameters["b_force_rho_trace"] = False
         parameters["force_rho_hermitian_step"] = 1
+        parameters["force_rho_hermitian_gates"] = 1
         parameters["output_step"] = 1
         parameters["output_files_prefix"] = s_output_path
         parameters["1q_components"] = ["x", "y", "z"]

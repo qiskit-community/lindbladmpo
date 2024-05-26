@@ -34,7 +34,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
     IMAGINARY_THRESHOLD = 1e-4
     """Threshold for the imaginary value of a quantity that should be real, to issue a warning."""
 
-    TRACE_RHO_THRESHOLD = 1e-4
+    TRACE_RHO_WARN_THRESHOLD = 1e-4
     """Threshold for the deviation of the density matrix trace from 1, to issue a warning."""
 
     DEFAULT_PARAMETERS = {
@@ -456,7 +456,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
                 rho = rho_t.data
                 tr_rho = np.trace(rho).real
-                if abs(tr_rho - 1) > self.TRACE_RHO_THRESHOLD:
+                if abs(tr_rho - 1) > self.TRACE_RHO_WARN_THRESHOLD:
                     self._print(f"Warning: Tr[rho] != 1 : {tr_rho}.\n")
                 S_2 = -math.log(sum(scipy.linalg.eigvals(rho) ** 2).real)
                 OSEE = np.nan
@@ -558,6 +558,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             "b_periodic_y",
             "b_force_rho_trace",
             "force_rho_hermitian_step",
+            "force_rho_hermitian_gates",
             "trotter_order",
             "b_initial_rho_compression",
             "b_apply_gate_compression",

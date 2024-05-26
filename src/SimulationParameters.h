@@ -26,10 +26,13 @@ public:
         	// truncation is done using the most severe condition between cut_off_rho and max_dim_rho.
 
         operator[]("b_force_rho_trace") = "1";		// Whether to force the density matrix trace to 1,
-            // by substituting rho /= trace{rho} at every time step, compensating for finite-step errors
+            // by substituting rho /= trace{rho} at every time step and every two-qubit gate applied,
+            // compensating for finite-step errors
         operator[]("force_rho_hermitian_step") = "4";	// Determines every how many tau time steps
         	// to substitute rho = 0.5 * (rho + rho^dagger). This may reduce certain errors, but is
         	// computationally expensive.
+        operator[]("force_rho_hermitian_gates") = "0";	// Determines every how many 2q-gates applied
+            // consecutively (during one time step) to force rho Hermiticity.
         operator[]("b_apply_gate_compression") = "1"; //Whether to do a state truncation with parameter
             // cut_off_rho after each two-qubit gate
         operator[]("b_initial_rho_compression") = "0";	// If nonzero, after reading rho from

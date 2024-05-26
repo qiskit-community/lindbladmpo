@@ -552,7 +552,8 @@ class LindbladMPOSolver:
                         + " should be equal to or larger than 0 (integer)\n"
                     )
                     continue
-            elif key == "output_step" or key == "force_rho_hermitian_step":
+            elif (key == "output_step" or key == "force_rho_hermitian_step"
+                  or key == "force_rho_hermitian_gates"):
                 if not LindbladMPOSolver._is_int(parameters[key]):
                     check_msg += "Error 180: " + key + " should be an integer\n"
                     continue

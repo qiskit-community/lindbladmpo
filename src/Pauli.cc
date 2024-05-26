@@ -605,22 +605,27 @@ Cplx SpinHalfSystem::Expect(const vector <string>& opnames, const vector <int>& 
 
 void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing, int site)
 {
-  // TODO possibly worth if'ing over 0 rates
-
-  Cplx z = GammaMinus * Cplx_i;
-  Lindbladian += z, "_S-S+", site;
-  Lindbladian += -z * 0.5, "_projUp", site;
-  Lindbladian += -z * 0.5, "projUp", site;
-
-  z = GammaPlus * Cplx_i;
-  Lindbladian += z, "_S+S-", site;
-  Lindbladian += -z * 0.5, "_projDn", site;
-  Lindbladian += -z * 0.5, "projDn", site;
-
-  z = GammaDephasing * Cplx_i;
-  Lindbladian += z, "Sz_Sz", site;
-  Lindbladian += -z * 0.5, "Id", site;
-  Lindbladian += -z * 0.5, "Id", site;
+  if (GammaMinus)
+  {
+      Cplx z = GammaMinus * Cplx_i;
+      Lindbladian += z, "_S-S+", site;
+      Lindbladian += -z * 0.5, "_projUp", site;
+      Lindbladian += -z * 0.5, "projUp", site;
+  }
+  if (GammaPlus)
+  {
+      Cplx z = GammaPlus * Cplx_i;
+      Lindbladian += z, "_S+S-", site;
+      Lindbladian += -z * 0.5, "_projDn", site;
+      Lindbladian += -z * 0.5, "projDn", site;
+  }
+  if (GammaDephasing)
+  {
+      Cplx z = GammaDephasing * Cplx_i;
+      Lindbladian += z, "Sz_Sz", site;
+      Lindbladian += -z * 0.5, "Id", site;
+      Lindbladian += -z * 0.5, "Id", site;
+  }
 }
 //_____________________________________________________
 
