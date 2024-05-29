@@ -143,7 +143,19 @@ ITensor PauliSite::op(const string &opname, const Args &args) const
   }
   else if (opname == "Sx_Sx")
   {
-    Error("Operator " + opname + " missing implementation.");
+    Op.set(dd, uu_, 1.0);
+    Op.set(du, ud_, 1.0);
+    Op.set(uu, dd_, 1.0);
+    Op.set(ud, du_, 1.0);
+
+  }
+  else if (opname == "Sy_Sy")
+  {
+    Op.set(dd,uu_,1);
+    Op.set(du,ud_,-1);
+    Op.set(uu,dd_,1);
+    Op.set(ud,du_,-1);
+   
   }
   else if (opname == "_S-S+")
   {
