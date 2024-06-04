@@ -17,30 +17,36 @@
 #include "io_utils.h"
 #include <string>
 
-//Apply the X gate (qubit i) on a mixed state rho
-void ApplyXGate(MPS &, const Pauli &,int);
+// Apply the X gate (qubit i) on a mixed state rho
+void ApplyXGate(MPS &, const Pauli &, int);
 
-//Apply the Y gate (qubit i) on a mixed state rho
-void ApplyYGate(MPS &, const Pauli &,int);
+// Apply the Y gate (qubit i) on a mixed state rho
+void ApplyYGate(MPS &, const Pauli &, int);
 
-//Apply the X gate (qubit i) on a mixed state rho
-void ApplyZGate(MPS &r, const Pauli &,int);
+// Apply the X gate (qubit i) on a mixed state rho
+void ApplyZGate(MPS &r, const Pauli &, int);
 
-//Apply the SqrtX gate (qubit i) on a mixed state rho
-void ApplySqrtXGate(MPS &, const Pauli &,int);
+// Apply the SqrtX gate (qubit i) on a mixed state rho
+void ApplySqrtXGate(MPS &, const Pauli &, int);
 
-void ApplyHGate(MPS &, const Pauli &,int);
+void ApplyHGate(MPS &, const Pauli &, int);
 
-void ApplyControlledXYZGate(MPS &, const Pauli &,int,int,string,Args=Args("Cutoff",0));
+void ApplyProjUp(MPS &, const Pauli &, int);
 
-//Apply the CNOT gate on some mixed state rho, at sites (control,target)
-void ApplyCNOTGate(MPS &, const Pauli &,int,int,Args=Args("Cutoff",0));
+void ApplyProjDn(MPS &, const Pauli &, int);
 
-//Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
-void ApplyControlledZGate(MPS &, const Pauli &,int,int,Args arg=Args("Cutoff",0));
+void ApplyControlledXYZGate(MPS &, const Pauli &, int, int, string, Args = Args("Cutoff", 0));
+
+// Apply the CNOT gate on some mixed state rho, at sites (control,target)
+void ApplyCNOTGate(MPS &, const Pauli &, int, int, Args = Args("Cutoff", 0));
+
+// Apply the controlled-Z gate on some mixed state rho, at sites (i,j)
+void ApplyControlledZGate(MPS &, const Pauli &, int, int, Args arg = Args("Cutoff", 0));
 
 // From an ordered list of gates [g1,g2, ..., gN] specified in a string s, and from a 'initial' pure state |psi0>,
 // construct |psi>=g1*g2*...*gN |psi0>
-void ApplyListOfGatesOnAPureState(string  ,MPS&     ,const SpinHalfSystem&);
+void ApplyListOfGatesOnAPureState(string, MPS &, const SpinHalfSystem &);
+
+void StringToOperatorsList(string, vector<string> &, vector<int> &);
 
 #endif

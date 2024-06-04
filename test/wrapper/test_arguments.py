@@ -64,13 +64,6 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         out = LindbladMPOSolver.verify_parameters(parameters)
         self.assertNotEqual(expected, out)
 
-    def test_arg_t_final_F2(self):
-        """Argument test."""
-        parameters = {"t_final": -20, "tau": DEFAULT_TAU, "N": DEFAULT_N}
-        expected = ""
-        out = LindbladMPOSolver.verify_parameters(parameters)
-        self.assertNotEqual(expected, out)
-
     def test_arg_t_final_P(self):
         """Argument test."""
         parameters = {"t_final": 20, "tau": DEFAULT_TAU, "N": DEFAULT_N}
@@ -835,7 +828,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         """A multiple arguments test."""
         parameters = {}
         parameters["N"] = 5
-        parameters["t_final"] = -9  # should fail
+        parameters["t_final"] = 9
         parameters["tau"] = 0.1
 
         parameters["h_x"] = 1.111
@@ -886,7 +879,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["2q_indices"] = [(1, 2), (3, 5, 4), (2, 4)]  # this should fail
 
         out = LindbladMPOSolver.verify_parameters(parameters)
-        self.assertTrue(out.count("Error") == 13)
+        self.assertTrue(out.count("Error") == 12)
 
     def test_arg_3(self):
         """A multiple arguments test."""
@@ -978,6 +971,7 @@ class LindbladMPOSolverTestArguments(unittest.TestCase):
         parameters["cut_off_rho"] = 1e-11
         parameters["b_force_rho_trace"] = False
         parameters["force_rho_hermitian_step"] = 1
+        parameters["force_rho_hermitian_gates"] = 1
         parameters["output_step"] = 1
         parameters["output_files_prefix"] = s_output_path
         parameters["1q_components"] = ["x", "y", "z"]

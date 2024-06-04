@@ -246,14 +246,14 @@ class LindbladMPOSolver:
                     if i_op != n_indices - 1:
                         file.write(",")
                 file.write("\n")
-            elif key == "custom_observables":
+            elif key == "custom_observables" or key == "collapse":
                 file.write(key + " = ")
                 observables: list = parameters[key]
                 n_observables = len(observables)
                 for i_obs, (obs_def, obs_components) in enumerate(observables):
                     file.write(obs_def[0])
-                    # file.write(" ")
-                    # file.write(obs_def[1])
+                    file.write(" ")
+                    file.write(obs_def[1])
                     file.write(":")
                     n_components = len(obs_components)
                     for i_component, obs_component in enumerate(obs_components):
@@ -533,7 +533,7 @@ class LindbladMPOSolver:
                 if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 140: " + key + " is not a float\n"
                     continue
-                if key != "t_init" and parameters[key] <= 0:
+                if key == "tau" and parameters[key] <= 0:
                     check_msg += "Error 150: " + key + " must be larger than 0\n"
                     continue
                 if key == "t_init" and parameters[key] > parameters["t_final"]:
@@ -552,7 +552,11 @@ class LindbladMPOSolver:
                         + " should be equal to or larger than 0 (integer)\n"
                     )
                     continue
-            elif key == "output_step" or key == "force_rho_hermitian_step":
+            elif (
+                key == "output_step"
+                or key == "force_rho_hermitian_step"
+                or key == "force_rho_hermitian_gates"
+            ):
                 if not LindbladMPOSolver._is_int(parameters[key]):
                     check_msg += "Error 180: " + key + " should be an integer\n"
                     continue
@@ -570,6 +574,8 @@ class LindbladMPOSolver:
                 or (key == "g_0")
                 or (key == "g_1")
                 or (key == "g_2")
+                or (key == "g_3")
+                or (key == "g_4")
             ):
                 if LindbladMPOSolver.is_float(parameters[key]):
                     continue
@@ -716,7 +722,9 @@ class LindbladMPOSolver:
                         "list/np.array) in the size of number_of_qubits^2 of floats\n"
                     )
                     continue
-            elif key == "apply_gates" or key == "custom_observables":
+            elif (
+                key == "apply_gates" or key == "custom_observables" or key == "collapse"
+            ):
                 if (
                     not isinstance(parameters[key], tuple)
                     and not isinstance(parameters[key], list)
@@ -759,7 +767,8 @@ class LindbladMPOSolver:
                                 " (time, gate name, qubit, [qubit])\n"
                             )
                             continue
-                else:  # Hence key == "custom_observables"
+                else:  # Hence key == "custom_observables" or key == "collapse"
+                    b_is_collapse = key == "collapse"
                     for g_tuple in custom_list:
                         tuple_len = len(g_tuple)
                         if (
@@ -775,15 +784,31 @@ class LindbladMPOSolver:
                             )
                             continue
                         obs_type = g_tuple[0][1]
-                        if not isinstance(g_tuple[0][0], str) or (
-                            obs_type != "g" and obs_type != "p"
-                        ):
+                        if not isinstance(g_tuple[0][0], str):
                             check_msg += (
                                 "Error 342: each member of the first element of"
                                 + key
                                 + " must be a tuple of the form"
-                                " (obs_name, obs_type), with obs_type being either 'g' or"
-                                " 'p' to indicate a gate-based observable or a Pauli expansion\n"
+                                " (obs_name, obs_type)\n"
+                            )
+                            continue
+                        if b_is_collapse:
+                            if obs_type != "o":
+                                check_msg += (
+                                    "Error 342: each member of the first element of"
+                                    + key
+                                    + " must be a tuple of the form"
+                                    " (obs_name, obs_type), with obs_type being 'o' to indicate"
+                                    " a 1Q operator expansion\n"
+                                )
+                                continue
+                        elif obs_type != "g" and obs_type != "o":
+                            check_msg += (
+                                "Error 342: each member of the first element of"
+                                + key
+                                + " must be a tuple of the form (obs_name, obs_type),"
+                                " with obs_type being either 'g' or 'o' to indicate"
+                                " a gate-based observable or a 1Q operator expansion\n"
                             )
                             continue
                         for o_tuple in g_tuple[1]:
@@ -799,15 +824,15 @@ class LindbladMPOSolver:
                                     " (gate_name, q0, q1, ...)\n"
                                 )
                                 continue
-                            if obs_type == "p" and (
+                            if obs_type == "o" and (
                                 not isinstance(o_tuple[0], str)
-                                or not LindbladMPOSolver.is_float(o_tuple[1])
+                                or not LindbladMPOSolver._is_int(o_tuple[1])
                             ):
                                 check_msg += (
-                                    "Error 343: each member of Pauli-based component of"
+                                    "Error 343: each member of an operator-based component of"
                                     + key
                                     + " must be a tuple of the form"
-                                    " (pauli-string, weight)\n"
+                                    " (operator name, qubit)\n"
                                 )
                                 continue
 
@@ -1196,29 +1221,4 @@ class LindbladMPOSolver:
                 check_msg += "Error: unknown parameter key passed: " + key + "\n"
         # End of: "for key in dict.keys(parameters)"
 
-        # More cross-parameter checks:
-        if ("t_final" in parameters) and ("tau" in parameters):
-            if (LindbladMPOSolver.is_float(parameters["tau"])) and (
-                LindbladMPOSolver.is_float(parameters["t_final"])
-            ):
-                if (parameters["tau"] > 0) and (parameters["t_final"] > 0):
-                    if parameters["tau"] > parameters["t_final"] - parameters.get(
-                        "t_init", 0.0
-                    ):
-                        check_msg += (
-                            "Error 640: t_final (total time) is smaller than tau (time step "
-                            "for time evolution)\n "
-                        )
-                    elif "output_step" in parameters:
-                        if LindbladMPOSolver._is_int(parameters["output_step"]):
-                            if parameters["output_step"] > 0:
-                                if (
-                                    parameters["output_step"] * parameters["tau"]
-                                    > parameters["t_final"]
-                                ):
-                                    check_msg += (
-                                        "Error 650: output_step multiplied by tau is larger "
-                                        "than t_final (output_step in units of tau, times "
-                                        "tau is larger than the simulation time)\n "
-                                    )
         return check_msg

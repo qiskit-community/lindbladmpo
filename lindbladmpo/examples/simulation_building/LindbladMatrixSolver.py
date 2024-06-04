@@ -34,7 +34,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
     IMAGINARY_THRESHOLD = 1e-4
     """Threshold for the imaginary value of a quantity that should be real, to issue a warning."""
 
-    TRACE_RHO_THRESHOLD = 1e-4
+    TRACE_RHO_WARN_THRESHOLD = 1e-4
     """Threshold for the deviation of the density matrix trace from 1, to issue a warning."""
 
     DEFAULT_PARAMETERS = {
@@ -49,6 +49,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
         "g_0": (0.0, "v"),
         "g_1": (0.0, "v"),
         "g_2": (0.0, "v"),
+        "g_3": (0.0, "v"),
+        "g_4": (0.0, "v"),
         "b_quiet": (False, "s"),
         "b_save_final_state": (False, "s"),
         "1q_components": (["z"], "s"),
@@ -208,6 +210,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             g_0 = self._get_parameter("g_0")
             g_1 = self._get_parameter("g_1")
             g_2 = self._get_parameter("g_2")
+            g_3 = self._get_parameter("g_3")
+            g_4 = self._get_parameter("g_4")
             J = self._get_parameter("J")
             J_z = self._get_parameter("J_z")
             _1q_components = self._get_parameter("1q_components")
@@ -300,6 +304,12 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 if g_2[i_qubit]:
                     L_ops.append(Sz(i_qubit))
                     L_sig.append(Signal(g_2[i_qubit]))
+                if g_3[i_qubit]:
+                    L_ops.append(Sx(i_qubit))
+                    L_sig.append(Signal(g_3[i_qubit]))
+                if g_4[i_qubit]:
+                    L_ops.append(Sy(i_qubit))
+                    L_sig.append(Signal(g_4[i_qubit]))
 
             for i in r_qubits:
                 for j in r_qubits:
@@ -456,7 +466,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
                 rho = rho_t.data
                 tr_rho = np.trace(rho).real
-                if abs(tr_rho - 1) > self.TRACE_RHO_THRESHOLD:
+                if abs(tr_rho - 1) > self.TRACE_RHO_WARN_THRESHOLD:
                     self._print(f"Warning: Tr[rho] != 1 : {tr_rho}.\n")
                 S_2 = -math.log(sum(scipy.linalg.eigvals(rho) ** 2).real)
                 OSEE = np.nan
@@ -558,6 +568,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             "b_periodic_y",
             "b_force_rho_trace",
             "force_rho_hermitian_step",
+            "force_rho_hermitian_gates",
             "trotter_order",
             "b_initial_rho_compression",
             "b_apply_gate_compression",

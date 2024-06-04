@@ -73,7 +73,7 @@ def prepare_time_data(
     # output_step = parameters.get('output_step', 1)
     # TODO handle output_step
     n_t_steps = int((t_final - t_init) / (tau * 1)) + 1
-    t_tick_indices = np.arange(0, n_t_steps, int(n_t_steps / n_t_ticks))
+    t_tick_indices = np.arange(0, n_t_steps, max(1, int(n_t_steps / n_t_ticks)))
     # TODO: Fix division by zero when n_t_ticks < n_t_steps above
     t_eval = np.arange(t_init, t_final, tau)
     if t_final not in t_eval:
@@ -980,6 +980,48 @@ def plot_3q_obs_curves(
     s_file_label = f"sigma_{s_obs_name[0]}.sigma_{s_obs_name[1]}.sigma_{s_obs_name[2]}"
     _save_fig(b_save_figures, s_file_prefix, s_file_label)
     return ax, obs_data_list
+
+
+def plot_custom_obs_curves(
+    parameters: dict,
+    result: dict,
+    obs_names: List[str],
+    ax=None,
+    fontsize=16,
+    line_styles: Optional[Sequence] = None,
+    b_save_figures=True,
+    s_file_label="",
+    s_title=None,
+    tex_labels: Optional[List[str]] = None,
+):
+    """
+    Prepare the data and plot multiple custom observable vs. time.
+
+    Args:
+            parameters: A dictionary from which the basic time parameters are taken.
+            result: A dictionary from which the observables are taken.
+            obs_names: The names of the observable, used to obtain the data.
+            ax: An optional axis object. If None, a new figure is created.
+            fontsize: The fontsize to use in the figure.
+            line_styles: A list with line styles iterated (periodically) for the curves. If None,
+                    the default file-level member LINDBLADMPO_LINE_STYLES is used.
+            b_save_figures: Whether to save the plotted figure to file.
+            s_file_label: An optional path and file name for the saved figure.
+            s_title: An optional title for the figure. If empty, a default title is formatted.
+            tex_labels: An optional list of tex labels for the legend.
+    """
+    obs_data_list = []
+    for s_obs_name in obs_names:
+        s_obs_name = s_obs_name.lower()
+        obs_data, _ = prepare_curve_data(result, "obs-cu", s_obs_name, ())
+        obs_data_list.append(obs_data)
+    ax = plot_curves(
+        obs_data_list, tex_labels, s_title, ax, fontsize, line_styles=line_styles
+    )
+    _, _, t_tick_labels, _ = prepare_time_data(parameters)
+    ax.set_xticks(t_tick_labels)
+    ax.set_xticklabels(t_tick_labels, fontsize=fontsize)
+    _save_fig(b_save_figures, "", s_file_label)
 
 
 def plot_2q_correlation_curves(
