@@ -44,9 +44,13 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     vector<double> g_0 = param.doublevec("g_0");
     vector<double> g_1 = param.doublevec("g_1");
     vector<double> g_2 = param.doublevec("g_2");
+    vector<double> g_3 = param.doublevec("g_3");
+    vector<double> g_4 = param.doublevec("g_4");
     unsigned int g_0_len = g_0.size();
     unsigned int g_1_len = g_1.size();
     unsigned int g_2_len = g_2.size();
+    unsigned int g_3_len = g_3.size();
+    unsigned int g_4_len = g_4.size();
 
     if (g_0_len != 1 && L.predefined && !L.predefined_chain)
         cout2 << "Error: the parameter g_0 has " << g_0_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_0 should be uniform for such a lattice.\n", exit(1);
@@ -54,6 +58,10 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         cout2 << "Error: the parameter g_1 has " << g_1_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_1 should be uniform for such a lattice.\n", exit(1);
     if (g_2_len != 1 && L.predefined && !L.predefined_chain)
         cout2 << "Error: the parameter g_2 has " << g_2_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_2 should be uniform for such a lattice.\n", exit(1);
+    if (g_3_len != 1 && L.predefined && !L.predefined_chain)
+        cout2 << "Error: the parameter g_3 has " << g_3_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_3 should be uniform for such a lattice.\n", exit(1);
+    if (g_4_len != 1 && L.predefined && !L.predefined_chain)
+        cout2 << "Error: the parameter g_4 has " << g_4_len << " value(s) but L.predefined_chain=" << L.predefined_chain << ". g_4 should be uniform for such a lattice.\n", exit(1);
 
     if (h_x_len != 1 && h_x_len != N)
         cout2 << "Error: the parameter h_x has " << h_x_len << " value(s) but 1 or " << N << " value(s) were expected.\n", exit(1);
@@ -157,24 +165,32 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
     if (g_2_len != 1 && g_2_len != N)
         cout2 << "Error: the parameter g_2 has " << g_2_len << " value(s) but 1 or " << N <<
         	" value(s) were expected.\n", exit(1);
+    if (g_3_len != 1 && g_3_len != N)
+        cout2 << "Error: the parameter g_3 has " << g_3_len << " value(s) but 1 or " << N <<
+        	" value(s) were expected.\n", exit(1);
+    if (g_4_len != 1 && g_4_len != N)
+        cout2 << "Error: the parameter g_4 has " << g_4_len << " value(s) but 1 or " << N <<
+        	" value(s) were expected.\n", exit(1);
     if (g_0_len == 1)
         g_0 = vector<double>(N, g_0[0]);
     if (g_1_len == 1)
         g_1 = vector<double>(N, g_1[0]);
     if (g_2_len == 1)
         g_2 = vector<double>(N, g_2[0]);
-
-    vector<double> g_3 = vector<double>(N, 0.);
-    // TODO: support parameter input
+    if (g_3_len == 1)
+        g_3 = vector<double>(N, g_3[0]);
+    if (g_2_len == 1)
+        g_4 = vector<double>(N, g_4[0]);
 
     for (int i = 1; i <= int(N); i++)
-        if (g_0[i - 1] || g_1[i - 1] || g_2[i - 1] || g_3[i - 1])
+        if (g_0[i - 1] || g_1[i - 1] || g_2[i - 1] || g_3[i - 1] || g_4[i - 1])
         {
-            C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], g_3[i - 1], i);
+            C.AddSingleSpinBath(g_0[i - 1], g_1[i - 1], g_2[i - 1], g_3[i - 1], g_4[i - 1], i);
             // The first argument is the rate of dissipative processes where a spin goes from down to up
             // The second argument is the rate of dissipative processes where a spin goes from up to down
             // The third argument is the rate of energy-conserving (pure) dephasing processes
             // The fourth argument is the rate of bit flip processes
+            // The fifth argument is the rate of bit-phase flip processes
             b_time_evolution = true;
         }
     return b_time_evolution;

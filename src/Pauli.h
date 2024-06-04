@@ -63,7 +63,7 @@ class SpinHalfSystem {
 
   //Adds a single-spin term to the Lindbladian above
   void AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing,
-    double GammaBitFlip, int site);
+    double GammaBitFlip, double GammaBitPhaseFlip, int site);
   
   //Trace of rho
   complex<double> trace_rho() const;

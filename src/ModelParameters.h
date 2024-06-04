@@ -38,7 +38,9 @@ public:
         //Losses / dissipation
         operator[]("g_0") = "0"; // Strength of the excitation term
         operator[]("g_1") = "0"; // Strength of the loss term
-        operator[]("g_2") = "0"; // Strength of the dephasing term
+        operator[]("g_2") = "0"; // Strength of the dephasing term (a Pauli z)
+        operator[]("g_3") = "0"; // Strength of the bit flip term (a Pauli x)
+        operator[]("g_4") = "0"; // Strength of the bit-phase flip term (a Pauli y)
 
         //Parameters of the interaction Hamiltonian
         operator[]("J") = "0";   // Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single value, or a list of values

@@ -574,6 +574,8 @@ class LindbladMPOSolver:
                 or (key == "g_0")
                 or (key == "g_1")
                 or (key == "g_2")
+                or (key == "g_3")
+                or (key == "g_4")
             ):
                 if LindbladMPOSolver.is_float(parameters[key]):
                     continue

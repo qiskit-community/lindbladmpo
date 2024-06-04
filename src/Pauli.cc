@@ -620,7 +620,7 @@ Cplx SpinHalfSystem::Expect(const vector <string>& opnames, const vector <int>& 
 }
 
 void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, double GammaDephasing,
-    double GammaBitFlip, int site)
+    double GammaBitFlip, double GammaBitPhaseFlip, int site)
 {
   if (GammaMinus)
   {
@@ -647,6 +647,13 @@ void SpinHalfSystem::AddSingleSpinBath(double GammaPlus, double GammaMinus, doub
   {
       Cplx z = GammaBitFlip * Cplx_i;
       Lindbladian += z, "Sx_Sx", site;
+      Lindbladian += -z * 0.5, "Id", site;
+      Lindbladian += -z * 0.5, "Id", site;
+  }
+  if (GammaBitPhaseFlip)
+  {
+      Cplx z = GammaBitPhaseFlip * Cplx_i;
+      Lindbladian += z, "Sy_Sy", site;
       Lindbladian += -z * 0.5, "Id", site;
       Lindbladian += -z * 0.5, "Id", site;
   }
