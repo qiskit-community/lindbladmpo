@@ -13,81 +13,78 @@
 #ifndef _IO_UTILS_
 #define _IO_UTILS_
 #include "itensor/all.h"
-#include <string>
-#include <vector>
+#include <algorithm>
 #include <map>
 #include <regex>
-#include <algorithm>
+#include <string>
+#include <vector>
 using namespace itensor;
 using namespace std;
 //____________________________________________________________
-//The function below translate numbers (etc.) into character strings
-//the second parameter (optional) is the precision (digits)
+// The function below translate numbers (etc.) into character strings
+// the second parameter (optional) is the precision (digits)
 
-template <class T>
-inline string to_string(const T &t, unsigned int precision = 0)
+template <class T> inline string to_string(const T &t, unsigned int precision = 0)
 {
-  stringstream ss;
-  if (precision > 0)
-    ss.precision(precision);
-  ss << t;
-  return ss.str();
+    stringstream ss;
+    if (precision > 0)
+        ss.precision(precision);
+    ss << t;
+    return ss.str();
 }
 //____________________________________________________________
-template <class T>
-ostream &operator<<(ostream &o, const vector<T> &v)
+template <class T> ostream &operator<<(ostream &o, const vector<T> &v)
 {
-  for (unsigned int i = 0; i < v.size(); i++)
-    o << "[" << i << "]" << v[i] << " ";
-  return o;
+    for (unsigned int i = 0; i < v.size(); i++)
+        o << "[" << i << "]" << v[i] << " ";
+    return o;
 }
 //____________________________________________________________
 
 class stream2d
 {
-public:
-	ostream *ostream1, *ostream2;
-	bool b_quiet;
+  public:
+    ostream *ostream1, *ostream2;
+    bool b_quiet;
 
-	stream2d(ostream *stream1 = NULL, ostream *stream2 = NULL)
-	{
-		b_quiet = false;
-		ostream1 = stream1;
-		ostream2 = stream2;
-	};
+    stream2d(ostream *stream1 = NULL, ostream *stream2 = NULL)
+    {
+        b_quiet = false;
+        ostream1 = stream1;
+        ostream2 = stream2;
+    };
 
-	template<class T>
-	stream2d& operator<<(T val)
-	{
-		if (ostream1 and !b_quiet)
-			*ostream1 << val;
-		if (ostream2)
-			*ostream2 << val;
-		return *this;
-	}
+    template <class T> stream2d &operator<<(T val)
+    {
+        if (ostream1 and !b_quiet)
+            *ostream1 << val;
+        if (ostream2)
+            *ostream2 << val;
+        return *this;
+    }
 
-	void precision(streamsize pr)
-	{
-		if (ostream1)
-			ostream1->precision(pr);
-		if (ostream2)
-			ostream2->precision(pr);
-	}
+    void precision(streamsize pr)
+    {
+        if (ostream1)
+            ostream1->precision(pr);
+        if (ostream2)
+            ostream2->precision(pr);
+    }
 
-	stream2d& flush()
-	{
-		if (ostream1)
-			ostream1->flush();
-		if (ostream2)
-			ostream2->flush();
-		return *this;
-	}
+    stream2d &flush()
+    {
+        if (ostream1)
+            ostream1->flush();
+        if (ostream2)
+            ostream2->flush();
+        return *this;
+    }
 
-	stream2d& quiet(bool b_quiet_ = true)
-	{
-		b_quiet = b_quiet_;
-		return *this;
-	}
+    stream2d &quiet(bool b_quiet_ = true)
+    {
+        b_quiet = b_quiet_;
+        return *this;
+    }
 };
 
 extern stream2d cout2;
@@ -95,284 +92,285 @@ extern stream2d cout2;
 //____________________________________________________________
 inline vector<string> &split(const string &s, char delimiter, vector<std::string> &elems)
 {
-  stringstream ss(s);
-  string item;
-  while (getline(ss, item, delimiter))
-  {
-    if (item.length() > 0)
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, delimiter))
     {
-      elems.push_back(item);
+        if (item.length() > 0)
+        {
+            elems.push_back(item);
+        }
     }
-  }
-  return elems;
+    return elems;
 }
 inline vector<string> split(const string &s, char delimiter)
 {
-  vector<string> elems;
-  split(s, delimiter, elems);
-  return elems;
+    vector<string> elems;
+    split(s, delimiter, elems);
+    return elems;
 }
 
-// trim a string 
+// trim a string
 inline void trim(string &s)
 {
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
-                                  { return !std::isspace(ch); }));
-  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
-                       { return !std::isspace(ch); })
-              .base(),
-          s.end());
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
 }
 //____________________________________________________________
 class Parameters : public map<string, string>
 {
-public:
-  //------------------------------------------------------
-  // The method 'ReadFromFile reads an input file (specified by its name) which should be of the following (text) format:
-  // variable1 = value_of_variable_1
-  // variable2 = value_of_variable_2
-  // ...
-  //
-  // * All spaces are ignored by the parser
-  // * Any line without any '=' sign is ignored
-  // * All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h).
-  // At this stage all values are strings, and they are added to the Parameters object.
-  // The methods Parameters::val, Parameters::longval, Parameters::boolval, and Parameters::stringval can later be used to retrieve these values as
-  // double, long, bool and string.
+  public:
+    //------------------------------------------------------
+    // The method 'ReadFromFile reads an input file (specified by its name) which should be of the following (text)
+    // format: variable1 = value_of_variable_1 variable2 = value_of_variable_2
+    // ...
+    //
+    // * All spaces are ignored by the parser
+    // * Any line without any '=' sign is ignored
+    // * All the variables should have been previously declared (see SimulationParameters.h or ModelParameters.h).
+    // At this stage all values are strings, and they are added to the Parameters object.
+    // The methods Parameters::val, Parameters::longval, Parameters::boolval, and Parameters::stringval can later be
+    // used to retrieve these values as double, long, bool and string.
 
-  void ReadFromFile(string filename)
-  {
-    ifstream file(filename);
-    if (!file)
-      cerr << "Error: unable to open the file " << filename << endl, exit(1);
-    else
-      cout << "Reading parameters from the file " << filename << endl;
-    string line;
-    while (getline(file, line))
+    void ReadFromFile(string filename)
     {
-      if (line != "")
-      {
-        string delimiter = "=";
-        size_t position = 0;
-        string var_name;
-        position = line.find(delimiter);
-        if (position != string::npos)
+        ifstream file(filename);
+        if (!file)
+            cerr << "Error: unable to open the file " << filename << endl, exit(1);
+        else
+            cout << "Reading parameters from the file " << filename << endl;
+        string line;
+        while (getline(file, line))
         {
-          var_name = line.substr(0, position);
-          var_name = regex_replace(var_name, regex("\\s+"), ""); // remove white spaces using a regular expression
-          string var_value = line.erase(0, position + delimiter.length());
-          //remove white spaces at the begining and at the end (but not in the middle)
-          trim(var_value);
-          map<string, string>::const_iterator it = find(var_name);
-          if (it != end())
-            operator[](var_name) = var_value;
-          else
-            cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n", exit(1);
+            if (line != "")
+            {
+                string delimiter = "=";
+                size_t position = 0;
+                string var_name;
+                position = line.find(delimiter);
+                if (position != string::npos)
+                {
+                    var_name = line.substr(0, position);
+                    var_name =
+                        regex_replace(var_name, regex("\\s+"), ""); // remove white spaces using a regular expression
+                    string var_value = line.erase(0, position + delimiter.length());
+                    // remove white spaces at the begining and at the end (but not in the middle)
+                    trim(var_value);
+                    map<string, string>::const_iterator it = find(var_name);
+                    if (it != end())
+                        operator[](var_name) = var_value;
+                    else
+                        cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n",
+                            exit(1);
+                }
+                else
+                {
+                    cout << "\nWarning: the input line :" << line << " has been ignored (no '=')." << endl;
+                }
+            }
+        }
+    }
+    //------------------------------------------------------
+    double val(string var_name) const
+    {
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
+        {
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+            return 0;
         }
         else
         {
-          cout << "\nWarning: the input line :"
-               << line << " has been ignored (no '=')." << endl;
+            double value;
+            try
+            {
+                value = stod(it->second);
+            }
+            catch (...)
+            {
+                cout2 << "Error: was expecting a double after '" << var_name << "' and instead got '" << it->second
+                      << "'\n",
+                    exit(1);
+            }
+            return value;
         }
-      }
     }
-  }
-  //------------------------------------------------------
-  double val(string var_name) const
-  {
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
+    //------------------------------------------------------
+    long longval(string var_name) const
     {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-      return 0;
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
+        {
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+            return 0;
+        }
+        else
+        {
+            long i;
+            try
+            {
+                i = stoi(it->second);
+            }
+            catch (...)
+            {
+                cout2 << "Error: was expecting a long int and instead got '" << it->second << "'\n", exit(1);
+            }
+            return i;
+        }
     }
-    else {
-      double value;
-      try
-      {
-        value = stod(it->second);
-      }
-      catch (...)
-      {
-        cout2 << "Error: was expecting a double after '"<<var_name<<"' and instead got '" << it->second << "'\n", exit(1);
-      }
-      return value;
-    }
-  }
-  //------------------------------------------------------
-  long longval(string var_name) const
-  {
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
+    //------------------------------------------------------
+    long boolval(string var_name) const
     {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-      return 0;
-    }
-    else
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
+        {
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+            return 0;
+        }
+        else
+        {
+            string s = it->second;
+            std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+            if (s == "1" || s == "true")
+                return true;
+            if (s == "0" || s == "false")
+                return false;
+            cout2 << "Error " << var_name << "=" << it->second
+                  << " but a boolean was expected: true/false (case-insensitive), or 1/0\n",
+                exit(1);
+        }
+    } //------------------------------------------------------
+    string stringval(string var_name) const
     {
-      long i;
-      try
-      {
-        i = stoi(it->second);
-      }
-      catch (...)
-      {
-        cout2 << "Error: was expecting a long int and instead got '" << it->second << "'\n", exit(1);
-      }
-      return i;
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
+        {
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+            return 0;
+        }
+        else
+            return (it->second);
     }
-  }
-  //------------------------------------------------------
-  long boolval(string var_name) const
-  {
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
+    //------------------------------------------------------
+    void Print(ostream &o) const
     {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-      return 0;
+        o << "Full list of parameters (taken from the command line, input file, and defaults):\n";
+        for (map<string, string>::const_iterator it = begin(); it != end(); it++)
+        {
+            o << it->first << " = " << it->second << endl;
+        }
     }
-    else
+    void Print(stream2d &o) const
     {
-      string s = it->second;
-	  std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
-      if (s == "1" || s == "true")
-        return true;
-      if (s == "0" || s == "false")
-        return false;
-      cout2 << "Error " << var_name << "=" << it->second << " but a boolean was expected: true/false (case-insensitive), or 1/0\n", exit(1);
+        o << "Full list of parameters (taken from the command line, input file, and defaults):\n";
+        for (map<string, string>::const_iterator it = begin(); it != end(); it++)
+        {
+            o << it->first << " = " << it->second << "\n";
+            o.flush();
+        }
     }
-  } //------------------------------------------------------
-  string stringval(string var_name) const
-  {
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
+    //------------------------------------------------------
+    void ReadArguments(int argc, char *argv[])
     {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-      return 0;
-    }
-    else
-      return (it->second);
-  }
-  //------------------------------------------------------
-  void Print(ostream &o) const
-  {
-    o << "Full list of parameters (taken from the command line, input file, and defaults):\n";
-    for (map<string, string>::const_iterator it = begin(); it != end(); it++)
-    {
-      o << it->first << " = " << it->second << endl;
-    }
-  }
-  void Print(stream2d &o) const
-  {
-    o << "Full list of parameters (taken from the command line, input file, and defaults):\n";
-    for (map<string, string>::const_iterator it = begin(); it != end(); it++)
-    {
-      o << it->first << " = " << it->second << "\n";
-      o.flush();
-    }
-  }
-  //------------------------------------------------------
-  void ReadArguments(int argc, char *argv[])
-  {
-    for (int n = 1; n < argc; n++)
-    {
-      string var_name(argv[n]);
-      map<string, string>::const_iterator it = find(var_name);
+        for (int n = 1; n < argc; n++)
+        {
+            string var_name(argv[n]);
+            map<string, string>::const_iterator it = find(var_name);
 
-      if (it != end())
-      {
-        n++;
-        if (n == argc)
-          cerr << "Error: missing value after " << var_name << endl, exit(1);
-        operator[](var_name) = string(argv[n]);
-      }
-      else
-      {
-        cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n";
-        cout << "List of command-line parameters :\n";
-        Print(cout);
-        exit(1);
-      }
-    }
-  }
-  //------------------------------------------------------
-  // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
-  vector<double> doublevec(string var_name) const
-  {
-    vector<double> vec;
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
-    {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-    }
-    else
-    {
-      vector<string> str_vec;
-      str_vec = split(it->second, ',');
-      for (auto &s : str_vec)
-      {
-        double x;
-        try
-        {
-          x = stod(s);
+            if (it != end())
+            {
+                n++;
+                if (n == argc)
+                    cerr << "Error: missing value after " << var_name << endl, exit(1);
+                operator[](var_name) = string(argv[n]);
+            }
+            else
+            {
+                cerr << "Error, the input parameter " << var_name << " does not exist in this model.\n";
+                cout << "List of command-line parameters :\n";
+                Print(cout);
+                exit(1);
+            }
         }
-        catch (...)
+    }
+    //------------------------------------------------------
+    // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<double>
+    vector<double> doublevec(string var_name) const
+    {
+        vector<double> vec;
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
         {
-          cout2 << "Error: was expecting a double and instead got " << s << "\n", exit(1);
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
         }
-        vec.push_back(x);
-      }
-    }
-    return vec;
-  }
-  //------------------------------------------------------
-  // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<long>
-  vector<long> longvec(string var_name) const
-  {
-    vector<long> vec;
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
-    {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
-    }
-    else
-    {
-      vector<string> str_vec;
-      str_vec = split(it->second, ',');
-      for (auto &s : str_vec)
-      {
-        long i;
-        try
+        else
         {
-          i = stoi(s);
+            vector<string> str_vec;
+            str_vec = split(it->second, ',');
+            for (auto &s : str_vec)
+            {
+                double x;
+                try
+                {
+                    x = stod(s);
+                }
+                catch (...)
+                {
+                    cout2 << "Error: was expecting a double and instead got " << s << "\n", exit(1);
+                }
+                vec.push_back(x);
+            }
         }
-        catch (...)
+        return vec;
+    }
+    //------------------------------------------------------
+    // The method below converts a string of the type 1.2,2,-4.4,3.3 into a vector<long>
+    vector<long> longvec(string var_name) const
+    {
+        vector<long> vec;
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
         {
-          cout2 << "Error: was expecting a long int and instead got '" << s << "'\n", exit(1);
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
         }
-        vec.push_back(i);
-      }
+        else
+        {
+            vector<string> str_vec;
+            str_vec = split(it->second, ',');
+            for (auto &s : str_vec)
+            {
+                long i;
+                try
+                {
+                    i = stoi(s);
+                }
+                catch (...)
+                {
+                    cout2 << "Error: was expecting a long int and instead got '" << s << "'\n", exit(1);
+                }
+                vec.push_back(i);
+            }
+        }
+        return vec;
     }
-    return vec;
-  }
-  //------------------------------------------------------
-  // The method below converts a string of the type hello,thanks,home,car into a vector<string>
-  vector<string> stringvec(string var_name, char delimiter = ',') const
-  {
-    vector<string> vec;
-    map<string, string>::const_iterator it = find(var_name);
-    if (it == end())
+    //------------------------------------------------------
+    // The method below converts a string of the type hello,thanks,home,car into a vector<string>
+    vector<string> stringvec(string var_name, char delimiter = ',') const
     {
-      cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+        vector<string> vec;
+        map<string, string>::const_iterator it = find(var_name);
+        if (it == end())
+        {
+            cout2 << "Error: Parameter " << var_name << " is not defined.\n", exit(1);
+        }
+        else
+        {
+            vector<string> str_vec = split(it->second, delimiter);
+            for (auto &s : str_vec)
+                vec.push_back(s);
+        }
+        return vec;
     }
-    else
-    {
-      vector<string> str_vec = split(it->second, delimiter);
-      for (auto &s : str_vec)
-        vec.push_back(s);
-    }
-    return vec;
-  }
 };
 #endif
 
