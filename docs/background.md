@@ -22,33 +22,23 @@ https://doi.org/10.1103/PhysRevB.102.064301
 An MPS is a particular way to encode
 a many-body wave-function using a set of matrices. Consider a system made of
 $N$ qubits, in a pure state
-$\left|\psi\right\rangle=\sum_{s_1,s_2,\cdots,s_N}\psi\left(s_1,s_2,\cdots,s_N\right)\left|s_1\right\rangle\left|s_2\right\rangle\cdots\left|s_N\right\rangle$. 
-In this expression the sum runs over the $2^N$ basis states ($s_i\in\\{0,1\\}$) and the wave-function is encoded
-into the function $\psi:\\{s_i\\}\to\psi\left(s_1,s_2,\cdots,s_N\right)$. An MPS is a state where the wave function is written
-$\psi\left(s_1,s_2,\cdots,s_N\right)={\rm Tr}\left[A^{(s_1)}_1A^{(s_2)}_2\cdots A^{(s_N)}_N\right]$
-where, for each qubit $i$ we have introduced two matrices
-$A^{(0)}\_i$ and $A^{(1)}\_i$ (for a local Hilbert space of dimension
-$D$ one needs
-$D$ matrices
-$A^{(0)}\_i\cdots A^{(D)}\_i$ for each qubit). These matrices are in general rectangular
-($d_i\times d_{i+1}$)
-and the wave-function is obtained by multiplying them. What determines the dimensions of the matrices?
-If  the matrices are one-dimensional (scalar) one has  a trivial product state (and all product states can be written this way).
-On the other hand, if one allows for very large matrices, of size $2^N$, any arbitrary state can be written as an MPS. 
-In fact the MPS representation is really useful when the system has a moderate amount of bipartite entanglement.
-As a "rule of thumb", to get a good MPS approximation of a given state, each
-matrix $A^{(s_i)}\_i$, of size $d_{i-1}\times d_{i}$, should have a dimension
-$d_i$ of the order of
-$e^{S_{\rm vN}(i)}$, where
-$S_{\rm vN}(i)$ is the von Neumann entropy of the subsystem
-$[i+1,\cdots,N]$.
+  ```math
+\left|\psi\right\rangle=\sum_{s_1,s_2,\cdots,s_N}\psi\left(s_1,s_2,\cdots,s_N\right)\left|s_1\right\rangle\left|s_2\right\rangle\cdots\left|s_N\right\rangle.
+``` 
+In this expression the sum runs over the $2^N$ basis states ($s_i\in\\{0,1\\}$) and the wave-function is encoded into the function $\psi:\\{s_i\\}\to\psi\left(s_1,s_2,\cdots,s_N\right)$. An MPS is a state where the wave function is written
+  ```math
+\psi\left(s_1,s_2,\cdots,s_N\right)={\rm Tr}\left[A^{(s_1)}_1A^{(s_2)}_2\cdots A^{(s_N)}_N\right].
+```
+where, for each qubit $i$ we have introduced two matrices $A^{(0)}\_i$ and $A^{(1)}\_i$ (for a local Hilbert space of dimension $D$ one needs $D$ matrices $A^{(0)}\_i\cdots A^{(D)}\_i$ for each qubit). These matrices are in general rectangular ($d_i\times d_{i+1}$) and the wave-function is obtained by multiplying them.
+
+What determines the dimensions of the matrices? If the matrices are one-dimensional (scalar) one has  a trivial product state (and all product states can be written this way). On the other hand, if one allows for very large matrices, of size $2^N$, any arbitrary state can be written as an MPS. In fact the MPS representation is really useful when the system has a moderate amount of bipartite entanglement. As a "rule of thumb", to get a good MPS approximation of a given state, each matrix $A^{(s_i)}\_i$, of size $d_{i-1}\times d_{i}$, should have a dimension $d_i$ of the order of $e^{S_{\rm vN}(i)}$, where $S_{\rm vN}(i)$ is the von Neumann entropy of the subsystem $[i+1,\cdots,N]$.
 
 
 What about mixed states? They can be represented using so-called matrix-product operators (MPO),
   ```math
 \rho=\sum_{a_1,a_2,\cdots,a_N}{\rm Tr}\left[M^{(a_1)}_1 M^{(a_2)}_2\cdots M^{(a_N)}_N\right]\sigma^a_1 \otimes \sigma^a_2 \otimes \cdots \sigma^a_N
 ```
-where each $a\_i$ can take four values $\in\{1,x,y,z\}$, $\sigma^{a_i}$ is a Pauli matrix or the identity acting on qubit $i$, and we have associated four matrices $M_i^{(1)}, $M_i^{(x)}$, $M_i^{(y)}$ and $M_i^{(z)}$ to each qubit.
+where each $a\_i$ can take four values in $\\{1,x,y,z\\}$, $\sigma^{a}\_i$ is a Pauli matrix or the identity acting on qubit $i$, and we have associated four matrices $M_\i^{(1)}, $M_i^{(x)}$, $M_i^{(y)}$ and $M_i^{(z)}$ to each qubit.
 
 
 ### Bond dimension and entanglement
