@@ -23,11 +23,12 @@ An MPS is a particular way to encode
 a many-body wave-function using a set of matrices. Consider a system made of
 $N$ qubits, in a pure state
   ```math
-\left|\psi\right\rangle=\sum_{s_1,s_2,\cdots,s_N}\psi\left(s_1,s_2,\cdots,s_N\right)\left|s_1\right\rangle\left|s_2\right\rangle\cdots\left|s_N\right\rangle.
+\left|\psi\right\rangle=\sum_{s_1,s_2,\cdots,s_N}\psi\left(s_1,s_2,\cdots,s_N\right)\left|s_1\right\rangle\left|s_2\right\rangle\cdots\left|s_N\right\rangle,
 ``` 
-In this expression the sum runs over the $2^N$ basis states ($s_i\in\\{0,1\\}$) and the wave-function is encoded into the function $\psi:\\{s_i\\}\to\psi\left(s_1,s_2,\cdots,s_N\right).$ An MPS is a state where the wave function is written
+where in this expression the sum runs over the $2^N$ basis states ($s_i\in\\{0,1\\}$) and the wave-function is encoded into the function $\psi:\\{s_i\\}\to\psi\left(s_1,s_2,\cdots,s_N\right).$
+An MPS is a state where the wave function is written
   ```math
-\psi\left(s_1,s_2,\cdots,s_N\right)={\rm Tr}\left[A^{(s_1)}_1A^{(s_2)}_2\cdots A^{(s_N)}_N\right].
+\psi\left(s_1,s_2,\cdots,s_N\right)={\rm Tr}\left[A^{(s_1)}_1A^{(s_2)}_2\cdots A^{(s_N)}_N\right],
 ```
 where, for each qubit $i$ we have introduced two matrices $A^{(0)}\_i$ and $A^{(1)}\_i$ (for a local Hilbert space of dimension $D$ one needs $D$ matrices $A^{(0)}\_i\cdots A^{(D)}\_i$ for each qubit). These matrices are in general rectangular ($d_i\times d_{i+1}$) and the wave-function is obtained by multiplying them.
 
@@ -36,7 +37,7 @@ What determines the dimensions of the matrices? If the matrices are one-dimensio
 
 What about mixed states? They can be represented using so-called matrix-product operators (MPO),
   ```math
-\rho=\sum_{a_1,a_2,\cdots,a_N}{\rm Tr}\left[M^{(a_1)}_1 M^{(a_2)}_2\cdots M^{(a_N)}_N\right]\sigma^a_1 \otimes \sigma^a_2 \otimes \cdots \sigma^a_N
+\rho=\sum_{a_1,a_2,\cdots,a_N}{\rm Tr}\left[M^{(a_1)}_1 M^{(a_2)}_2\cdots M^{(a_N)}_N\right]\sigma^a_1 \otimes \sigma^a_2 \otimes \cdots \sigma^a_N,
 ```
 where each $a\_i$ can take four values in $\\{1,x,y,z\\}$, $\sigma^{a}\_i$ is a Pauli matrix or the identity acting on qubit $i$, and we have associated four matrices $M\_i^{(1)}$, $M_i^{(x)}$, $M_i^{(y)}$ and $M_i^{(z)}$ to each qubit.
 
@@ -81,7 +82,7 @@ http://dx.doi.org/10.1088/1742-5468/2009/02/P02035
 
 The representation of the many-body density matrix of the system in terms of an MPS is all the more efficient as the corresponding pure state (of the fictitious system) is weakly entangled.  So, it is natural to consider the  von Neumann entanglement entropy of the pure-state (of the fictitious system) obtained from the vectorization of the density matrix (of the real system). We stress that this quantity is not the von Neuman entropy of the real system, it is instead called the Operator Space Entanglement Entropy (OSEE) [https://doi.org/10.1103/PhysRevA.76.032316]. So, for a given target accuracy, the smaller the OSEE the smaller the bond dimension of the MPS (and the fastest the numerical calculations). In practice we instead often fix some maximum bond dimension for the MPS. Then,  the  smaller the OSEE of the physical state the better the MPS approximation will be.
 
-# iTensor Library
+# ITensor Library
 
-The present code is based on the iTensor library, C++ version 3 https://www.itensor.org.
+The present code is based on the C++ ITensor library, version 3, from https://www.itensor.org.
 See also the following paper: https://arxiv.org/abs/2007.14822 . The library allows to construct and manipulate MPS and MPO in a simple way and it allows to run DMRG calculations. It also allows to compute the time-evolution of a system where the state is encoded as an MPS and its Hamiltonian is encoded as an MPO.
