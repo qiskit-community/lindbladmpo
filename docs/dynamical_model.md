@@ -5,7 +5,7 @@ In the case where the system is made of qubits (two-level systems), the Hilbert 
 
 The time-evolution of the system coupled to a Markovian environment (a memory-less bath) is often described using the Lindblad master equation,
   ```math
-\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]%2b\mathcal{D}[\rho],
+\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]+\mathcal{D}[\rho],
 ```
 where $[\cdot,\cdot]$ denotes the commutator of two operators.
 
@@ -24,7 +24,7 @@ The simulator uses a fixed Hamiltonian with coefficients which can be defined by
 respect to the frequency of a drive of a uniform frequency applied to all qubits (which are not necessarily identical themselves, however, and may be driven at different amplitudes and phases), or not driven at all.
 The Hamiltonian is represented as the sum of on-site terms and an interaction part,
 ```math
-{H}/{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  %2b h_{x,i}\sigma_i^x %2b h_{y,i}\sigma_i^y\right] + T,
+{H}/{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  + h_{x,i}\sigma_i^x + h_{y,i}\sigma_i^y\right] + T,
 ```
 with the interaction being,
 ```math
