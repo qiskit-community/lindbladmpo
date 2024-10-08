@@ -18,7 +18,7 @@ The solver is based on matrix product states (MPS) and matrix product operators 
 
 ## The Model
 
-The solver can model interacting qubits in a lattice with an arbitrary connectivity$^1$ defined by the user (however, the computing ressources needed to accurately simulate the system can strongly depend on this connectivity).
+The solver can model interacting qubits in a lattice with an arbitrary connectivity defined by the user (however, the computing ressources needed to accurately simulate the system can strongly depend on this connectivity).
 
 The simulator uses a fixed Hamiltonian with coefficients which can be defined by the user. The Hamiltonian is defined in the rotating frame with
 respect to the frequency of a drive of a uniform frequency applied to all qubits (which are not necessarily identical themselves, however, and may be driven at different amplitudes and phases), or not driven at all.
@@ -26,9 +26,9 @@ The Hamiltonian is represented as the sum of on-site terms and an interaction pa
 ```math
 {H}/{\hbar} = \sum_{i}\frac{1}{2}\left[h_{z,i}\sigma_i^z  + h_{x,i}\sigma_i^x + h_{y,i}\sigma_i^y\right] + T,
 ```
-with the interaction being,
+with the interaction being
 ```math
-T = \sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^%2b_i \sigma^-_{j} + {\rm h.c.} + \frac{1}{2} J_{ij}^z \sigma^z_i \sigma^z_{j}\right)=\\ \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} + J_{ij}\sigma^y_i \sigma^y_{j} + J_{ij}^z \sigma^z_i \sigma^z_{j}\right),
+T = \sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^+\_i \sigma^-_{j} + {\rm h.c.} + \frac{1}{2} J_{ij}^z \sigma^z_i \sigma^z_{j}\right)=\\ \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} + J_{ij}\sigma^y_i \sigma^y_{j} + J_{ij}^z \sigma^z_i \sigma^z_{j}\right),
 ```
 where $\sigma\_i^a, a=\{x,y,z\},$ are the Pauli matrices at each site and $\sigma^{\pm}_\i = {\sigma^{x}_\i\pm i\sigma^y_\i}/{2}$ are the ladder operators.
 
