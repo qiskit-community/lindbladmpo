@@ -5,7 +5,7 @@
 The code uses matrix-product-state (MPS) and matrix-product-operator (MPO) data structures, implemented in C++ (using the [ITensor](https://itensor.org/) library) for maximizing the performance with multithreaded computations, and wrapped by a Python layer with an easy-to-use interface and rich plotting features. The solver integrates in fixed time steps the Markovian master equation for the density matrix,
 
   ```math
-\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]+\mathcal{D}[\rho]
+\frac{\partial}{\partial t}\rho = -\frac{i}{\hbar}[H,\rho]+\mathcal{D}[\rho].
   ```
 
 The solver supports various initial states and observables, with the Hamiltonian and dissipator terms having time-independent coefficients;
