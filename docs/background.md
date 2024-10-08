@@ -27,17 +27,17 @@ In this expression the sum runs over the $2^N$ basis states ($s_i\in\\{0,1\\}$) 
 into the function $\psi:\\{s_i\\}\to\psi\left(s_1,s_2,\cdots,s_N\right)$. An MPS is a state where the wave function is written
 $\psi\left(s_1,s_2,\cdots,s_N\right)={\rm Tr}\left[A^{(s_1)}_1A^{(s_2)}_2\cdots A^{(s_N)}_N\right]$
 where, for each qubit $i$ we have introduced two matrices
-$A^{(0)}_i$ and $A^{(1)}_i$ (for a local Hilbert space of dimension
+$A^{(0)}\_i$ and $A^{(1)}\_i$ (for a local Hilbert space of dimension
 $D$ one needs
 $D$ matrices
-$A^{(0)}_i\cdots A^{(D)}_i$ for each qubit). These matrices are in general rectangular
+$A^{(0)}\_i\cdots A^{(D)}\_i$ for each qubit). These matrices are in general rectangular
 ($d_i\times d_{i+1}$)
 and the wave-function is obtained by multiplying them. What determines the dimensions of the matrices?
 If  the matrices are one-dimensional (scalar) one has  a trivial product state (and all product states can be written this way).
 On the other hand, if one allows for very large matrices, of size $2^N$, any arbitrary state can be written as an MPS. 
 In fact the MPS representation is really useful when the system has a moderate amount of bipartite entanglement.
 As a "rule of thumb", to get a good MPS approximation of a given state, each
-matrix $A^{(s_i)}_i$, of size $d_{i-1}\times d_{i}$, should have a dimension
+matrix $A^{(s_i)}\_i$, of size $d_{i-1}\times d_{i}$, should have a dimension
 $d_i$ of the order of
 $e^{S_{\rm vN}(i)}$, where
 $S_{\rm vN}(i)$ is the von Neumann entropy of the subsystem
