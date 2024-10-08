@@ -23,8 +23,8 @@ An MPS is a particular way to encode
 a many-body wave-function using a set of matrices. Consider a system made of
 $N$ qubits, in a pure state
 $\left|\psi\right\rangle=\sum_{s_1,s_2,\cdots,s_N}\psi\left(s_1,s_2,\cdots,s_N\right)\left|s_1\right\rangle\left|s_2\right\rangle\cdots\left|s_N\right\rangle$. 
-In this expression the sum runs over the $2^N$ basis states ($s_i\in\left\{0,1\right\}$) and the wave-function is encoded
-into the function $\psi:\left\{s_i\right\}\to\psi\left(s_1,s_2,\cdots,s_N\right)$. An MPS is a state where the wave function is written
+In this expression the sum runs over the $2^N$ basis states ($s_i\in\{0,1\}$) and the wave-function is encoded
+into the function $\psi:\{s_i\}\to\psi\left(s_1,s_2,\cdots,s_N\right)$. An MPS is a state where the wave function is written
 $\psi\left(s_1,s_2,\cdots,s_N\right)={\rm Tr}\left[A^{(s_1)}_1A^{(s_2)}_2\cdots A^{(s_N)}_N\right]$
 where, for each qubit $i$ we have introduced two matrices
 $A^{(0)}_i$ and $A^{(1)}_i$ (for a local Hilbert space of dimension
