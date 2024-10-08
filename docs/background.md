@@ -38,7 +38,7 @@ What about mixed states? They can be represented using so-called matrix-product 
   ```math
 \rho=\sum_{a_1,a_2,\cdots,a_N}{\rm Tr}\left[M^{(a_1)}_1 M^{(a_2)}_2\cdots M^{(a_N)}_N\right]\sigma^a_1 \otimes \sigma^a_2 \otimes \cdots \sigma^a_N
 ```
-where each $a\_i$ can take four values in $\\{1,x,y,z\\}$, $\sigma^{a}\_i$ is a Pauli matrix or the identity acting on qubit $i$, and we have associated four matrices $M\_i^{(1)}, $M_i^{(x)}$, $M_i^{(y)}$ and $M_i^{(z)}$ to each qubit.
+where each $a\_i$ can take four values in $\\{1,x,y,z\\}$, $\sigma^{a}\_i$ is a Pauli matrix or the identity acting on qubit $i$, and we have associated four matrices $M\_i^{(1)}$, $M_i^{(x)}$, $M_i^{(y)}$ and $M_i^{(z)}$ to each qubit.
 
 
 ### Bond dimension and entanglement
