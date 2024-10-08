@@ -28,9 +28,9 @@ The Hamiltonian is represented as the sum of on-site terms and an interaction pa
 ```
 with the interaction being
 ```math
-T = \sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^+\_i \sigma^-_{j} + {\rm h.c.} + \frac{1}{2} J_{ij}^z \sigma^z_i \sigma^z_{j}\right)=\\ \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} + J_{ij}\sigma^y_i \sigma^y_{j} + J_{ij}^z \sigma^z_i \sigma^z_{j}\right),
+T = \sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^+_i \sigma^-_{j} + {\rm h.c.} + \frac{1}{2} J_{ij}^z \sigma^z_i \sigma^z_{j}\right)=\\ \frac{1}{2}\sum_{ i}^N\sum_{ j\neq i}^N \left(J_{ij}\sigma^x_i \sigma^x_{j} + J_{ij}\sigma^y_i \sigma^y_{j} + J_{ij}^z \sigma^z_i \sigma^z_{j}\right),
 ```
-where $\sigma\_i^a, a=\{x,y,z\},$ are the Pauli matrices at each site and $\sigma^{\pm}_\i = {\sigma^{x}_\i\pm i\sigma^y_\i}/{2}$ are the ladder operators.
+where $\sigma\_i^a, a=\{x,y,z\},$ are the Pauli matrices at each site and $\sigma^{\pm}\_i = {\sigma^{x}\_i\pm i\sigma^y\_i}/{2}$ are the ladder operators.
 
 The Lindbladian used in the simulator is also fixed with coefficients that can be defined by the user. It is represented as a sum of three terms, $\mathcal{D} = \sum_j \mathcal{D}_j,$ with the first two terms model exchange with a thermal bath,
 ```math
@@ -39,7 +39,7 @@ The Lindbladian used in the simulator is also fixed with coefficients that can b
 ```math
 \mathcal{D}_1[\rho]=\sum_i g_{1,i}\left( \sigma_i^-\rho \sigma_i^{+}-\frac{1}{2}\left\{\sigma_i^{+}\sigma_i^-,\rho\right\}\right),
 ```
-and the last term models pure dephasing in xy plane,
+and the last term models pure dephasing in $xy$ plane,
 ```math
 \mathcal{D}_2[\rho] = \sum_i g_{2,i} \left(\sigma_i^z \rho\sigma_i^z - \rho\right).
 ```
