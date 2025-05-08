@@ -675,7 +675,7 @@ int main(int argc, char *argv[])
     }
     cout2.flush();
 
-    if (param.val("b_initial_rho_compression") != 0)
+    if (param.boolval("b_initial_rho_compression"))
     {
 
         cout2 << "C.rho.orthogonalize...";
