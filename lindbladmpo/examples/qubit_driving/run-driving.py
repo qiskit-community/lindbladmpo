@@ -28,7 +28,7 @@ b_save_to_db = True  # Whether to save to a .csv file an entry describing the si
 fontsize = 18  # Font size of the figures
 
 # Simulation parameters to vary - all of these are the metadata (database) entries
-N = 9  # Number of qubits. Note that the topologies are implemented only
+N = 19  # Number of qubits. Note that the topologies are implemented only
 # for some qubit numbers - see in the following.
 topology = "chain.E"  # Options: 'chain.M', 'chain.E', 'ring', 'plaquette'
 # Setting 'chain.M', the system is a linear 1D chain, with the Middle qubit driven by an x term,
@@ -45,16 +45,16 @@ load_unique_id = ""
 # with the initial condition being the final state of the loaded simulation
 t_init = 0.0  # Initial time, can be set to the final time of the loaded simulation,
 # which is convenient for plotting but not essential for the solution
-t_final = 1.0  # Final time of ths simulation
-tau = 0.02  # Discrete time step of the Trotterization. Should be much smaller than
+t_final = 3.0  # Final time of ths simulation
+tau = 0.1  # Discrete time step of the Trotterization. Should be much smaller than
 # all periods determined by the Hamiltonian parameters below.
 
 # Model parameters
-J_amp = 1.0  # XY coupling strength * 2 * pi
-h_x_amp = 1.0  # x-driving amplitude of the 0 qubit * 2 * pi
-h_z_amp = 0.0  # On-site z terms amplitude according to the alternating pattern
-g_0_amp = 0.1  # Rate of energy relaxation towards the ground state
-g_2_amp = 0.0  # Rate of decoherence (dephasing) terms in the Lindbladian
+J_amp = .5 / (2 * np.pi)  # XY coupling strength * 2 * pi
+h_x_amp = .0  # x-driving amplitude of the 0 qubit * 2 * pi
+h_z_amp = 0.23 / (2 * np.pi)  # On-site z terms amplitude according to the alternating pattern
+g_0_amp = 0.0  # Rate of energy relaxation towards the ground state
+g_2_amp = 0.01  # Rate of decoherence (dephasing) terms in the Lindbladian
 
 if topology == "plaquette" or topology == "ring":
     mpo_mapping = (
@@ -89,7 +89,7 @@ sim_metadata.update(
 
 # Now define the solver-specific parameters, and update the metadata
 if solver == "mpo":
-    max_dim_rho = 60  # Maximal bond dimension
+    max_dim_rho = 160  # Maximal bond dimension
     cut_off_rho = 1e-14  # Cutoff parameter of the Schmidt decomposition singular values
     force_rho_Hermitian_step = 5
     # Every how many steps to force the density matrix to be Hermitian

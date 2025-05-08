@@ -744,7 +744,7 @@ int main(int argc, char *argv[])
         cout2 << "Lindbladian is trivial and no time evolution will be applied.\n";
         cout2.flush();
     }
-    const int n_steps = int(t_total / tau);
+    const int n_steps = std::round(t_total / tau);
 
     // Open output files
     ofstream file_1q, file_2q, file_3q, file_global, file_custom;

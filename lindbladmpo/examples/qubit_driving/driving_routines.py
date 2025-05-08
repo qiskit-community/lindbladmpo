@@ -89,7 +89,10 @@ def solve_simulation(
     r_qubits = range(N)
     for i in r_qubits:
         if load_unique_id == "":
-            init_product_state.append("+z")  # Initialize all qubits to the ground state
+            if i % 2:
+                init_product_state.append("-z")  # Initialize all qubits to the ground state
+            else:
+                init_product_state.append("+z")
         _1q_indices.append(i)  # Request 1Q observables all qubits
     if topology == "chain.M":
         # The qubits to plot at the end of the simulation are by default not all qubits.
