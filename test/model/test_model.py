@@ -628,30 +628,36 @@ class LindbladMPOSolverModel(unittest.TestCase):
 
     def test_apply_gates_cx_sx_h(self):
         """Compare the application of gates at intermediate times."""
-        N = 8
+        N = 13
         t_final = 1
         solver_params1 = {
-            "tau": 0.02,
+            "tau": 0.1,
             "t_final": t_final,
             "N": N,
-            "h_z": 0.43,
+            "h_z": 0.,
             "1q_components": ["x", "y", "z"],
             "2q_components": ["xx", "yy", "zz", "xy", "xz", "yz"],
             "b_quiet": True,
-            "init_product_state": ["+x", "+x", "+z", "+z", "+z", "+z", "-z", "-z"],
+            "init_product_state": ["+x", "+x", "+z", "+z", "+z", "+z", "-z", "-z", "+z",
+                                   "+z", "+z", "+z", "+z"],
             "apply_gates": [
-                (0.0, "cz", 0, 1),
-                (0.0, "h", 2),
-                (0.0, "h", 3),
-                (0.0, "cz", 2, 3),
-                (0.0, "h", 4),
-                (0.0, "h", 5),
-                (0.0, "h", 5),
-                (0.0, "cx", 4, 5),
-                (0.0, "h", 5),
-                (0.0, "sx", 6),
-                (0.0, "sx", 7),
-                (0.0, "cz", 6, 7),
+                (0.1, "cz", 0, 1),
+                (0.2, "h", 2),
+                (0.3, "h", 3),
+                (0.4, "cz", 2, 3),
+                (0.5, "h", 4),
+                (0.6, "h", 5),
+                (0.7, "h", 5),
+                (0.8, "cx", 4, 5),
+                (0.9, "h", 5),
+                (0.3, "sx", 6),
+                (0.4, "sx", 7),
+                (0.5, "cz", 6, 7),
+                (0.7, "h", 10),
+                (0.7, "cx", 10, 8),
+                (0.7, "h", 12),
+                (0.8, "cx", 12, 11),
+                (0.9, "cx", 8, 11),
             ],
         }
         s_files_prefix1 = s_output_path + "test_apply_gates_cx_sx_h"
@@ -668,8 +674,8 @@ class LindbladMPOSolverModel(unittest.TestCase):
             solver1.result["obs-2q"][("xz", (2, 3))][1][-1],
         )
         self.assertAlmostEqual(
-            solver1.result["obs-2q"][("xx", (0, 1))][1][-1],
-            solver1.result["obs-2q"][("xx", (2, 3))][1][-1],
+            solver1.result["obs-2q"][("yy", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("yy", (2, 3))][1][-1],
         )
         self.assertAlmostEqual(
             solver1.result["obs-2q"][("xy", (0, 1))][1][-1],
@@ -680,12 +686,16 @@ class LindbladMPOSolverModel(unittest.TestCase):
             solver1.result["obs-2q"][("xz", (4, 5))][1][-1],
         )
         self.assertAlmostEqual(
-            solver1.result["obs-2q"][("xx", (0, 1))][1][-1],
-            solver1.result["obs-2q"][("xx", (4, 5))][1][-1],
+            solver1.result["obs-2q"][("yy", (0, 1))][1][-1],
+            solver1.result["obs-2q"][("yy", (4, 5))][1][-1],
         )
         self.assertAlmostEqual(
             solver1.result["obs-2q"][("xy", (0, 1))][1][-1],
             solver1.result["obs-2q"][("xy", (4, 5))][1][-1],
+        )
+        self.assertAlmostEqual(
+            solver1.result["global"][("s_2", ())][1][0],
+            0.,
         )
 
         (_, c_data1), _ = prepare_concurrence_data(solver1.result, (0, 1))

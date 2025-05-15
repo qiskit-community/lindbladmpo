@@ -870,10 +870,13 @@ int main(int argc, char *argv[])
           << "\n";
     cout2.flush();
 
+    const bool b_collapse_equal_mixture = param.boolval("b_collapse_equal_mixture");
     if (collapse.size())
     {
         auto t_collapse_start = steady_clock::now();
         cout2 << "\nStarting evaluation of " << collapse.size() << " collapse operators.\n";
+        if (b_collapse_equal_mixture)
+            cout2 << "Creating an equal mixture of collapsed states.\n";
 
         int i_coll = 0;
         MPS rho_0(C.rho); // Keep a copy of the uncollapsed state
@@ -901,6 +904,14 @@ int main(int argc, char *argv[])
                           << " but contains " << op_name << ".\n",
                         exit(1);
                 i_op++;
+            }
+            if (b_collapse_equal_mixture)
+            {
+                Cplx z = C.trace_rho();
+                if (std::abs(z) < _2_N)
+                    cout2 << "\t\tNote: " << "Tr{rho} = " << z << " encountered during collapse projectors, "
+                          << "this is smaller than 2^(-N)!";
+                C.rho /= z;
             }
             if (i_coll == 0)
                 rho_c = MPS(C.rho);
