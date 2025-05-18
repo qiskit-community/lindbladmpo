@@ -572,6 +572,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             "trotter_order",
             "b_initial_rho_compression",
             "b_apply_gate_compression",
+            "b_collapse_equal_mixture",
             "max_dim_rho",
             "cut_off",
             "cut_off_rho",
