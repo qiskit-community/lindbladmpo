@@ -634,12 +634,25 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "tau": 0.1,
             "t_final": t_final,
             "N": N,
-            "h_z": 0.,
+            "h_z": 0.0,
             "1q_components": ["x", "y", "z"],
             "2q_components": ["xx", "yy", "zz", "xy", "xz", "yz"],
             "b_quiet": True,
-            "init_product_state": ["+x", "+x", "+z", "+z", "+z", "+z", "-z", "-z", "+z",
-                                   "+z", "+z", "+z", "+z"],
+            "init_product_state": [
+                "+x",
+                "+x",
+                "+z",
+                "+z",
+                "+z",
+                "+z",
+                "-z",
+                "-z",
+                "+z",
+                "+z",
+                "+z",
+                "+z",
+                "+z",
+            ],
             "apply_gates": [
                 (0.1, "cz", 0, 1),
                 (0.2, "h", 2),
@@ -695,7 +708,7 @@ class LindbladMPOSolverModel(unittest.TestCase):
         )
         self.assertAlmostEqual(
             solver1.result["global"][("s_2", ())][1][0],
-            0.,
+            0.0,
         )
 
         (_, c_data1), _ = prepare_concurrence_data(solver1.result, (0, 1))
