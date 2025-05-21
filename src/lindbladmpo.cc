@@ -685,10 +685,11 @@ int main(int argc, char *argv[])
         cout2 << "New max bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
         cout2.flush();
     }
+    const bool b_force_rho_trace = param.boolval("b_force_rho_trace");
 
     Cplx tr = C.trace_rho();
     cout2 << "Tr{rho}: " << tr;
-    if (std::abs(tr - 1) > TRACE_RHO_DIV_THRESHOLD)
+    if ((std::abs(tr - 1) > TRACE_RHO_DIV_THRESHOLD) && b_force_rho_trace)
     {
         cout2 << ", normalizing.";
         C.rho /= tr;
@@ -911,7 +912,7 @@ int main(int argc, char *argv[])
                 if (std::abs(z) < _2_N)
                     cout2 << "\t\tNote: " << "Tr{rho} = " << z << " encountered during collapse projectors, "
                           << "this is smaller than 2^(-N)!";
-                C.rho /= z;
+                // C.rho /= z;
             }
             if (i_coll == 0)
                 rho_c = MPS(C.rho);
@@ -927,14 +928,13 @@ int main(int argc, char *argv[])
             cout2 << "\t\tNote: this is smaller than 2^(-N)!"
                   << "\n";
         // TODO: This is a somewhat arbitrary threshold for the warning.
-        C.rho /= z;
+        // C.rho /= z;
         auto t_collapse_end = steady_clock::now();
         duration_ms = duration_cast<milliseconds>(t_collapse_end - t_collapse_start);
         cout2 << "Collapse evaluation terminated. Duration: " << duration_ms.count() / 1000. << "s\n";
     }
 
     char buf[100];
-    const bool b_force_rho_trace = param.boolval("b_force_rho_trace");
     const long force_rho_hermitian_step = param.longval("force_rho_hermitian_step");
     const long force_rho_hermitian_gates = param.longval("force_rho_hermitian_gates");
     const bool b_quiet = param.boolval("b_quiet");
