@@ -2,5 +2,5 @@ pylint==2.12.1
 stestr
 matplotlib>=2.1
 scipy>=1.0
-black~=22.0
+black>=24.3.0
 numpy>=1.17
