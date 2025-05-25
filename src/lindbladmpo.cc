@@ -130,14 +130,14 @@ int main(int argc, char *argv[])
     }
 
     C.ConstructIdentity(); // Construct the density matrix corresponding to infinite temperature
-
+    const double cut_off_rho = param.val("cut_off_rho");
     // Note on the option below: if we  "Normalize=true" (default for fitapplyMPO)
     // we would normalize rho such that Tr[rho^2]=1, (norm of the MPS)
     // which is of course not appropriate for a density matrix.
     auto argsRho = Args();
     argsRho.add("Normalize", false);
     argsRho.add("MaxDim", param.longval("max_dim_rho"));
-    argsRho.add("Cutoff", param.val("cut_off_rho"));
+    argsRho.add("Cutoff", cut_off_rho);
 
     vector<long> init_graph_state = param.longvec("init_graph_state");
     vector<long> init_cz_gates = param.longvec("init_cz_gates");
@@ -680,7 +680,7 @@ int main(int argc, char *argv[])
 
         cout2 << "C.rho.orthogonalize...";
         cout2.flush();
-        C.rho.orthogonalize(Args("Cutoff", param.val("cut_off_rho"), "MaxDim", param.longval("max_dim_rho")));
+        C.rho.orthogonalize(Args("Cutoff", cut_off_rho, "MaxDim", param.longval("max_dim_rho")));
         cout2 << "done.\n";
         cout2 << "New max bond dimension of rho:" << maxLinkDim(C.rho) << "\n";
         cout2.flush();
@@ -912,7 +912,7 @@ int main(int argc, char *argv[])
                 if (std::abs(z) < _2_N)
                     cout2 << "\t\tNote: " << "Tr{rho} = " << z << " encountered during collapse projectors, "
                           << "this is smaller than 2^(-N)!";
-                // C.rho /= z;
+                 C.rho /= z;
             }
             if (i_coll == 0)
                 rho_c = MPS(C.rho);
@@ -928,16 +928,17 @@ int main(int argc, char *argv[])
             cout2 << "\t\tNote: this is smaller than 2^(-N)!"
                   << "\n";
         // TODO: This is a somewhat arbitrary threshold for the warning.
-        // C.rho /= z;
+         C.rho /= z;
         auto t_collapse_end = steady_clock::now();
         duration_ms = duration_cast<milliseconds>(t_collapse_end - t_collapse_start);
         cout2 << "Collapse evaluation terminated. Duration: " << duration_ms.count() / 1000. << "s\n";
     }
 
     char buf[100];
+    const bool b_quiet = param.boolval("b_quiet");
+    const double cut_off_observable = param.val("cut_off_observable");
     const long force_rho_hermitian_step = param.longval("force_rho_hermitian_step");
     const long force_rho_hermitian_gates = param.longval("force_rho_hermitian_gates");
-    const bool b_quiet = param.boolval("b_quiet");
     cout2.quiet(b_quiet);
     double t = t_0;
     for (int n = 0; n <= n_steps; n++)
@@ -1093,6 +1094,8 @@ int main(int argc, char *argv[])
                                 cout2 << "\tWarning: <S^" << s << "(" << i << ")> = " << expectation_value
                                       << "; it should be real, but has an imaginary part > " << IMAGINARY_THRESHOLD
                                       << ".\n";
+                            if (cut_off_observable && (abs(expectation_value) < cut_off_observable))
+                                expectation_value = .0;
                             file_1q << t << "\t" << char(toupper(s[0])) << "\t" << i << "\t" << expectation_value.real()
                                     << endl;
                             count++;
@@ -1129,6 +1132,8 @@ int main(int argc, char *argv[])
                                       << ")> = " << expectation_value
                                       << "; it should be real, but has an imaginary part > " << IMAGINARY_THRESHOLD
                                       << ".\n";
+                            if (cut_off_observable && (abs(expectation_value) < cut_off_observable))
+                                expectation_value = .0;
                             file_2q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << "\t" << i << "\t" << j
                                     << "\t" << expectation_value.real() << endl;
                             count++;
@@ -1165,6 +1170,8 @@ int main(int argc, char *argv[])
                                       << k << ")" << expectation_value
                                       << "; it should be real, but has an imaginary part > " << IMAGINARY_THRESHOLD
                                       << ".\n";
+                            if (cut_off_observable && (abs(expectation_value) < cut_off_observable))
+                                expectation_value = .0;
                             file_3q << t << "\t" << char(toupper(s[0])) << char(toupper(s[1])) << char(toupper(s[2]))
                                     << "\t" << i << "\t" << j << "\t" << k << "\t" << expectation_value.real() << endl;
                             count++;
@@ -1192,6 +1199,8 @@ int main(int argc, char *argv[])
                         for (MPS &proj : ProjectorList)
                         {
                             Cplx op_val = innerC(proj, C.rho);
+                            if (cut_off_observable && (abs(op_val) < cut_off_observable))
+                                op_val = .0;
                             file_custom << t << " \t" << ProjectorNames[c] << "\t" << op_val.real() << endl;
                             c++;
                         }
@@ -1203,6 +1212,8 @@ int main(int argc, char *argv[])
                         for (string &s_op_obs : OperatorObsNames)
                         {
                             Cplx op_val = C.Expect(OperatorObs[c], OperatorObsQubits[c]);
+                            if (cut_off_observable && (abs(op_val) < cut_off_observable))
+                                op_val = .0;
                             // cout2 << "\nCalculating: " << OperatorObs[c] << " " << OperatorObsQubits[c];
                             file_custom << t << " \t" << s_op_obs << "\t" << op_val.real() << endl;
                             c++;

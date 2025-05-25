@@ -24,8 +24,11 @@ class SimulationParameters : public Parameters
         operator[]("trotter_order") = "4"; // Possible choices are 2, 3, 4. 3 or 4 are recommended.
         operator[]("max_dim_rho") = "400"; // Maximum bond dimension for density matrices
         operator[]("cut_off_rho") =
-            "1e-16"; // Maximum truncation error for density matrices. The actual
-                     // truncation is done using the most severe condition between cut_off_rho and max_dim_rho.
+            "1e-16"; // Maximum truncation error for density matrices. The actual truncation is
+                     // done using the most severe condition between cut_off_rho and max_dim_rho.
+        operator[]("cut_off_observable") = "0"; // If a nonzero value is given, it is the maximum
+                     // (absolute) value of an observable to be written to output files -
+                     // smaller values are truncated to 0.
 
         operator[]("b_force_rho_trace") = "1";         // Whether to force the density matrix trace to 1,
                                                        // by substituting rho /= trace{rho} at every time step and every
@@ -41,7 +44,7 @@ class SimulationParameters : public Parameters
             "0"; // If nonzero, after reading rho from
                  // a saved file, perform a re-gauging/compression using ITensor's method orthogonalize().
         operator[]("b_quiet") = "0"; // If nonzero, after initialization of the simulation
-                                     // avoid the console output at every time step (but write it the log file).
+                 // avoid the console output at every time step (but write it to the log file).
 
         operator[]("init_product_state") =
             ""; // Initialize a product state. Can be specified

@@ -955,7 +955,7 @@ class LindbladMPOSolver:
                         "Error 410: " + key + " must be a non-negative integer\n"
                     )
                     continue
-            elif (key == "cut_off") or (key == "cut_off_rho"):
+            elif (key == "cut_off") or (key == "cut_off_rho") or (key == "cut_off_observable"):
                 if not LindbladMPOSolver.is_float(parameters[key]):
                     check_msg += "Error 420: " + key + " is not a float\n"
                     continue

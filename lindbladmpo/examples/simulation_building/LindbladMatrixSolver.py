@@ -394,6 +394,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
 
             if parameters.get("b_save_final_state", False):  # Write final state
                 np.save(self.s_output_path + ".state", sol.y[-1])
+            cut_off_observable = parameters.get("cut_off_observable", .0)
 
             file_1q = open(self.s_output_path + ".obs-1q.dat", "w")
             file_2q = open(self.s_output_path + ".obs-2q.dat", "w")
@@ -419,6 +420,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             f"Warning: imaginary component {val.imag} in observable "
                             f"{key[0].upper()}, qubit {key[1] + 1}.\n"
                         )
+                    if cut_off_observable and (abs(val) < cut_off_observable):
+                        val = .0
                     file_1q.write(f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{val.real}\n")
                 file_1q.write("\n")
                 file_1q.flush()
@@ -431,6 +434,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             f"Warning: imaginary component {val.imag} in observable "
                             f"{key[0].upper()}, qubits ({key[1] + 1}, {key[2] + 1}).\n"
                         )
+                    if cut_off_observable and (abs(val) < cut_off_observable):
+                        val = .0
                     file_2q.write(
                         f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{key[2] + 1}\t{val.real}\n"
                     )
@@ -446,6 +451,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             f"{key[0].upper()}, qubits ({key[1] + 1}, {key[2] + 1}, "
                             f"{key[3] + 1}).\n"
                         )
+                    if cut_off_observable and (abs(val) < cut_off_observable):
+                        val = .0
                     file_3q.write(
                         f"{t}\t{key[0].upper()}\t{key[1] + 1}\t{key[2] + 1}\t{key[3] + 1}\t{val.real}\n"
                     )
@@ -459,6 +466,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                             f"Warning: imaginary component {val.imag} in observable "
                             f"{obs_cu_name}.\n"
                         )
+                    if cut_off_observable and (abs(val) < cut_off_observable):
+                        val = .0
                     file_cu.write(f"{t}\t{obs_cu_name}\t{val.real}\n")
                     # print(f"{t}\t{obs_cu_name}\t{val.real}")
                 file_cu.write("\n")
