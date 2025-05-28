@@ -40,6 +40,32 @@ def _save_fig(b_save_figures, s_file_prefix, s_file_label):
         plt.savefig(s_file_prefix + s_file_label + ".png")
 
 
+def find_index_nearest_time_within_tolerance(arr, target_time, rtol):
+    """
+    Find the index of the nearest time entry in an array of time values.
+
+    This function computes the index of the time entry in the given array that is
+    closest to the specified target time. It takes into account the relative tolerance
+    (`rtol`) for determining closeness.
+
+    Args:
+        arr (sequence of float): An array of time values.
+        target_time (float): The target time to compare against.
+        rtol (float): The relative tolerance for considering time values as close.
+
+    Returns:
+        int: The index of the closest time entry in the array. If no time entry is found
+        that meets the rtol criteria, the function still returns the index of
+        the time entry closest to the target time.
+    """
+    diff = np.abs(np.array(arr) - target_time)
+    closest_index = np.argmin(diff)
+    if np.isclose(diff[closest_index], 0, rtol=rtol, atol=0):
+        return closest_index
+    else:
+        return closest_index
+
+
 def prepare_time_data(
     parameters: dict,
     n_t_ticks=10,
@@ -235,7 +261,9 @@ def prepare_2q_correlation_matrix(
                     # arrays are identical, if they are equal in number. Verifying the time array lengths
                     # will avoid crashes due to interrupted simulations with incomplete data files.
                     try:
-                        t_index = obs_0[0].index(t)
+                        t_index = find_index_nearest_time_within_tolerance(
+                            obs_0[0], t, 0.01
+                        )
                         obs_data[i, j] = (
                             obs_2[1][t_index] - obs_0[1][t_index] * obs_1[1][t_index]
                         )
@@ -284,7 +312,9 @@ def prepare_xy_current_data(
                 # arrays are identical, if they are equal in number. Verifying the time array lengths
                 # will avoid crashes due to interrupted simulations with incomplete data files.
                 try:
-                    t_index = obs_2[0].index(t)
+                    t_index = find_index_nearest_time_within_tolerance(
+                        obs_2[0], t, 0.01
+                    )
                     obs_data[i_bond] = 0.5 * (obs_1[1][t_index] - obs_2[1][t_index])
                 except ValueError:
                     pass
