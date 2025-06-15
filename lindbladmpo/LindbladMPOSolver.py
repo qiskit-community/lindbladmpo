@@ -55,7 +55,7 @@ class LindbladMPOSolver:
         self.s_id_suffix = ""
         self.result = {}
 
-    def solve(self):
+    def solve(self, b_load_output=True):
         """Solves the simulation and loads the result dictionaries."""
         if self.s_input_file == "":
             self.build()
@@ -64,7 +64,10 @@ class LindbladMPOSolver:
         )
         if exit_code != 0:
             raise Exception("There was an error executing the solver.")
-        self.result = LindbladMPOSolver.load_output(self.s_output_path)
+        if b_load_output:
+            self.result = LindbladMPOSolver.load_output(self.s_output_path)
+        else:
+            self.result = {}
 
     @staticmethod
     def process_default_paths(
