@@ -80,7 +80,7 @@ class ModelParameters : public SimulationParameters
 
         operator[]("custom_observables") = "";
         operator[]("collapse") = "";
-        operator[]("b_collapse_equal_mixture") = "";
+        operator[]("b_collapse_equal_mixture") = "0";
     }
 };
 
