@@ -73,7 +73,7 @@ class LindbladMatrixSolver(LindbladMPOSolver):
         super().__init__(parameters)
         self._log_file = None
 
-    def solve(self):
+    def solve(self, b_load_output=True):
         """Solves the simulation and loads the result dictionaries."""
         if self.s_input_file == "":
             self.build()
@@ -502,7 +502,10 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                 file_gl.write(f"\n")
                 file_gl.flush()
 
-            self.result = self.load_output(self.s_output_path)
+            if b_load_output:
+                self.result = self.load_output(self.s_output_path)
+            else:
+                self.result = {}
         except Exception as e:
             self._print(str(e))
             raise e
