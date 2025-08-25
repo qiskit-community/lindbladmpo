@@ -100,16 +100,18 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
 
     vector<double> J = param.doublevec("J");
     vector<double> J_z = param.doublevec("J_z");
+    vector<double> J_x = param.doublevec("J_x");
+    vector<double> J_y = param.doublevec("J_y");
 
-    if ((J_z.size() > 1 || J.size() > 1) && L.predefined)
+    if ((J_z.size() > 1 || J_x.size() > 1 || J_y.size() > 1 || J.size() > 1) && L.predefined)
     {
-        cout2 << "Error: J_z.size()=" << J_z.size() << " and " << J.size() << " but L.predefined=" << L.predefined
-              << ". Couplings J and J_z must be uniform in such a predefined lattice.\n",
+        cout2 << "Error: L.predefined=" << L.predefined
+              << ". Couplings J, J_z, J_x, J_y must be uniform in such a predefined lattice.\n",
             exit(1);
     }
 
     if (J.size() > 1 && J.size() != num_bonds)
-        cout2 << "Error: the paramter J has " << J.size() << " values but 0, 1 or " << num_bonds
+        cout2 << "Error: the parameter J has " << J.size() << " values but 0, 1 or " << num_bonds
               << " value(s) were expected.\n",
             exit(1);
     if (J.size() <= 1)
@@ -119,9 +121,8 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
             J_0 = J[0];
         J = vector<double>(num_bonds, J_0);
     }
-
     if (J_z.size() > 1 && J_z.size() != num_bonds)
-        cout2 << "Error: the paramter J_z has " << J_z.size() << " values but 0, 1 or " << num_bonds
+        cout2 << "Error: the parameter J_z has " << J_z.size() << " values but 0, 1 or " << num_bonds
               << " value(s) were expected.\n",
             exit(1);
     if (J_z.size() <= 1)
@@ -130,6 +131,28 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         if (J_z.size() == 1)
             J_z_0 = J_z[0];
         J_z = vector<double>(num_bonds, J_z_0);
+    }
+    if (J_x.size() > 1 && J_x.size() != num_bonds)
+        cout2 << "Error: the parameter J_x has " << J_x.size() << " values but 0, 1 or " << num_bonds
+              << " value(s) were expected.\n",
+            exit(1);
+    if (J_x.size() <= 1)
+    {
+        double J_x_0 = .0;
+        if (J_x.size() == 1)
+            J_x_0 = J_x[0];
+        J_x = vector<double>(num_bonds, J_x_0);
+    }
+    if (J_y.size() > 1 && J_y.size() != num_bonds)
+        cout2 << "Error: the parameter J_y has " << J_y.size() << " values but 0, 1 or " << num_bonds
+              << " value(s) were expected.\n",
+            exit(1);
+    if (J_y.size() <= 1)
+    {
+        double J_y_0 = .0;
+        if (J_y.size() == 1)
+            J_y_0 = J_y[0];
+        J_y = vector<double>(num_bonds, J_y_0);
     }
 
     AutoMPO &auto_L = C.Lindbladian;
@@ -153,6 +176,18 @@ bool SetLindbladian(SpinHalfSystem &C, ModelParameters param, Lattice2d L)
         {
             auto_L += -.5 * J_z[n], "Sz", i, "Sz", j;
             auto_L += .5 * J_z[n], "_Sz", i, "_Sz", j;
+            b_time_evolution = true;
+        }
+        if (J_x[n])
+        {
+            auto_L += -.5 * J_x[n], "Sx", i, "Sx", j;
+            auto_L += .5 * J_x[n], "_Sx", i, "_Sx", j;
+            b_time_evolution = true;
+        }
+        if (J_y[n])
+        {
+            auto_L += -.5 * J_y[n], "Sy", i, "Sy", j;
+            auto_L += .5 * J_y[n], "_Sy", i, "_Sy", j;
             b_time_evolution = true;
         }
     }

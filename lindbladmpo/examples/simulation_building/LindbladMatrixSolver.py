@@ -45,6 +45,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
         "h_y": (0.0, "v"),
         "h_z": (0.0, "v"),
         "J_z": (0.0, "m"),
+        "J_x": (0.0, "m"),
+        "J_y": (0.0, "m"),
         "J": (0.0, "m"),
         "g_0": (0.0, "v"),
         "g_1": (0.0, "v"),
@@ -214,6 +216,8 @@ class LindbladMatrixSolver(LindbladMPOSolver):
             g_4 = self._get_parameter("g_4")
             J = self._get_parameter("J")
             J_z = self._get_parameter("J_z")
+            J_x = self._get_parameter("J_x")
+            J_y = self._get_parameter("J_y")
             _1q_components = self._get_parameter("1q_components")
             _1q_indices = parameters.get("1q_indices", None)
             if _1q_indices is None:  # Add 1Q observables for all qubits.
@@ -317,6 +321,10 @@ class LindbladMatrixSolver(LindbladMPOSolver):
                         H += 0.5 * J[i, j] * (Sx(i) * Sx(j) + Sy(i) * Sy(j))
                     if J_z[i, j]:
                         H += 0.5 * J_z[i, j] * (Sz(i) * Sz(j))
+                    if J_x[i, j]:
+                        H += 0.5 * J_x[i, j] * (Sx(i) * Sx(j))
+                    if J_y[i, j]:
+                        H += 0.5 * J_y[i, j] * (Sy(i) * Sy(j))
             for i_qubit in _1q_indices:
                 for s_op in _1q_components:
                     obs_1q.append(get_operator_from_label(s_op, i_qubit))

@@ -48,8 +48,12 @@ class ModelParameters : public SimulationParameters
         // Parameters of the interaction Hamiltonian
         operator[]("J") = "0"; // Hopping H=-J*(S+S- + S-S+) = -2*J*(SxSx+SySy). THis parameter can either be a single
                                // value, or a list of values
-        operator[]("J_z") =
-            "0"; // Sz-Sz Interaction strength. This parameter can either be a single value, or a list of values
+        operator[]("J_z") = "0";
+         // ZZ Interaction strength, either a single value, or a list of values.
+        operator[]("J_x") = "0";
+         // XX Interaction strength, either a single value, or a list of values.
+        operator[]("J_y") = "0";
+         // YY Interaction strength, either a single value, or a list of values.
 
         // Lattice specification
         operator[]("b_periodic_x") = "false"; // if true -> periodic boundary conditions in the x direction (Warining:
