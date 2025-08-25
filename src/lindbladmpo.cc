@@ -22,6 +22,7 @@
 #include <chrono>
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
 
 using namespace itensor;
 using namespace std;
@@ -101,9 +102,10 @@ int main(int argc, char *argv[])
     ofstream log_file(output_prefix + ".log.txt");
     cout2 = stream2d(&cout, &log_file);
 
+    pid_t pid = getpid();
     cout2.precision(8);
-    cout2 << "lindbladmpo solver log. Solver version: " << SOLVER_VERSION << "\n";
-    cout2 << "---------------------------------------------\n";
+    cout2 << "lindbladmpo solver log. Solver version: " << SOLVER_VERSION << ", PID: " << pid << "\n";
+    cout2 << "--------------------------------------------------\n";
     param.Print(cout2);
     cout2 << "------------------------------------------------------------------\n";
     cout2 << strstr.str();
