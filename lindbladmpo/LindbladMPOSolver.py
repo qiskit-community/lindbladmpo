@@ -164,8 +164,13 @@ class LindbladMPOSolver:
                 interactions.append("J_y")
         if len(interactions) > 1:
             for k in range(len(interactions) - 1):
-                if parameters[interactions[k]].shape != parameters[interactions[k + 1]].shape:
-                    raise Exception("If J, J_z, J_x, J_y are matrices, they must have the same shape.")
+                if (
+                    parameters[interactions[k]].shape
+                    != parameters[interactions[k + 1]].shape
+                ):
+                    raise Exception(
+                        "If J, J_z, J_x, J_y are matrices, they must have the same shape."
+                    )
         if len(interactions) > 0:
             b_bond_indices = True
             for i in range(parameters[interactions[0]].shape[0]):
