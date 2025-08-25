@@ -135,19 +135,24 @@ class LindbladMPOSolverModel(unittest.TestCase):
         self.assertAlmostEqual(solver.result["obs-1q"][("z", (1,))][1][-1], expected_Z)
 
     def test_product_state(self):
-        """Test multiple product state initializations that are equivalent."""
+        """Test multiple product state initializations that are equivalent, and J vs. J_x + J_y."""
         N = 6
         t_final = 1.5
         J = np.zeros((N, N))
+        J_x = np.zeros((N, N))
+        J_y = np.zeros((N, N))
         J[0, 1] = -1.8
         J[2, 3] = -1.8
-        J[4, 5] = -1.8
+        J_x[4, 5] = -1.8
+        J_y[4, 5] = -1.8
         solver_params1 = {
             "tau": 0.02,
             "t_final": t_final,
             "N": N,
             "g_1": 0.1,
             "J": J,
+            "J_x": J_x,
+            "J_y": J_y,
             "init_product_state": [
                 "+y",
                 "+x",
@@ -270,6 +275,12 @@ class LindbladMPOSolverModel(unittest.TestCase):
         J_z = np.zeros((N, N))
         J_z[1, 2] = 0.7
         J_z[0, 2] = -0.4
+        J_x = np.zeros((N, N))
+        J_x[1, 2] = 0.3
+        J_x[0, 1] = -0.5
+        J_y = np.zeros((N, N))
+        J_y[1, 0] = 0.6
+        J_y[0, 2] = -0.8
         solver_params1 = {
             "tau": 0.02,
             "t_final": t_final,
@@ -284,6 +295,8 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "h_z": [0.1, -1.2, 0.7],
             "J": J,
             "J_z": J_z,
+            "J_x": J_x,
+            "J_y": J_y,
             "init_product_state": ["+x", (0.8, 0.1, -0.6), (0.3, -1.8)],
             "init_cz_gates": [(0, 2)],
             "1q_components": ["X", "Y", "Z"],
@@ -359,13 +372,19 @@ class LindbladMPOSolverModel(unittest.TestCase):
         t_final = 2
         t_delta = 2
         J = np.zeros((N, N))
-        J[0, 1] = 1.5
+        J[0, 1] = 0.5
         J[2, 1] = 0.8
         J_z = np.zeros((N, N))
         J_z[1, 2] = 0.7
-        J_z[0, 2] = 1.4
+        J_z[0, 2] = 0.4
+        J_x = np.zeros((N, N))
+        J_x[1, 2] = 0.1
+        J_x[0, 1] = -0.2
+        J_y = np.zeros((N, N))
+        J_y[1, 0] = -0.3
+        J_y[0, 2] = -0.5
         solver_params1 = {
-            "tau": 0.02,
+            "tau": 0.005,
             "t_final": t_final,
             "N": N,
             "g_0": [0.1, 0.05, 0.02],
@@ -376,6 +395,8 @@ class LindbladMPOSolverModel(unittest.TestCase):
             "h_z": [0.1, -1.2, 0.7],
             "J": J,
             "J_z": J_z,
+            "J_x": J_x,
+            "J_y": J_y,
             "init_product_state": ["id", 0.2, (0.2, 0.0, -0.9)],
             "init_cz_gates": [(1, 2)],
             "1q_components": ["X", "Y", "Z"],

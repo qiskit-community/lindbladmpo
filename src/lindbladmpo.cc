@@ -22,6 +22,7 @@
 #include <chrono>
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
 
 using namespace itensor;
 using namespace std;
@@ -29,7 +30,7 @@ using namespace std::chrono;
 
 stream2d cout2 = stream2d(&cerr, NULL);
 
-const string SOLVER_VERSION = "0.3.2";
+const string SOLVER_VERSION = "0.3.3";
 
 const double IMAGINARY_THRESHOLD = 1e-4;
 // Threshold for the imaginary value of a quantity that should be real, to issue a warning
@@ -101,9 +102,10 @@ int main(int argc, char *argv[])
     ofstream log_file(output_prefix + ".log.txt");
     cout2 = stream2d(&cout, &log_file);
 
+    pid_t pid = getpid();
     cout2.precision(8);
-    cout2 << "lindbladmpo solver log. Solver version: " << SOLVER_VERSION << "\n";
-    cout2 << "---------------------------------------------\n";
+    cout2 << "lindbladmpo solver log. Solver version: " << SOLVER_VERSION << ", PID: " << pid << "\n";
+    cout2 << "--------------------------------------------------\n";
     param.Print(cout2);
     cout2 << "------------------------------------------------------------------\n";
     cout2 << strstr.str();

@@ -156,23 +156,30 @@ class LindbladMPOSolver:
         if "J_z" in parameters.keys():
             if isinstance(parameters["J_z"], np.ndarray):
                 interactions.append("J_z")
-        if len(interactions) == 2:
-            if parameters["J"].shape == parameters["J_z"].shape:
-                b_bond_indices = True
-                for i in range(parameters["J"].shape[0]):
-                    for j in range(parameters["J"].shape[1]):
-                        if parameters["J"][i, j] != 0 or parameters["J_z"][i, j] != 0:
-                            first_bond_indices.append(i + 1)
-                            second_bond_indices.append(j + 1)
-            else:
-                raise Exception("J and J_z are not of the same size.")
-        elif len(interactions) == 1:
+        if "J_x" in parameters.keys():
+            if isinstance(parameters["J_x"], np.ndarray):
+                interactions.append("J_x")
+        if "J_y" in parameters.keys():
+            if isinstance(parameters["J_y"], np.ndarray):
+                interactions.append("J_y")
+        if len(interactions) > 1:
+            for k in range(len(interactions) - 1):
+                if (
+                    parameters[interactions[k]].shape
+                    != parameters[interactions[k + 1]].shape
+                ):
+                    raise Exception(
+                        "If J, J_z, J_x, J_y are matrices, they must have the same shape."
+                    )
+        if len(interactions) > 0:
             b_bond_indices = True
             for i in range(parameters[interactions[0]].shape[0]):
                 for j in range(parameters[interactions[0]].shape[1]):
-                    if parameters[interactions[0]][i, j] != 0:
-                        first_bond_indices.append(i + 1)
-                        second_bond_indices.append(j + 1)
+                    for k in range(len(interactions)):
+                        if parameters[interactions[k]][i, j] != 0:
+                            first_bond_indices.append(i + 1)
+                            second_bond_indices.append(j + 1)
+                            break
 
         print("Creating solver input file:")
         s_input_file = s_input_file.replace("\\", "/")
@@ -184,7 +191,7 @@ class LindbladMPOSolver:
             elif key == "output_files_prefix":
                 file.write(key + " = " + s_output_path + "\n")
             elif (
-                (key in ("J", "J_z"))
+                (key in ("J", "J_z", "J_x", "J_y"))
                 and isinstance(parameters[key], np.ndarray)
                 and len(parameters[key]) > 1
             ):
@@ -631,7 +638,7 @@ class LindbladMPOSolver:
                         "array (of floats)\n"
                     )
                     continue
-            elif (key == "J_z") or (key == "J"):
+            elif (key == "J_z") or (key == "J_x") or (key == "J_y") or (key == "J"):
                 if LindbladMPOSolver.is_float(parameters[key]):
                     continue
                 if N == -1:
